@@ -18,7 +18,8 @@ class SimpleTextClipboard():
         Replaces the current content of the clipboard
         :param new_contents: The new string to be saved
         """
-        self.contents = str(new_contents)
+        #self.contents = str(new_contents)
+        self.contents = str(new_contents) + ' (was on server)'
 
 clipboard = SimpleTextClipboard()
 

@@ -13,8 +13,11 @@ class MyApp(QtWidgets.QMainWindow):
     event_handler = None
 
 
+    def paste_data(self, data):
+        self.label.setText(data)
+
     def paste_clicked(self):
-        self.event_handler.retrieve_from_storage()
+        self.event_handler.retrieve_from_storage(self.paste_data)
 
     def copy_clicked(self):
         current_item = self.listWidget.currentItem()

@@ -3,21 +3,27 @@ import sys
 from PyQt5 import uic
 from PyQt5 import QtWidgets, QtGui
 
+from core.event_handler import EventHandler
+
 ui_file = "tester.ui"
 
 
 class MyApp(QtWidgets.QMainWindow):
 
+    event_handler = None
+
 
     def paste_clicked(self):
-        if self.listWidget.currentItem() is not None:
-            print(self.listWidget.currentItem().text())
+        self.event_handler.retrieve_from_storage()
 
     def copy_clicked(self):
-        pass
+        current_item = self.listWidget.currentItem()
+        if current_item is not None:
+            self.event_handler.put_into_storage(current_item.text())
 
     def __init__(self):
         super().__init__()
+        self.event_handler = EventHandler(app)
         uic.loadUi(ui_file, self)
 
         self.listWidget.addItem('Es war einmal ein altes Schloss')

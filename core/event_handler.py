@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication
 
 from .clipboard import Clipboard
+from .network_manager import NetworkManager
 
 class EventHandler:
     """
@@ -9,6 +10,7 @@ class EventHandler:
     It also retrieves data from the server and can return it
     """
     clipboard = None
+    network_manager = None
 
     def _save_to_local_clipboard(self, data):
         """
@@ -22,7 +24,7 @@ class EventHandler:
         Passes the saved data to the server to store it there
         :param data: The data to be sent
         """
-        pass
+        self.network_manager.send_data(data)
 
     def put_into_storage(self, data):
         """
@@ -42,3 +44,4 @@ class EventHandler:
 
     def __init__(self, qApp):
         self.clipboard = Clipboard(qApp.clipboard())
+        self.network_manager = NetworkManager()

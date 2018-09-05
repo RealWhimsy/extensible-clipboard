@@ -1,7 +1,6 @@
-from PyQt5.QtWidgets import QApplication
-
 from .clipboard import Clipboard
 from .network_manager import NetworkManager
+
 
 class EventHandler:
     """
@@ -9,7 +8,9 @@ class EventHandler:
     and also forwards the data to the server
     It also retrieves data from the server and can return it
     """
+    # A Clipboard from this package, used for changing the local clipboard
     clipboard = None
+    # A NetworkManager from this package, used for interacting with the remote clipboard
     network_manager = None
 
     def _save_to_local_clipboard(self, data):
@@ -30,7 +31,7 @@ class EventHandler:
         """
         Responsible for storing data on a higher level. This function should be called when you want to save
         data in your clipboard and on the server simultaneously
-        :data: The data to be saved
+        :param data: The data to be saved
         """
         self._save_to_local_clipboard(data)
         self._propagate_to_server(data)
@@ -43,6 +44,9 @@ class EventHandler:
         clipboard_data = self.network_manager.get_data(callback)
         return clipboard_data
 
-    def __init__(self, qApp):
-        self.clipboard = Clipboard(qApp.clipboard())
+    def __init__(self, q_app):
+        """
+        :param q_app: The current QApplication this package is part of running in
+        """
+        self.clipboard = Clipboard(q_app.clipboard())
         self.network_manager = NetworkManager()

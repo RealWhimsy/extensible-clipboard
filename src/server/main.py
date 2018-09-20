@@ -1,38 +1,28 @@
 import hug
+import sys
 
-class SimpleTextClipboard():
-    """
-    A simple clipboard implementation that supports storing and later retrieving a string
-    """
-
-    contents = ''
-
-    def get_contents(self):
-        """
-        :return: The current contents of the clipboard. Returns an empty string if nothing has been saved yet
-        """
-        return self.contents
-
-    def set_contents(self, new_contents):
-        """
-        Replaces the current content of the clipboard
-        :param new_contents: The new string to be saved
-        """
-        #self.contents = str(new_contents)
-        self.contents = str(new_contents) + ' (was on server)'
-
-clipboard = SimpleTextClipboard()
+import clipboard_handler 
 
 @hug.get('/get')
 def get_contents():
-    return clipboard.get_contents()
+    return "Hello world"
 
 @hug.post('/post')
 def set_contents(new_contents):
-    clipboard.set_contents(new_contents)
+    pass
+"""
+def start_clipboard_handler():
+    ""
+    Starts a QT-Application which will handle actions on the system clipboard
+    ""
+    print("before construction chandler")
+    cl = clipboard_handler.ClipboardHandler()
 
 def main():
-    get_contents.interface.cli()
+    print("in main")
+    start_clipboard_handler()
 
+main()
+"""
 if __name__ == "__main__":
     main()

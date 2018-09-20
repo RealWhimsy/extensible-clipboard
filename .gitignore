@@ -109,5 +109,8 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# PyCharm
 .idea
+
+# ctags
 /tags

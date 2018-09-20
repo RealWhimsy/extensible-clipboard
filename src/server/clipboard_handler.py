@@ -3,7 +3,7 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTimer
 
-import clipboard
+from clipboard import Clipboard
 
 
 class ClipboardHandler:
@@ -58,7 +58,7 @@ class ClipboardHandler:
         """
         # start QCoreApp ...
         q_app = QtWidgets.QApplication(sys.argv)
-        self.clipboard = clipboard.Clipboard(q_app.clipboard())
+        self.clipboard = Clipboard(q_app.clipboard())
         print("about to start q_app")
         q_app.exec()
         print("started q_app")

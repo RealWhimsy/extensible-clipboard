@@ -1,7 +1,8 @@
 import hug
 import sys
+import _thread
 
-import clipboard_handler 
+from clipboard_handler import ClipboardHandler
 
 @hug.get('/get')
 def get_contents():
@@ -10,19 +11,15 @@ def get_contents():
 @hug.post('/post')
 def set_contents(new_contents):
     pass
-"""
+
 def start_clipboard_handler():
-    ""
+    """
     Starts a QT-Application which will handle actions on the system clipboard
-    ""
-    print("before construction chandler")
-    cl = clipboard_handler.ClipboardHandler()
+    """
+    cl = ClipboardHandler()
 
 def main():
     print("in main")
     start_clipboard_handler()
 
-main()
-"""
-if __name__ == "__main__":
-    main()
+_thread.start_new_thread(main, () )

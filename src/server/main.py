@@ -10,16 +10,22 @@ def get_contents():
 
 @hug.post('/post')
 def set_contents(new_contents):
-    pass
+    print('saving on server')
+    save_on_server()
+    clh.save_in_clipboard()
 
 def start_clipboard_handler():
     """
     Starts a QT-Application which will handle actions on the system clipboard
     """
-    cl = ClipboardHandler()
+    clh = ClipboardHandler()
 
 def main():
     print("in main")
     start_clipboard_handler()
 
-_thread.start_new_thread(main, () )
+#_thread.start_new_thread(main, () )
+
+if __name__ == "__main__":
+    print('called')
+    main()

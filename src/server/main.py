@@ -1,14 +1,31 @@
-import hug
 import sys
-import _thread
+import threading
+
+from flask import Flask
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QThread
 
 from clipboard_handler import ClipboardHandler
 
-@hug.get('/get')
+app = Flask(__name__)
+
+@app.route('/')
 def get_contents():
     return "Hello world"
 
-@hug.post('/post')
+class FlaskThread(QThread):
+    
+    def __init__(self):
+        QThread.__init__(self)
+        self.app = app
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        self.app.run()
+
+
 def set_contents(new_contents):
     print('saving on server')
     save_on_server()
@@ -21,11 +38,14 @@ def start_clipboard_handler():
     clh = ClipboardHandler()
 
 def main():
-    print("in main")
-    start_clipboard_handler()
+    q_app = QtWidgets.QApplication(sys.argv)
+    webapp = FlaskThread()
+    webapp.start()
+
+    q_app.aboutToQuit.connect(webapp.terminate)
+    return q_app.exec()
 
 #_thread.start_new_thread(main, () )
 
 if __name__ == "__main__":
-    print('called')
-    main()
+    sys.exit(main())

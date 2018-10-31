@@ -57,8 +57,4 @@ class ClipboardHandler:
         of running in
         """
         # start QCoreApp ...
-        q_app = QtWidgets.QApplication(sys.argv)
         #self.clipboard = Clipboard(q_app.clipboard())
-        print("about to start q_app")
-        q_app.exec()
-        print("started q_app")

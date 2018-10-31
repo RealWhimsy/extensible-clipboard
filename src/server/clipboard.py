@@ -18,7 +18,7 @@ class Clipboard:
         :param data: The data that will be saved in the clipboard
         """
         data = str(data)
-        # print('saving data: {}'.format(data))
+        print('saving data: {}'.format(data))
         self.clipboard.setText(data)
 
     def __init__(self, clip):

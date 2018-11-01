@@ -25,13 +25,6 @@ class ClipboardHandler:
         """
         self.clipboard.save(data)
 
-    def _propagate_to_server(self, data):
-        """
-        Passes the saved data to the server to store it there
-        :param data: The data to be sent
-        """
-        self.network_manager.send_data(data)
-
     def put_into_storage(self, data):
         """
         Responsible for storing data on a higher level.
@@ -40,7 +33,6 @@ class ClipboardHandler:
         :param data: The data to be saved
         """
         self._save_to_local_clipboard(data)
-        self._propagate_to_server(data)
 
     def retrieve_from_storage(self, callback):
         """
@@ -51,10 +43,10 @@ class ClipboardHandler:
         clipboard_data = self.network_manager.get_data(callback)
         return clipboard_data
 
-    def __init__(self):
+    def __init__(self, q_app):
         """
         :param q_app: The current QApplication this package is part
         of running in
         """
         # start QCoreApp ...
-        #self.clipboard = Clipboard(q_app.clipboard())
+        self.clipboard = Clipboard(q_app.clipboard())

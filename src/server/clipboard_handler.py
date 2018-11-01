@@ -1,12 +1,11 @@
 import sys
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QObject, pyqtSlot
 
 from clipboard import Clipboard
 
 
-class ClipboardHandler:
+class ClipboardHandler(QObject):
     """
     This class is responsible to take data from other programs,
     plugins etc and save them to the clipboard
@@ -32,6 +31,7 @@ class ClipboardHandler:
         data in your clipboard and on the server simultaneously
         :param data: The data to be saved
         """
+        print('Putting "{}" into storage'.format(data))
         self._save_to_local_clipboard(data)
 
     def retrieve_from_storage(self, callback):

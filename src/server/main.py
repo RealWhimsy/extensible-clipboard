@@ -3,27 +3,37 @@ import sys
 import threading
 
 from flask import Flask, request
+from flask_restful import Resource, Api
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QThread
 
-#from clipboard_handler import ClipboardHandler
+from clipboard_handler import ClipboardHandler
+
 
 app = Flask(__name__)
-#clipboard_handler = ClipboardHandler()
+api = Api(app)
+clipboard_handler = ClipboardHandler()
 
-@app.route('/')
-def get_contents():
-    return "Hello world"
+class Clip(Resource):
 
-@app.route('/post', methods=['POST'])
-def set_contents():
-    content = request.form['new_contents']
-    print('saving on server')
-    print(content)
-    return content
-    #save_on_server()
-    #clh.save_in_clipboard()
+    def get(self, clip_id=None):
+        if clip_id is None:
+            return {'message': 'nothing specified'}
+        return {'clip_id': clip_id}
+
+    def post(self, clip_id=None):
+        if clip_id is not None:
+            return {'message': 'clip already exists, use PUT to update'}
+        print('saving on server')
+        content = request.form['clip']
+        print(content)
+        return {'saved': content}
+        #save_on_server()
+        #clh.save_in_clipboard()
+        
+
+api.add_resource(Clip, '/clip/', '/clip/<string:clip_id>')
 
 # Built after https://codereview.stackexchange.com/questions/114221/python-gui-by-qtwebkit-and-flask
 

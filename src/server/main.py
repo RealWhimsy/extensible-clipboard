@@ -2,7 +2,7 @@ import signal
 import sys
 import threading
 
-from flask import Flask, request
+from flask import abort, Flask, request
 from flask_restful import Resource, Api
 
 from PyQt5 import QtWidgets
@@ -22,15 +22,16 @@ class Clip(Resource):
         if clip_id is None:
             return {'message': 'nothing specified'}
         clip = self.server.get_clip_by_id(clip_id)
-        print(clip)
-        if clip is None:
-            return {'error': '404'} # TODO
+       
+        if clip is 'null':
+            return abort(404)
         return clip
 
     def post(self, clip_id=None):
         if clip_id is not None:
             return {'message': 'clip already exists, use PUT to update'}
-        content = request.form['clip']
+
+        content = request.form['clip'] # Automatically sends 400 if no match
         new_item_id = self.server.save_in_database(content)
         self.server.emit_data(content)
         return {'saved': new_item_id}
@@ -53,7 +54,6 @@ class FlaskThread(QtCore.QObject):
         self.app.run(debug=True, use_reloader=False)
 
     def emit_data(self, data):
-        print('in emit_data {}'.format(data))
         self.data.emit(data)
 
     def save_in_database(self, data):

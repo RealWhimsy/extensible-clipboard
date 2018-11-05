@@ -21,15 +21,19 @@ class Clip(Resource):
     def get(self, clip_id=None):
         if clip_id is None:
             return {'message': 'nothing specified'}
-        return {'clip_id': clip_id}
+        clip = self.server.get_clip_by_id(clip_id)
+        print(clip)
+        if clip is None:
+            return {'error': '404'} # TODO
+        return clip
 
     def post(self, clip_id=None):
         if clip_id is not None:
             return {'message': 'clip already exists, use PUT to update'}
         content = request.form['clip']
-        self.server.save_in_database(content)
+        new_item_id = self.server.save_in_database(content)
         self.server.emit_data(content)
-        return {'saved': content}
+        return {'saved': new_item_id}
         
 
 
@@ -54,7 +58,10 @@ class FlaskThread(QtCore.QObject):
 
     def save_in_database(self, data):
         id = self.db.save_clip(data)
-        print('inserted object with id: {}'.format(id))
+        return id
+
+    def get_clip_by_id(self, id):
+        return self.db.get_clip_by_id(id)
 
 
 class MainApp(QtWidgets.QApplication):

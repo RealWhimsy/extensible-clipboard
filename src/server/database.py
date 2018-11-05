@@ -16,5 +16,11 @@ class ClipDatabase:
 
     def get_clip_by_id(self,  id):
         clip = self.clip_collection.find_one({'_id': ObjectId(id)})
-        return dumps(clip)
+        clip = dumps(clip)
+        if clip is 'null':
+            return None
+        else:
+            return dumps(clip)
 
+    def get_all_clips(self):
+        return dumps(self.clip_collection.find({}))

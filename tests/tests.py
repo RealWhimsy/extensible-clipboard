@@ -1,14 +1,29 @@
 import requests
 import unittest
 
+from pymongo import MongoClient
+
 
 class SimpleTextServerTest(unittest.TestCase):
 
     CLIP_URL = 'http://localhost:5000/clip/'
+    client = None
+    db = None
+    collection = None
 
-    def setUp(self):
-        #server.clipboard.contents = ''
-        pass
+    @classmethod
+    def setUpClass(cls):
+        cls.client = MongoClient()
+        cls.db = cls.client.clipboard
+        cls.clip_collection = cls.db['clip-collection']
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.clip_collection.delete_many({})
+
+    def tearDown(self):
+        # Removes all previously saved documents
+        self.clip_collection.delete_many({})
 
     def test_get_returns_json(self):
         r = requests.post(self.CLIP_URL, data={'clip': 'Clip 1'})
@@ -53,6 +68,18 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.get(self.CLIP_URL + '111111111111111111111111')
         self.assertEqual(r.status_code, requests.codes.not_found)
 
+    def test_POST_on_existing_item_returns_405(self):
+        r = requests.post(self.CLIP_URL + '444')
+        self.assertEqual(r.status_code, requests.codes.method_not_allowed)
+
+    def test_GET_without_id_returns_all_clips(self):
+        requests.post(self.CLIP_URL, data={'clip': 'Clip 1'})
+        requests.post(self.CLIP_URL, data={'clip': 'Clip 2'})
+
+        r = requests.get(self.CLIP_URL)
+        objects = r.json()
+        self.assertIn('Clip 1', objects)
+        self.assertIn('Clip 2', objects)
 
 if __name__ == "__main__":
     unittest.main()

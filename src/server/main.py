@@ -1,49 +1,20 @@
 import signal
 import sys
 
-from flask import abort, make_response, Flask, request
-from flask_restful import Resource, Api
+from flask import Flask
+from flask_restful import Api
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 from clipboard_handler import ClipboardHandler
 from database import ClipDatabase
-
-
-class Clip(Resource):
-
-    def __init__(self, **kwargs):
-        self.server = kwargs['server']
-        
-
-    def get(self, clip_id=None):
-        if clip_id is None:
-            clip = self.server.get_all_clips()
-        else:
-            clip = self.server.get_clip_by_id(clip_id)
-       
-        if clip is None:
-            return abort(404)
-
-        return clip
-
-    def post(self, clip_id=None):
-        if clip_id is not None:
-            response = make_response('Use PUT to update existing objects', 405)
-            return response
-
-        content = request.form['clip'] # Automatically sends 400 if no match
-        new_item_id = self.server.save_in_database(content)
-        self.server.emit_data(content)
-        return {'saved': new_item_id}
-        
-
+from resources import Clip
 
 # Built after https://codereview.stackexchange.com/questions/114221/python-gui-by-qtwebkit-and-flask
 # https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-works-better-method
 
-class FlaskThread(QtCore.QObject):
+class FlaskQt(QtCore.QObject):
     
     data = QtCore.pyqtSignal(object)
 
@@ -70,33 +41,46 @@ class FlaskThread(QtCore.QObject):
 
 
 class MainApp(QtWidgets.QApplication):
-    flask_server = None
-    app = Flask(__name__)
-    flask_thread = None
-    api = Api(app)
-    clh = None
-    database = None
 
     def dummy(self, data):
+        # Not really sure, why this method is neede, might be related to event-loops
         self.clh.put_into_storage(data)
 
     def main(self):
-        self.database = ClipDatabase()
-        self.flask_server = FlaskThread(self.app, self.database)
-        self.flask_thread = QtCore.QThread()
-        self.flask_server.moveToThread(self.flask_thread)
-        self.flask_thread.started.connect(self.flask_server.start_server)
+        self.server_qt.moveToThread(self.server_thread)
+        self.server_thread.started.connect(self.server_qt.start_server)
 
-        self.aboutToQuit.connect(self.flask_thread.terminate)
+        # Kills server with whole app
+        self.aboutToQuit.connect(self.server_thread.terminate)
+        # Makes C-c usable in console, because QT would block it normally
         signal.signal(signal.SIGINT, signal.SIG_DFL)
-        self.clh = ClipboardHandler(self)
 
-        self.flask_server.data.connect(self.dummy)
+        self.server_qt.data.connect(self.dummy)
+
+        # Creates endpoint for REST-Api
         self.api.add_resource(Clip, '/clip/', '/clip/<string:clip_id>',
                 resource_class_kwargs={
-                    'server': self.flask_server})
+                    'server': self.server_qt})
 
-        self.flask_thread.start()
+        self.server_thread.start()
+
+    def __init__(self, argv):
+        super(MainApp, self).__init__(argv)
+
+        # The flask-server itself
+        self.flask_server = Flask(__name__)
+        # Restful-Flask server
+        self.api = Api(self.flask_server)
+        # Database for saving clips, currently mongo
+        self.database = ClipDatabase()
+
+        # Qt-Object the server gets wrapped in
+        self.server_qt = FlaskQt(self.flask_server, self.database)
+        # QThread, it executes the server
+        self.server_thread = QtCore.QThread()
+        # Connection to system clipboard
+        self.clh = ClipboardHandler(self)
+
 
 
 if __name__ == "__main__":

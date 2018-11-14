@@ -11,11 +11,14 @@ from clipboard_handler import ClipboardHandler
 from database import ClipDatabase
 from resources import Clip
 
-# Built after https://codereview.stackexchange.com/questions/114221/python-gui-by-qtwebkit-and-flask
-# https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-works-better-method
+"""
+Built after https://codereview.stackexchange.com/questions/114221/python-gui-by-qtwebkit-and-flask
+https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-works-better-method
+"""  # noqa
+
 
 class FlaskQt(QtCore.QObject):
-    
+
     data = QtCore.pyqtSignal(object)
 
     def __init__(self, flask_app, database):
@@ -43,16 +46,18 @@ class FlaskQt(QtCore.QObject):
 class MainApp(QtWidgets.QApplication):
 
     def dummy(self, data):
-        # Not really sure, why this method is neede, might be related to event-loops
+        # Not really sure, why this method is needed,
+        # might be related to event-loops
         self.clh.put_into_storage(data)
 
     def add_resources(self):
         # Creates endpoint for REST-Api
-        self.api.add_resource(Clip, '/clip/', '/clip/<string:clip_id>',
-                resource_class_kwargs={
-                    'server': self.server_qt
-                }
-        )
+        self.api.add_resource(Clip,
+                              '/clip/', '/clip/<string:clip_id>',
+                              resource_class_kwargs={
+                                    'server': self.server_qt
+                                  }
+                              )
 
     def main(self):
         self.server_qt.moveToThread(self.server_thread)
@@ -83,7 +88,6 @@ class MainApp(QtWidgets.QApplication):
         self.server_thread = QtCore.QThread()
         # Connection to system clipboard
         self.clh = ClipboardHandler(self)
-
 
 
 if __name__ == "__main__":

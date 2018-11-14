@@ -14,8 +14,6 @@ class ClipboardHandler(QObject):
     """
     # A Clipboard from this package, used for changing the local clipboard
     clipboard = None
-    # A NetworkManager from this package, used for interacting with the remote clipboard
-    network_manager = None
 
     def _save_to_local_clipboard(self, data):
         """

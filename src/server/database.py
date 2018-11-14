@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 from bson.json_util import dumps
@@ -13,9 +14,11 @@ class ClipDatabase:
 
     def save_clip(self, content):
         _id = uuid4()
+        modified_date = datetime.now()
         new_clip = {
                 '_id': str(_id),
-                'text': content
+                'text': content,
+                'last_modified': modified_date.isoformat()
         }
 
         new_clip = self.clip_collection.insert_one(new_clip)

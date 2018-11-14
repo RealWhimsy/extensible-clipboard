@@ -46,6 +46,14 @@ class MainApp(QtWidgets.QApplication):
         # Not really sure, why this method is neede, might be related to event-loops
         self.clh.put_into_storage(data)
 
+    def add_resources(self):
+        # Creates endpoint for REST-Api
+        self.api.add_resource(Clip, '/clip/', '/clip/<string:clip_id>',
+                resource_class_kwargs={
+                    'server': self.server_qt
+                }
+        )
+
     def main(self):
         self.server_qt.moveToThread(self.server_thread)
         self.server_thread.started.connect(self.server_qt.start_server)
@@ -56,12 +64,7 @@ class MainApp(QtWidgets.QApplication):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
 
         self.server_qt.data.connect(self.dummy)
-
-        # Creates endpoint for REST-Api
-        self.api.add_resource(Clip, '/clip/', '/clip/<string:clip_id>',
-                resource_class_kwargs={
-                    'server': self.server_qt})
-
+        self.add_resources()
         self.server_thread.start()
 
     def __init__(self, argv):

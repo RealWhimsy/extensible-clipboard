@@ -29,7 +29,6 @@ class ClipboardHandler(QObject):
         data in your clipboard and on the server simultaneously
         :param data: The data to be saved
         """
-        print('Putting "{}" into storage'.format(data))
         self._save_to_local_clipboard(data)
 
     def retrieve_from_storage(self, callback):

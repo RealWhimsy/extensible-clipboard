@@ -1,4 +1,5 @@
 from datetime import datetime
+from configparser import ConfigParser
 from uuid import UUID, uuid4
 
 from bson.binary import Binary, UUID_SUBTYPE
@@ -10,16 +11,18 @@ from pymongo import MongoClient
 class ClipDatabase:
 
     def __init__(self):
-        self.client = MongoClient()
-        self.db = self.client.clipboard
-        self.clip_collection = self.db['clip-collection']
+        config = ConfigParser()
+        config.read('config.ini')
+        database_conf = config['database']
+        self.client = MongoClient(database_conf['url'], int(database_conf['port']))
+        self.db = getattr(self.client, database_conf['database'])
+        self.clip_collection = self.db[database_conf['collection']]
 
     def create_binary_uuid(self, id):
         """
         https://stackoverflow.com/questions/51283260/pymongo-uuid-search-not-returning-documents-that-definitely-exist
         """  # noqc
-        id_bytes = id.bytes
-        bin_id = Binary(bytes(bytearray(id_bytes)), UUID_SUBTYPE)
+        bin_id = Binary(id.bytes, UUID_SUBTYPE)
         return bin_id
 
     def save_clip(self, content):

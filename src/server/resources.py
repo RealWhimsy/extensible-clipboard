@@ -26,5 +26,6 @@ class Clip(Resource):
 
         content = request.form['clip']  # Automatically sends 400 if no match
         new_item = self.server.save_in_database(content)
-        self.server.emit_data(content)
+
         return new_item
+

@@ -31,7 +31,6 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(self.CLIP_URL, data={'clip': 'Clip 1'})
 
         _id = loads(r.json())['_id']
-        _id = _id['$uuid']
 
         r = requests.get(self.CLIP_URL + _id)
         header = r.headers.get('content-type')
@@ -42,7 +41,6 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, requests.codes.ok)
 
         object_id = loads(r.json())['_id']
-        object_id = object_id['$uuid']
         
         r = requests.get(self.CLIP_URL + object_id)
         self.assertEqual(r.status_code, requests.codes.ok)
@@ -52,12 +50,10 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(self.CLIP_URL, data={'clip': 'Clip 1'})
         self.assertEqual(r.status_code, requests.codes.ok)
         object_id_1 = loads(r.json())['_id']
-        object_id_1 = object_id_1['$uuid']
 
         r = requests.post(self.CLIP_URL, data={'clip': 'Clip 2'})
         self.assertEqual(r.status_code, requests.codes.ok)
         object_id_2 = loads(r.json())['_id']
-        object_id_2 = object_id_2['$uuid']
         
         object_1 = requests.get(self.CLIP_URL + object_id_1)
         object_2 = requests.get(self.CLIP_URL + object_id_2)

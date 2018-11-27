@@ -73,8 +73,10 @@ class FlaskQt(QtCore.QObject):
 class MainApp(QtWidgets.QApplication):
 
     def dummy(self, data):
-        # Not really sure, why this method is needed,
-        # might be related to event-loops
+        """
+        Not really sure, why this method is needed,
+        might be related to event-loops
+        """
         self.clh.put_into_storage(data)
 
     def add_resources(self):

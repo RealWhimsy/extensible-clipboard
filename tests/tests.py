@@ -24,8 +24,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def tearDown(self):
         # Removes all previously saved documents
-        #self.clip_collection.delete_many({})
-        pass
+        self.clip_collection.delete_many({})
 
     def test_get_returns_json(self):
         r = requests.post(self.CLIP_URL, data={'clip': 'Clip 1'})

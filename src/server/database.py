@@ -1,3 +1,4 @@
+from base64 import b64encode
 from datetime import datetime
 from configparser import ConfigParser
 from uuid import UUID, uuid4
@@ -32,6 +33,12 @@ class ClipDatabase:
         i.e. convert uuid-objects to their string or hand binary
         """
         clip['_id'] = str(clip['_id'])
+
+        if 'content' in clip['data']:
+            data = b64encode(clip['data']['content'])
+
+            clip['data'] = str(data)[2:-1]
+
         return clip
 
     def save_clip(self, content):
@@ -44,11 +51,15 @@ class ClipDatabase:
         _id = uuid4()
         _id = self.create_binary_uuid(_id)
         modified_date = datetime.now()
+
         new_clip = {
                 '_id': _id,
                 'data': content,
                 'last_modified': modified_date.isoformat()
         }
+
+        if 'filename' in content:
+            new_clip['filename'] = content['filename']
 
         insert_result = self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})

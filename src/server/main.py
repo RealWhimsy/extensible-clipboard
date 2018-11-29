@@ -30,7 +30,7 @@ class MainApp(QtWidgets.QApplication):
     def add_resources(self):
         # Creates endpoint for REST-Api
         self.api.add_resource(Clip,
-                              '/clip/', '/clip/<string:clip_id>',
+                              '/clip/', '/clip/<uuid:clip_id>',
                               resource_class_kwargs={
                                     'server': self.server_qt
                                   }

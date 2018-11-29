@@ -73,8 +73,8 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.get(self.CLIP_URL + str(_id))
         self.assertEqual(r.status_code, requests.codes.not_found)
 
-    def test_POST_on_existing_item_returns_405(self):
-        r = requests.post(self.CLIP_URL + '444')
+    def test_POST_with_uuid_returns_405(self):
+        r = requests.post(self.CLIP_URL + str(uuid4()))
         self.assertEqual(r.status_code, requests.codes.method_not_allowed)
 
     def test_GET_without_id_returns_all_clips(self):

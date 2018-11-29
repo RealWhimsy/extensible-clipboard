@@ -7,6 +7,7 @@ from bson.binary import Binary, UUID_SUBTYPE
 from bson.json_util import default, dumps
 from bson.objectid import ObjectId
 from pymongo import MongoClient
+from pymongo.collection import ReturnDocument
 
 
 class ClipDatabase:
@@ -27,6 +28,9 @@ class ClipDatabase:
 
         https://stackoverflow.com/questions/51283260/pymongo-uuid-search-not-returning-documents-that-definitely-exist
         """  # noqc
+        if type(_id) is not str:
+            _id = str(_id)
+
         bin_id = UUID(_id)
         bin_id = Binary(bin_id.bytes, UUID_SUBTYPE)
         return bin_id
@@ -107,11 +111,13 @@ class ClipDatabase:
                  if no object with the id could be found in the database
         """
         bin_id = self._create_binary_uuid(object_id)
-        clip = self.clip_collection.find_one({'_id': bin_id})
+        new_doc = self.clip_collection.find_one_and_replace(
+                {'_id': bin_id},
+                {'data': data},
+                return_document=ReturnDocument.AFTER
+        )
 
-        if clip is not None:
-            self.clip_collection.replace_one({'_id': bin_id}, {'data': data})
-            clip = self.clip_collection.find_one({'_id': bin_id})
-            clip = dumps(self._build_json_response_clip(clip))
+        if new_doc is not None:  # When replace actually did take place
+            new_doc = dumps(self._build_json_response_clip(new_doc))
 
-        return clip
+        return new_doc

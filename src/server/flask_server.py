@@ -1,5 +1,6 @@
 from PyQt5 import QtCore
 
+
 class FlaskQt(QtCore.QObject):
     """
     Wrapper around the Flask-server to be able to run it in a QThread.
@@ -27,14 +28,19 @@ class FlaskQt(QtCore.QObject):
         """
         self.data.emit(data)
 
-    def save_in_database(self, data):
+    def save_in_database(self, data, _id=None):
         """
         Saves the clip it got from the resource in the database and
         :param data: The data (text, binary) received by the Resource
+        :param _id: If specified, the object with this id will be updated
         :return: the newly created entry
         """
+        if _id is None:
+            new_clip = self.db.save_clip(data)
+        else:
+            new_clip = self.db.update_clip(_id, data)
+
         self.emit_data(data)
-        new_clip = self.db.save_clip(data)
         return new_clip
 
     def get_clip_by_id(self, id):
@@ -51,4 +57,3 @@ class FlaskQt(QtCore.QObject):
         :return: A json-array containing all clips
         """
         return self.db.get_all_clips()
-

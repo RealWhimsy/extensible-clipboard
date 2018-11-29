@@ -1,6 +1,7 @@
 from json import loads
 import requests
 import unittest
+from uuid import uuid4
 
 from pymongo import MongoClient
 
@@ -68,9 +69,9 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, requests.codes.bad_request)
 
     def test_not_existing_id_raises_404(self):
-        #r = requests.get(self.CLIP_URL + '111111111111111111111111')
-        #self.assertEqual(r.status_code, requests.codes.not_found)
-        pass
+        _id = uuid4()
+        r = requests.get(self.CLIP_URL + str(_id))
+        self.assertEqual(r.status_code, requests.codes.not_found)
 
     def test_POST_on_existing_item_returns_405(self):
         r = requests.post(self.CLIP_URL + '444')
@@ -84,6 +85,28 @@ class SimpleTextServerTest(unittest.TestCase):
         objects = r.json()
         self.assertIn('Clip 1', objects)
         self.assertIn('Clip 2', objects)
+
+    def test_PUT_needs_id(self):
+        r = requests.put(self.CLIP_URL)
+        self.assertEqual(r.status_code, requests.codes.method_not_allowed)
+
+    def test_PUT_needs_existing_url(self):
+        _id = uuid4()
+        r = requests.put(self.CLIP_URL + str(_id), data={'clip': 'clip new'})
+
+        self.assertEqual(r.status_code, requests.codes.not_found)
+
+    def test_correct_PUT_returns_updated_clip(self):
+        r = requests.post(self.CLIP_URL, data={'clip': 'old clip'})
+        _id = loads(r.json())['_id']
+
+        r = requests.put(self.CLIP_URL + _id, data={'clip': 'new clip'})
+        r = r.json()
+
+        self.assertIn(_id, r)
+        self.assertNotIn('old clip', r)
+        self.assertIn('new clip', r)
+
 
 if __name__ == "__main__":
     unittest.main()

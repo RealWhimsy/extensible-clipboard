@@ -18,7 +18,6 @@ https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-w
 """  # noqa
 
 
-
 class MainApp(QtWidgets.QApplication):
 
     def dummy(self, data):

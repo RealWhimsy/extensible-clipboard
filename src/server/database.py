@@ -15,15 +15,20 @@ class ClipDatabase:
         config = ConfigParser()
         config.read('config.ini')
         database_conf = config['database']
-        self.client = MongoClient(database_conf['url'], int(database_conf['port']))
+        self.client = MongoClient(
+                database_conf['url'],
+                int(database_conf['port']))
         self.db = getattr(self.client, database_conf['database'])
         self.clip_collection = self.db[database_conf['collection']]
 
-    def _create_binary_uuid(self, id):
+    def _create_binary_uuid(self, _id):
         """
+        Creates an Mongo binary uuid from the string-representation of a uuid4
+
         https://stackoverflow.com/questions/51283260/pymongo-uuid-search-not-returning-documents-that-definitely-exist
         """  # noqc
-        bin_id = Binary(id.bytes, UUID_SUBTYPE)
+        bin_id = UUID(_id)
+        bin_id = Binary(bin_id.bytes, UUID_SUBTYPE)
         return bin_id
 
     def _build_json_response_clip(self, clip):
@@ -49,7 +54,7 @@ class ClipDatabase:
         :return: A json-like string with the newly created object
         """
         _id = uuid4()
-        _id = self._create_binary_uuid(_id)
+        _id = self._create_binary_uuid(str(_id))
         modified_date = datetime.now()
 
         new_clip = {
@@ -74,16 +79,14 @@ class ClipDatabase:
         :return: Json-like string containing the found object or None
                  if no object with the id could be found in the database
         """
-        clip_id = UUID(clip_id)
         clip_id = self._create_binary_uuid(clip_id)
 
         clip = self.clip_collection.find_one({'_id': clip_id})
-        clip = dumps(self._build_json_response_clip(clip))
 
-        if clip is 'null':
-            return None
-        else:
-            return clip
+        if clip is not None:
+            clip = dumps(self._build_json_response_clip(clip))
+
+        return clip
 
     def get_all_clips(self):
         """
@@ -92,3 +95,23 @@ class ClipDatabase:
         results = list(self.clip_collection.find({}))
         json_result = [self._build_json_response_clip(i) for i in results]
         return dumps(json_result)
+
+    def update_clip(self, object_id, data):
+        """
+        Updates an existing clip-object with new data.
+
+        :param object_id: Id of the object to be updated
+        :param data: New data. For safety, you should not replace text with
+                     a file and vice versa
+        :return: Json string containing the newly updated object or None
+                 if no object with the id could be found in the database
+        """
+        bin_id = self._create_binary_uuid(object_id)
+        clip = self.clip_collection.find_one({'_id': bin_id})
+
+        if clip is not None:
+            self.clip_collection.replace_one({'_id': bin_id}, {'data': data})
+            clip = self.clip_collection.find_one({'_id': bin_id})
+            clip = dumps(self._build_json_response_clip(clip))
+
+        return clip

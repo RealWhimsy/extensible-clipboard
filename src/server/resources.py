@@ -10,9 +10,30 @@ class Clip(Resource):
     def __init__(self, **kwargs):
         self.server = kwargs['server']
 
+    def _get_data_from_request(self, request):
+        # Server received a file
+        if 'file' in request.files:
+            f = request.files['file']
+            """ Right now, no check for mime-match
+            received_mt = f.mimetype
+            guessed_mt = guess_type(f.filename)[0]
+
+            if received_mt != guessed_mt:
+                return make_response(
+                        'Request and file specify different mimetypes',
+                        400)
+
+            """
+            return {'filename': f.filename, 'content': f.stream.read()}
+
+        # Server received an object (text)
+        else:
+            return request.form['clip']  # Automatically sends 400 if no match
+
     def get(self, clip_id=None):
 
         if clip_id is None:
+            # Returns all visible clips
             clip = self.server.get_all_clips()
         else:
             clip = self.server.get_clip_by_id(clip_id)
@@ -22,8 +43,20 @@ class Clip(Resource):
 
         return clip
 
-    def handle_file_upload(self, f):
-        pass
+    def put(self, clip_id=None):
+        if clip_id is None:
+            response = make_response(
+                    'Please specifiy an existing object to update',
+                    405)
+            return response
+
+        data = self._get_data_from_request(request)
+        clip = self.server.save_in_database(_id=clip_id, data=data)
+
+        if clip is not None:
+            return clip
+        else:
+            return abort(404)
 
     def post(self, clip_id=None):
 
@@ -31,26 +64,7 @@ class Clip(Resource):
             response = make_response('Use PUT to update existing objects', 405)
             return response
 
-        # Server received a file
-        if 'file' in request.files:
-            f = request.files['file']
-            
-            received_mt = f.mimetype
-            guessed_mt = guess_type(f.filename)[0]
+        content = self._get_data_from_request(request)
 
-            if received_mt != guessed_mt:
-                return make_response(
-                        'Request and file specify different mimetypes',
-                        400)
-
-
-            custom_file = {'filename': f.filename, 'content': f.stream.read()}
-            new_item = self.server.save_in_database(custom_file)
-            return new_item
-
-        # Server received an object (text)
-        else:
-            content = request.form['clip']  # Automatically sends 400 if no match
-            new_item = self.server.save_in_database(content)
-            return new_item
-
+        new_item = self.server.save_in_database(data=content)
+        return new_item

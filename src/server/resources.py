@@ -1,8 +1,8 @@
 from mimetypes import guess_type
 
-from flask import abort, make_response, request
+from flask import request
 
-from flask_restful import Resource
+from flask_restful import abort, Resource
 
 
 class Clip(Resource):
@@ -45,10 +45,8 @@ class Clip(Resource):
 
     def put(self, clip_id=None):
         if clip_id is None:
-            response = make_response(
-                    'Please specifiy an existing object to update',
+            return ({'error': 'Please specifiy an existing object to update'},
                     405)
-            return response
 
         data = self._get_data_from_request(request)
         clip = self.server.save_in_database(_id=clip_id, data=data)
@@ -61,10 +59,10 @@ class Clip(Resource):
     def post(self, clip_id=None):
 
         if clip_id is not None:
-            response = make_response('Use PUT to update existing objects', 405)
-            return response
+            return ({'error': 'Use PUT to update existing objects'},
+                    405)
 
         content = self._get_data_from_request(request)
 
         new_item = self.server.save_in_database(data=content)
-        return new_item
+        return new_item, 201

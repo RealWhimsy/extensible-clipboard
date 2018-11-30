@@ -38,7 +38,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def test_can_save_and_retrieve_single_item(self):
         r = requests.post(self.CLIP_URL, data={'clip': 'Clip 1'})
-        self.assertEqual(r.status_code, requests.codes.ok)
+        self.assertEqual(r.status_code, requests.codes.created)
 
         object_id = loads(r.json())['_id']
         
@@ -48,11 +48,11 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def test_can_save_and_retrieve_multiple_items(self):
         r = requests.post(self.CLIP_URL, data={'clip': 'Clip 1'})
-        self.assertEqual(r.status_code, requests.codes.ok)
+        self.assertEqual(r.status_code, requests.codes.created)
         object_id_1 = loads(r.json())['_id']
 
         r = requests.post(self.CLIP_URL, data={'clip': 'Clip 2'})
-        self.assertEqual(r.status_code, requests.codes.ok)
+        self.assertEqual(r.status_code, requests.codes.created)
         object_id_2 = loads(r.json())['_id']
         
         object_1 = requests.get(self.CLIP_URL + object_id_1)

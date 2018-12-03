@@ -121,3 +121,14 @@ class ClipDatabase:
             new_doc = dumps(self._build_json_response_clip(new_doc))
 
         return new_doc
+
+    def delete_entry_by_id(self, clip_id):
+        """
+        Deletes an object.
+        :param clip_id: Id of the objecte to be deleted
+        :return: Number of deleted objects. 
+                 Can be zero, if no objects were deleted
+        """
+        bin_id = self._create_binary_uuid(clip_id)
+
+        return self.clip_collection.delete_one({'_id': bin_id}).deleted_count

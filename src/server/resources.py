@@ -66,3 +66,14 @@ class Clip(Resource):
 
         new_item = self.server.save_in_database(data=content)
         return new_item, 201
+
+    def delete(self, clip_id=None):
+        if clip_id is None:
+            return ({'error': 'Please specifiy an existing object to delete'},
+                    405)
+        item = self.server.delete_entry_by_id(clip_id=clip_id)
+
+        if item is not 0:
+            return ('', 204)
+        else:
+            return abort(404)

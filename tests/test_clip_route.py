@@ -107,6 +107,32 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertNotIn('old clip', r)
         self.assertIn('new clip', r)
 
+    def test_delete_item_returns_no_content_on_success(self):
+        r = requests.post(self.CLIP_URL, data={'clip': 'Test delete'})
+        _id = loads(r.json())['_id']
+
+        r = requests.delete(self.CLIP_URL + _id)
+
+        self.assertEqual(r.status_code, 204)
+
+    def test_delete_needs_id(self):
+        r = requests.delete(self.CLIP_URL)
+        self.assertEqual(r.status_code, 405)
+
+    def test_deleted_item_get_no_longer_returned(self):
+        r = requests.post(self.CLIP_URL, data={'clip': 'Test delete'})
+        _id = loads(r.json())['_id']
+
+        r = requests.delete(self.CLIP_URL + _id)
+        r = requests.get(self.CLIP_URL + _id)
+
+        self.assertEqual(r.status_code, 404)
+
+    def test_cannot_delete_non_existing_item(self):
+        _id = str(uuid4())
+        r = requests.delete(self.CLIP_URL + _id)
+
+        self.assertEqual(r.status_code, 404)
 
 if __name__ == "__main__":
     unittest.main()

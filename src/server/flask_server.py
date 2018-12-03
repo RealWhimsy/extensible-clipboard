@@ -57,3 +57,10 @@ class FlaskQt(QtCore.QObject):
         :return: A json-array containing all clips
         """
         return self.db.get_all_clips()
+
+    def delete_entry_by_id(self, clip_id):
+        """
+        Deletes a clip from the collection.
+        :return: Number of deleted items, can be 0 if no match found
+        """
+        return self.db.delete_entry_by_id(clip_id)

@@ -62,7 +62,9 @@ class Clip(Resource):
             return ({'error': 'Use PUT to update existing objects'},
                     405)
 
-        content = self._get_data_from_request(request)
+        content = {}
+        content['data'] = self._get_data_from_request(request)
+        content['mimetype'] = request.form['mimetype']
 
         new_item = self.server.save_in_database(data=content)
         return new_item, 201

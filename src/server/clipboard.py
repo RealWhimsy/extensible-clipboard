@@ -1,3 +1,8 @@
+from mimetypes import guess_type
+from sys import getsizeof
+
+from PyQt5.QtCore import QMimeData, QByteArray
+
 class Clipboard:
     """
     This class acts as an intermediary between the core
@@ -15,15 +20,26 @@ class Clipboard:
     # The QClipboard
     clipboard = None
 
+    def _prepare_data(self, data):
+        if type(data) is str:
+            data = bytes(data, 'utf-8')
+        else:
+            data = bytes(data)
+        data = QByteArray.fromRawData(data)
+        return data
+
     def save(self, data):
         """
         Parses the data to a String (only for the current implementation)
             and saves it in the system's clipboard
         :param data: The data that will be saved in the clipboard
         """
-        data = str(data)
+        mime_type = data['mimetype']
+        data = self._prepare_data(data['data'])
+        mime_data = QMimeData()
+        mime_data.setData(mime_type, data)
         self.clipboard.clear()
-        self.clipboard.setText(data)
+        self.clipboard.setMimeData(mime_data)
 
     def __init__(self, clip):
         """

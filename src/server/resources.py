@@ -12,23 +12,25 @@ class Clip(Resource):
 
     def _get_data_from_request(self, request):
         # Server received a file
+        data = {}
         if 'file' in request.files:
             f = request.files['file']
-            """ Right now, no check for mime-match
             received_mt = f.mimetype
             guessed_mt = guess_type(f.filename)[0]
 
             if received_mt != guessed_mt:
-                return make_response(
-                        'Request and file specify different mimetypes',
-                        400)
+                return abort(400)
 
-            """
-            return {'filename': f.filename, 'content': f.stream.read()}
+            data['filename'] = f.filename
+            data['content'] = f.stream.read()
+            data['mimetype'] = received_mt
 
         # Server received an object (text)
         else:
-            return request.form['clip']  # Automatically sends 400 if no match
+            data['content'] = request.form['clip']
+            data['mimetype'] = request.form['mimetype']
+
+        return data
 
     def get(self, clip_id=None):
 
@@ -62,11 +64,9 @@ class Clip(Resource):
             return ({'error': 'Use PUT to update existing objects'},
                     405)
 
-        content = {}
-        content['data'] = self._get_data_from_request(request)
-        content['mimetype'] = request.form['mimetype']
+        data = self._get_data_from_request(request)
 
-        new_item = self.server.save_in_database(data=content)
+        new_item = self.server.save_in_database(data=data)
         return new_item, 201
 
     def delete(self, clip_id=None):

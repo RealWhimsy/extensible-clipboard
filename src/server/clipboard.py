@@ -35,7 +35,7 @@ class Clipboard:
         :param data: The data that will be saved in the clipboard
         """
         mime_type = data['mimetype']
-        data = self._prepare_data(data['data'])
+        data = self._prepare_data(data['content'])
         mime_data = QMimeData()
         mime_data.setData(mime_type, data)
         self.clipboard.clear()

@@ -43,14 +43,14 @@ class ClipDatabase:
         """
         clip['_id'] = str(clip['_id'])
 
-        if 'content' in clip['data']:
-            data = b64encode(clip['data']['content'])
+        if 'filename' in clip:
+            data = b64encode(clip['data'])
 
             clip['data'] = str(data)[2:-1]
 
         return clip
 
-    def save_clip(self, content):
+    def save_clip(self, data):
         """
         Inserts a new clip-object into the database.
 
@@ -63,12 +63,12 @@ class ClipDatabase:
 
         new_clip = {
                 '_id': _id,
-                'data': content,
+                'data': data['content'],
                 'last_modified': modified_date.isoformat()
         }
 
-        if 'filename' in content:
-            new_clip['filename'] = content['filename']
+        if 'filename' in data:
+            new_clip['filename'] = data['filename']
 
         insert_result = self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
@@ -113,7 +113,7 @@ class ClipDatabase:
         bin_id = self._create_binary_uuid(object_id)
         new_doc = self.clip_collection.find_one_and_replace(
                 {'_id': bin_id},
-                {'data': data},
+                {'data': data['content']},
                 return_document=ReturnDocument.AFTER
         )
 

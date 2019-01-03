@@ -35,7 +35,6 @@ class FileUploadTest(unittest.TestCase):
 
             self.assertEqual(r.status_code, requests.codes.created)
 
-    @unittest.skip('Currently no check for mime-match')
     def test_wrong_mime_type_results_in_error(self):
         with open('tests/res/example.txt', 'rb') as f:
             files = {'file': ('example.txt', f,  'text/xml')}

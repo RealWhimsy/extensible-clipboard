@@ -23,7 +23,7 @@ class Clip(Resource):
 
             data['filename'] = f.filename
             data['content'] = f.stream.read()
-            data['mimetype'] = received_mt
+            data['mimetype'] = guessed_mt
 
         # Server received an object (text)
         else:

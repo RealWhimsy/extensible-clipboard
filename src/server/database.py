@@ -64,6 +64,7 @@ class ClipDatabase:
         new_clip = {
                 '_id': _id,
                 'data': data['content'],
+                'mimetype': data['mimetype'],
                 'last_modified': modified_date.isoformat()
         }
 

@@ -1,7 +1,7 @@
 from importlib import import_module
 from os import listdir
 
-from .base_hook import BaseHook
+from .basehook import BaseHook
 
 class HookManager:
 
@@ -9,6 +9,7 @@ class HookManager:
         # Rebuild hooks if method is called manually fore some reason
         if self.hooks:
             self.hooks = []
+
         files = listdir('src/server/hooks/')
         # Remove all files not ending on _hook.py
         hook_files = [f for f in files if f.endswith('_hook.py')]
@@ -30,5 +31,4 @@ class HookManager:
     def __init__(self):
         self.hooks = []
         self._create_hooks()
-        print(self.hooks)
         self.call_hooks()

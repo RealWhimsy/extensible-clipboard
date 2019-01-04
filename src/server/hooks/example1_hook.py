@@ -1,4 +1,4 @@
-from .base_hook import BaseHook
+from .basehook import BaseHook
 
 class ExampleHook(BaseHook):
 

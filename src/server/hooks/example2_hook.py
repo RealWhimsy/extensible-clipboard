@@ -1,6 +1,6 @@
-from .base_hook import BaseHook
+from .basehook import BaseHook
 
 class SecondExample(BaseHook):
 
     def do_work(self, obj=None):
-        print('SecondExample is working')
+        print('SecondExample頑張ってるよ')

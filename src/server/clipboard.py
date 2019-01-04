@@ -3,6 +3,7 @@ from sys import getsizeof
 
 from PyQt5.QtCore import QMimeData, QByteArray
 
+
 class Clipboard:
     """
     This class acts as an intermediary between the core

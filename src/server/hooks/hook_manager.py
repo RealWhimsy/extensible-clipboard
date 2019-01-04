@@ -3,6 +3,7 @@ from os import listdir
 
 from .basehook import BaseHook
 
+
 class HookManager:
 
     def _create_hooks(self):
@@ -19,14 +20,13 @@ class HookManager:
             members = dir(module)
             for m in members:
                 # Do not even check underscored stuff and Parent class
-                if not m.startswith('_') and not 'BaseHook' in m:
+                if not m.startswith('_') and 'BaseHook'not in m:
                     hook = getattr(module, m)()  # instanciate found class
                     if isinstance(hook, BaseHook):  # is child of BaseHook
                         self.hooks.append(hook)
 
     def call_hooks(self, obj=None):
         [h.do_work() for h in self.hooks]
-
 
     def __init__(self):
         self.hooks = []

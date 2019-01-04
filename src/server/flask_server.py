@@ -2,6 +2,7 @@ from PyQt5 import QtCore
 
 from hooks.hook_manager import HookManager
 
+
 class FlaskQt(QtCore.QObject):
     """
     Wrapper around the Flask-server to be able to run it in a QThread.

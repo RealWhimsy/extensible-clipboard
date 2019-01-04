@@ -127,7 +127,7 @@ class ClipDatabase:
         """
         Deletes an object.
         :param clip_id: Id of the objecte to be deleted
-        :return: Number of deleted objects. 
+        :return: Number of deleted objects.
                  Can be zero, if no objects were deleted
         """
         bin_id = self._create_binary_uuid(clip_id)

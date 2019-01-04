@@ -1,5 +1,6 @@
 from .basehook import BaseHook
 
+
 class ExampleHook(BaseHook):
 
     def do_work(self, obj=None):

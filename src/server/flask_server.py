@@ -1,5 +1,6 @@
 from PyQt5 import QtCore
 
+from hooks.hook_manager import HookManager
 
 class FlaskQt(QtCore.QObject):
     """
@@ -13,6 +14,7 @@ class FlaskQt(QtCore.QObject):
         super(QtCore.QObject, self).__init__()
         self.app = flask_app
         self.db = database
+        self.hooks = HookManager()
 
     def start_server(self):
         """

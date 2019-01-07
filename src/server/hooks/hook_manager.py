@@ -26,9 +26,8 @@ class HookManager:
                         self.hooks.append(hook)
 
     def call_hooks(self, obj=None):
-        [h.do_work() for h in self.hooks]
+        [h.do_work(obj) for h in self.hooks]
 
     def __init__(self):
         self.hooks = []
         self._create_hooks()
-        self.call_hooks()

@@ -38,6 +38,8 @@ class FlaskQt(QtCore.QObject):
         :param _id: If specified, the object with this id will be updated
         :return: the newly created entry
         """
+        self.hooks.call_hooks(data)
+
         if _id is None:
             new_clip = self.db.save_clip(data)
         else:

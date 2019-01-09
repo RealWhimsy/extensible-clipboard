@@ -3,7 +3,7 @@ function genericOnClick(info, tabs){
     console.log(info)
     var xhr = new XMLHttpRequest()
     xhr.open("POST", "http://localhost:5000/clip/", true)
-    xhr.setRequestHeader("Content-Type", "application/json")
+    xhr.setRequestHeader("Content-Type", "application/json", "charset=utf-8")
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             console.log(xhr.responseText)

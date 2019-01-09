@@ -23,10 +23,9 @@ class Clipboard:
 
     def _prepare_data(self, data):
         if type(data) is str:
-            data = bytes(data, 'utf-8')
+            data = data.encode(encoding='utf8')
         else:
             data = bytes(data)
-        data = QByteArray.fromRawData(data)
         return data
 
     def save(self, data):
@@ -36,9 +35,12 @@ class Clipboard:
         :param data: The data that will be saved in the clipboard
         """
         mime_type = data['mimetype']
-        data = self._prepare_data(data['content'])
         mime_data = QMimeData()
-        mime_data.setData(mime_type, data)
+
+        prepared_data = self._prepare_data(data['content'])
+
+        mime_data.setData(mime_type, prepared_data)
+
         self.clipboard.clear()
         self.clipboard.setMimeData(mime_data)
 

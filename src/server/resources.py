@@ -27,8 +27,14 @@ class Clip(Resource):
 
         # Server received an object (text)
         else:
-            data['content'] = request.form['clip']
-            data['mimetype'] = request.form['mimetype']
+            if request.headers.get('CONTENT_TYPE') in 'application/json':
+                json = request.get_json()
+                data['content'] = json['clip']
+                data['mimetype'] = json['mimetype']
+                
+            else:
+                data['content'] = request.form['clip']
+                data['mimetype'] = request.form['mimetype']
 
         return data
 

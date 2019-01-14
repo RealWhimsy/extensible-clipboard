@@ -131,7 +131,7 @@ class SimpleTextServerTest(unittest.TestCase):
         child = self.add_child(parent_id)
         child_id = loads(child.json())['_id']
 
-        header = {'accept': 'text/plain, text/html;q=0.3'}
+        header = {'accept': 'text/plain;q=0.8, text/html;q=0.3'}
 
         r = requests.get(
                 self.CLIP_URL + child_id, 

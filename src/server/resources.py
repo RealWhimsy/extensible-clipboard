@@ -4,6 +4,8 @@ from flask import request
 
 from flask_restful import abort, Resource
 
+from exceptions import ParentNotFoundException, SameMimetypeException
+
 
 class Clip(Resource):
 
@@ -44,7 +46,11 @@ class Clip(Resource):
             # Returns all visible clips
             clip = self.server.get_all_clips()
         else:
-            clip = self.server.get_clip_by_id(clip_id)
+            preferred_type = None
+            if request.accept_mimetypes.best != '*/*':  # Default value
+                preferred_type = request.accept_mimetypes # Already sorted by Werkzeug
+
+            clip = self.server.get_clip_by_id(clip_id, preferred_type)
 
         if clip is None:
             return abort(404)
@@ -66,13 +72,32 @@ class Clip(Resource):
 
     def post(self, clip_id=None):
 
-        if clip_id is not None:
+        if clip_id is not None and not request.url.endswith('add_child'):
             return ({'error': 'Use PUT to update existing objects'},
                     405)
 
         data = self._get_data_from_request(request)
 
+        if request.url.endswith('add_child'):
+            data['parent'] = clip_id
+
         new_item = self.server.save_in_database(data=data)
+
+        # Checks if any errors occured during lookup;
+        # Works similar to passing of errors in Django
+        if 'error' in new_item:
+            error = new_item['error']
+            if type(error) is ParentNotFoundException:
+                return ({
+                    'error': 'Parent specified by request not found on server'},
+                    412    
+                )
+            elif type(error) is SameMimetypeException:
+                return ({
+                    'error': 'Entry has same mimetype specified as parent'},
+                    422
+                )
+
         return new_item, 201
 
     def delete(self, clip_id=None):

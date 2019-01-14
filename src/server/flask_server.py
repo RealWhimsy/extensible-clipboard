@@ -1,6 +1,7 @@
 from PyQt5 import QtCore
 
 from hooks.hook_manager import HookManager
+from exceptions import ParentNotFoundException, SameMimetypeException
 
 
 class FlaskQt(QtCore.QObject):
@@ -38,22 +39,25 @@ class FlaskQt(QtCore.QObject):
         :param _id: If specified, the object with this id will be updated
         :return: the newly created entry
         """
-        self.hooks.call_hooks(data)
+        #self.hooks.call_hooks(data)
+        new_clip = {}
+        try:
+            if _id is None:
+                new_clip = self.db.save_clip(data)
+            else:
+                new_clip = self.db.update_clip(_id, data)
+            self.emit_data(data)
+        except (ParentNotFoundException, SameMimetypeException) as e:
+            new_clip['error'] = e
 
-        if _id is None:
-            new_clip = self.db.save_clip(data)
-        else:
-            new_clip = self.db.update_clip(_id, data)
-
-        self.emit_data(data)
         return new_clip
 
-    def get_clip_by_id(self, id):
+    def get_clip_by_id(self, _id, preferred_type=None):
         """
         Queries the database for a clip with the specified uuid.
         :return: Json representation of the clip or None if no clip found
         """
-        return self.db.get_clip_by_id(id)
+        return self.db.get_clip_by_id(_id, preferred_type)
 
     def get_all_clips(self):
         """

@@ -9,6 +9,8 @@ from bson.objectid import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import ReturnDocument
 
+from exceptions import ParentNotFoundException, SameMimetypeException
+
 
 class ClipDatabase:
 
@@ -39,7 +41,7 @@ class ClipDatabase:
         """
         The method strips the additional informations added by Mongo
         in order to return pure json
-        i.e. convert uuid-objects to their string or hand binary
+        i.e. convert uuid-objects to their string or handle binary
         """
         clip['_id'] = str(clip['_id'])
 
@@ -48,7 +50,33 @@ class ClipDatabase:
 
             clip['data'] = str(data)[2:-1]
 
+        if 'parent' in clip:
+            clip['parent'] = str(clip['parent'])
+
         return clip
+
+    def _get_children(self, parent):
+        return self.clip_collection.find({'parent': self._create_binary_uuid(parent['_id'])})
+
+    def _find_best_match(self, parent, preferred_types):
+        """
+        Searches all children of parent if a direct match for
+        the specified mimetypes can be found.
+        :param parent: Mongo-object, should have children in db
+        :param preferred_types: List of tuples representing the Accept-header 
+            of the request. Format: ('text/plain', 1.0).
+            The list is to be sorted by the rules of the Accept-header
+            Wildcards not supported currently.
+        :return: The Mongo-object with the closes match. parent, if no match
+        """
+        children = self._get_children(parent)
+
+        for curr_type in preferred_types:
+            for child in children:
+                if child['mimetype'] == curr_type[0]:
+                    return child
+
+        return parent
 
     def save_clip(self, data):
         """
@@ -60,27 +88,41 @@ class ClipDatabase:
         _id = uuid4()
         _id = self._create_binary_uuid(str(_id))
         modified_date = datetime.now()
+        new_clip = {}
 
-        new_clip = {
-                '_id': _id,
-                'data': data['content'],
-                'mimetype': data['mimetype'],
-                'last_modified': modified_date.isoformat()
-        }
+        if 'parent' in data:
+            parent_id = self._create_binary_uuid(data['parent'])
+            parent = self.clip_collection.find_one({'_id': parent_id})
+            # Abandon insert, when parent-id not in db
+            if parent is None:
+                raise ParentNotFoundException
+
+            if parent['mimetype'] == data['mimetype']:
+                raise SameMimetypeException
+            new_clip['parent'] = self._create_binary_uuid(data['parent'])
+
+        new_clip['_id'] = _id
+        new_clip['data'] = data['content']
+        new_clip['mimetype'] = data['mimetype']
+        new_clip['last_modified'] = modified_date.isoformat() 
 
         if 'filename' in data:
             new_clip['filename'] = data['filename']
+
 
         insert_result = self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
         return dumps(self._build_json_response_clip(new_clip))
 
-    def get_clip_by_id(self,  clip_id):
+    def get_clip_by_id(self, clip_id, preferred_types=None):
         """
         Searches the database for a clip with the specified id.
 
         :param id: The id to be searched. Has to be the string representation
                    of a uuid-object
+        :param preferred_types: List of tuples representing the Accept-header 
+            of the request. Format of single entry: ('text/plain', 1.0).
+            The list is to be sorted by the rules of the Accept-header
         :return: Json-like string containing the found object or None
                  if no object with the id could be found in the database
         """
@@ -88,9 +130,14 @@ class ClipDatabase:
 
         clip = self.clip_collection.find_one({'_id': clip_id})
 
-        if clip is not None:
-            clip = dumps(self._build_json_response_clip(clip))
+        if clip is None:
+            return clip
 
+        if preferred_types:  # Request specified mimetype
+            if not clip['mimetype'] == preferred_types[0]:
+                clip = self._find_best_match(clip, preferred_types)
+
+        clip = dumps(self._build_json_response_clip(clip))
         return clip
 
     def get_all_clips(self):

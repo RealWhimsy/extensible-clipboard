@@ -95,3 +95,23 @@ class SimpleTextServerTest(unittest.TestCase):
 
         json = loads(r.json())
         self.assertIn('<h1>Child text</h1>', json['data'])
+
+    def test_wildcard_in_ACCEPT_header_honored(self):
+        parent_id = self.create_parent()
+        self.add_child(parent_id)
+
+        r = requests.post(
+                self.CLIP_URL + parent_id + '/add_child',
+                data={'mimetype': 'application/json',
+                      'clip': '{"key": "json-child"}',
+                      'parent': parent_id
+                     })
+
+        header = {'accept': 'application/*;q=0.5 ,text/plain;q=0.8'}
+        r = requests.get(
+            self.CLIP_URL + parent_id,
+            headers=header
+        )
+
+        json = loads(r.json())
+        self.assertIn('json-child', json['data'])

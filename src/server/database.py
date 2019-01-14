@@ -71,11 +71,25 @@ class ClipDatabase:
         """
         children = self._get_children(parent)
 
+        # first round, exact match
         for curr_type in preferred_types:
             for child in children:
                 if child['mimetype'] == curr_type[0]:
                     return child
+        
+        # second round, wildcard match
+        children.rewind()
+        for curr_type in preferred_types:
+            # Check if mimestring is wildcard and get part before the /
+            mime_base = curr_type[0] 
+            if '*' in mime_base:
+                mime_base = mime_base.split('/')[0]
 
+                for child in children:
+                    if mime_base in child['mimetype']:
+                        return child
+
+        # No exact or wildcard match, default to parent 
         return parent
 
     def save_clip(self, data):

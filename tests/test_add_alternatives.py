@@ -115,3 +115,12 @@ class SimpleTextServerTest(unittest.TestCase):
 
         json = loads(r.json())
         self.assertIn('json-child', json['data'])
+
+    def test_cannot_create_grandchildren(self):
+        parent_id = self.create_parent()
+        child = self.add_child(parent_id)
+        child_id = loads(child.json())['_id']
+        grandchild = self.add_child(child_id)
+
+        self.assertEqual(grandchild.status_code, 422)
+        self.assertIn('Can only create child for original entry', grandchild.json()['error'])

@@ -1,7 +1,7 @@
 from PyQt5 import QtCore
 
 from hooks.hook_manager import HookManager
-from exceptions import ParentNotFoundException, SameMimetypeException
+from exceptions import *
 
 
 class FlaskQt(QtCore.QObject):
@@ -47,7 +47,7 @@ class FlaskQt(QtCore.QObject):
             else:
                 new_clip = self.db.update_clip(_id, data)
             self.emit_data(data)
-        except (ParentNotFoundException, SameMimetypeException) as e:
+        except (GrandchildException, ParentNotFoundException, SameMimetypeException) as e:
             new_clip['error'] = e
 
         return new_clip

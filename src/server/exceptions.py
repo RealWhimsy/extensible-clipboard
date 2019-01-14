@@ -4,3 +4,6 @@ class ParentNotFoundException(Exception):
 
 class SameMimetypeException(Exception):
     pass
+
+class GrandchildException(Exception):
+    pass

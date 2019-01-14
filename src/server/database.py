@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import ReturnDocument
 
-from exceptions import ParentNotFoundException, SameMimetypeException
+from exceptions import *
 
 
 class ClipDatabase:
@@ -110,7 +110,8 @@ class ClipDatabase:
             # Abandon insert, when parent-id not in db
             if parent is None:
                 raise ParentNotFoundException
-
+            if 'parent' in parent:
+                raise GrandchildException
             if parent['mimetype'] == data['mimetype']:
                 raise SameMimetypeException
             new_clip['parent'] = self._create_binary_uuid(data['parent'])
@@ -141,17 +142,14 @@ class ClipDatabase:
                  if no object with the id could be found in the database
         """
         clip_id = self._create_binary_uuid(clip_id)
-
         clip = self.clip_collection.find_one({'_id': clip_id})
 
-        if clip is None:
-            return clip
+        if clip is not None:
+            if preferred_types:  # Request specified mimetype
+                if not clip['mimetype'] == preferred_types[0]:
+                    clip = self._find_best_match(clip, preferred_types)
 
-        if preferred_types:  # Request specified mimetype
-            if not clip['mimetype'] == preferred_types[0]:
-                clip = self._find_best_match(clip, preferred_types)
-
-        clip = dumps(self._build_json_response_clip(clip))
+            clip = dumps(self._build_json_response_clip(clip))
         return clip
 
     def get_all_clips(self):

@@ -4,7 +4,7 @@ from flask import request
 
 from flask_restful import abort, Resource
 
-from exceptions import ParentNotFoundException, SameMimetypeException
+from exceptions import *
 
 
 class Clip(Resource):
@@ -95,6 +95,11 @@ class Clip(Resource):
             elif type(error) is SameMimetypeException:
                 return ({
                     'error': 'Entry has same mimetype specified as parent'},
+                    422
+                )
+            elif type(error) is GrandchildException:
+                return ({
+                    'error': 'Can only create child for original entry'},
                     422
                 )
 

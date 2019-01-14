@@ -107,7 +107,7 @@ class SimpleTextServerTest(unittest.TestCase):
                       'parent': parent_id
                      })
 
-        header = {'accept': 'application/*;q=0.5 ,text/plain;q=0.8'}
+        header = {'accept': 'application/*'}
         r = requests.get(
             self.CLIP_URL + parent_id,
             headers=header
@@ -124,3 +124,19 @@ class SimpleTextServerTest(unittest.TestCase):
 
         self.assertEqual(grandchild.status_code, 422)
         self.assertIn('Can only create child for original entry', grandchild.json()['error'])
+
+    def test_ACCEPT_will_always_get_best_result(self):
+        # parent: plain, child: html, query:child but prefers plains > parent delivered
+        parent_id = self.create_parent()
+        child = self.add_child(parent_id)
+        child_id = loads(child.json())['_id']
+
+        header = {'accept': 'text/plain, text/html;q=0.3'}
+
+        r = requests.get(
+                self.CLIP_URL + child_id, 
+                headers=header
+        )
+
+        json = loads(r.json())
+        self.assertIn('parentClip', json['data'])

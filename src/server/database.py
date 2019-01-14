@@ -56,7 +56,15 @@ class ClipDatabase:
         return clip
 
     def _get_children(self, parent):
-        return self.clip_collection.find({'parent': self._create_binary_uuid(parent['_id'])})
+        parent_id = self._create_binary_uuid(parent['_id'])
+        return self.clip_collection.find(
+                {'$or': [
+                    {'parent': parent_id},
+                    {'_id': parent_id}
+                ]})
+
+    def _get_parent(self, child):
+        return self.clip_collection.find_one({'_id': self._create_binary_uuid(child['parent'])})
 
     def _find_best_match(self, parent, preferred_types):
         """
@@ -69,6 +77,9 @@ class ClipDatabase:
             Wildcards not supported currently.
         :return: The Mongo-object with the closes match. parent, if no match
         """
+        if 'parent' in parent:  # If requested entity is a child itself
+            parent = self._get_parent(parent)
+
         children = self._get_children(parent)
 
         # first round, exact match
@@ -189,6 +200,7 @@ class ClipDatabase:
         :return: Number of deleted objects.
                  Can be zero, if no objects were deleted
         """
+        #TODO Cascade delete children
         bin_id = self._create_binary_uuid(clip_id)
 
         return self.clip_collection.delete_one({'_id': bin_id}).deleted_count

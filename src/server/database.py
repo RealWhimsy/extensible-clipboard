@@ -74,7 +74,6 @@ class ClipDatabase:
         :param preferred_types: List of tuples representing the Accept-header 
             of the request. Format: ('text/plain', 1.0).
             The list is to be sorted by the rules of the Accept-header
-            Wildcards not supported currently.
         :return: The Mongo-object with the closes match. parent, if no match
         """
         if 'parent' in parent:  # If requested entity is a child itself
@@ -200,7 +199,15 @@ class ClipDatabase:
         :return: Number of deleted objects.
                  Can be zero, if no objects were deleted
         """
-        #TODO Cascade delete children
         bin_id = self._create_binary_uuid(clip_id)
-
-        return self.clip_collection.delete_one({'_id': bin_id}).deleted_count
+        clip = self.clip_collection.find_one({'_id': bin_id}) or {}
+        print(clip)
+        if 'parent' in clip:  # Only delete entry when child
+            return self.clip_collection.delete_one({'_id': bin_id}).deleted_count
+        else:  # Cascade when parent
+            deleted = self.clip_collection.delete_many(
+                    {'$or': [
+                        {'parent': bin_id},
+                        {'_id': bin_id}
+                    ]})
+            return deleted.deleted_count

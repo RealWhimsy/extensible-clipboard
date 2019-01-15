@@ -140,3 +140,16 @@ class SimpleTextServerTest(unittest.TestCase):
 
         json = loads(r.json())
         self.assertIn('parentClip', json['data'])
+
+    def test_delete_parent_will_delete_children(self):
+        parent_id = self.create_parent()
+        child = self.add_child(parent_id)
+        child_id = loads(child.json())['_id']
+        r = requests.get(self.CLIP_URL + child_id)
+        self.assertEqual(r.status_code, 200)
+
+        r = requests.delete(self.CLIP_URL + parent_id)
+        self.assertEqual(r.status_code, 204)
+
+        r = requests.get(self.CLIP_URL + child_id)
+        self.assertEqual(r.status_code, 404)

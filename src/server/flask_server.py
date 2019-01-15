@@ -76,3 +76,11 @@ class FlaskQt(QtCore.QObject):
         :return: Number of deleted items, can be 0 if no match found
         """
         return self.db.delete_entry_by_id(clip_id)
+
+    def get_alternatives(self, clip_id):
+        """
+        Gets a Json-Array containg id and mimetype of all related
+        (child, siblings or parent) entries of clip_id
+        :returns: Said array or None, if clip_id not found in db
+        """
+        return self.db.get_alternatives(clip_id)

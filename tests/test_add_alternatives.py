@@ -153,3 +153,30 @@ class SimpleTextServerTest(unittest.TestCase):
 
         r = requests.get(self.CLIP_URL + child_id)
         self.assertEqual(r.status_code, 404)
+
+    def test_can_get_list_of_alternatives(self):
+        parent_id = self.create_parent()
+        child = self.add_child(parent_id)
+        child_id = loads(child.json())['_id']
+        r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')
+        self.assertEqual(r.status_code, 200)
+
+        self.assertIn(parent_id, r.text)
+        self.assertIn(child_id, r.text)
+        json = loads(r.json())
+        self.assertEqual(len(json), 2)
+
+    def test_unrelated_clip_is_not_returned(self):
+        parent_id = self.create_parent()
+        child = self.add_child(parent_id)
+        child_id = loads(child.json())['_id']
+        r = requests.post(self.CLIP_URL,
+                      data={'mimetype': 'text/plain',
+                            'clip': 'WrongTurn'
+                           })
+        wrong_id = loads(r.json())['_id']
+        r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')
+
+        self.assertIn(parent_id, r.text)
+        self.assertIn(child_id, r.text)
+        self.assertNotIn(wrong_id, r.text)

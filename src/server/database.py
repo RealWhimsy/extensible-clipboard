@@ -55,7 +55,7 @@ class ClipDatabase:
 
         return clip
 
-    def _get_children(self, parent):
+    def _get_related_entries(self, parent):
         parent_id = self._create_binary_uuid(parent['_id'])
         return self.clip_collection.find(
                 {'$or': [
@@ -81,7 +81,7 @@ class ClipDatabase:
         if 'parent' in parent:  # If requested entity is a child itself
             parent = self._get_parent(parent)
 
-        children = self._get_children(parent)
+        children = self._get_related_entries(parent)
 
         # first round, exact match
         for curr_type in preferred_types:
@@ -202,7 +202,6 @@ class ClipDatabase:
         """
         bin_id = self._create_binary_uuid(clip_id)
         clip = self.clip_collection.find_one({'_id': bin_id}) or {}
-        print(clip)
         if 'parent' in clip:  # Only delete entry when child
             return self.clip_collection.delete_one({
                     '_id': bin_id
@@ -214,3 +213,19 @@ class ClipDatabase:
                         {'_id': bin_id}
                     ]})
             return deleted.deleted_count
+
+    def get_alternatives(self, clip_id):
+        bin_id = self._create_binary_uuid(clip_id)
+        parent = self.clip_collection.find_one({'_id': bin_id})
+        if parent is None:
+            return None
+        else:
+            results = []
+            clips = self._get_related_entries(parent)
+            for clip in clips:
+                results.append({
+                    '_id': str(clip['_id']),
+                    'mimetype': clip['mimetype']
+                })
+            print(results)
+            return dumps(results)

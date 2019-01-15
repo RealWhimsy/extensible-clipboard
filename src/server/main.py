@@ -33,6 +33,7 @@ class MainApp(QtWidgets.QApplication):
                               '/clip/',
                               '/clip/<uuid:clip_id>',
                               '/clip/<uuid:clip_id>/add_child',
+                              '/clip/<uuid:clip_id>/get_alternatives/',
                               resource_class_kwargs={
                                     'server': self.server_qt
                                   }

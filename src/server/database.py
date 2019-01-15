@@ -64,14 +64,16 @@ class ClipDatabase:
                 ]})
 
     def _get_parent(self, child):
-        return self.clip_collection.find_one({'_id': self._create_binary_uuid(child['parent'])})
+        return self.clip_collection.find_one({
+                '_id': self._create_binary_uuid(child['parent'])
+            })
 
     def _find_best_match(self, parent, preferred_types):
         """
         Searches all children of parent if a direct match for
         the specified mimetypes can be found.
         :param parent: Mongo-object, should have children in db
-        :param preferred_types: List of tuples representing the Accept-header 
+        :param preferred_types: List of tuples representing the Accept-header
             of the request. Format: ('text/plain', 1.0).
             The list is to be sorted by the rules of the Accept-header
         :return: The Mongo-object with the closes match. parent, if no match
@@ -86,12 +88,12 @@ class ClipDatabase:
             for child in children:
                 if child['mimetype'] == curr_type[0]:
                     return child
-        
+
         # second round, wildcard match
         children.rewind()
         for curr_type in preferred_types:
             # Check if mimestring is wildcard and get part before the /
-            mime_base = curr_type[0] 
+            mime_base = curr_type[0]
             if '*' in mime_base:
                 mime_base = mime_base.split('/')[0]
 
@@ -99,7 +101,7 @@ class ClipDatabase:
                     if mime_base in child['mimetype']:
                         return child
 
-        # No exact or wildcard match, default to parent 
+        # No exact or wildcard match, default to parent
         return parent
 
     def save_clip(self, data):
@@ -129,11 +131,10 @@ class ClipDatabase:
         new_clip['_id'] = _id
         new_clip['data'] = data['content']
         new_clip['mimetype'] = data['mimetype']
-        new_clip['last_modified'] = modified_date.isoformat() 
+        new_clip['last_modified'] = modified_date.isoformat()
 
         if 'filename' in data:
             new_clip['filename'] = data['filename']
-
 
         insert_result = self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
@@ -145,7 +146,7 @@ class ClipDatabase:
 
         :param id: The id to be searched. Has to be the string representation
                    of a uuid-object
-        :param preferred_types: List of tuples representing the Accept-header 
+        :param preferred_types: List of tuples representing the Accept-header
             of the request. Format of single entry: ('text/plain', 1.0).
             The list is to be sorted by the rules of the Accept-header
         :return: Json-like string containing the found object or None
@@ -203,7 +204,9 @@ class ClipDatabase:
         clip = self.clip_collection.find_one({'_id': bin_id}) or {}
         print(clip)
         if 'parent' in clip:  # Only delete entry when child
-            return self.clip_collection.delete_one({'_id': bin_id}).deleted_count
+            return self.clip_collection.delete_one({
+                    '_id': bin_id
+                }).deleted_count
         else:  # Cascade when parent
             deleted = self.clip_collection.delete_many(
                     {'$or': [

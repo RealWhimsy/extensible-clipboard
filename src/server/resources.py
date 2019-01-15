@@ -13,8 +13,8 @@ class Clip(Resource):
         self.server = kwargs['server']
 
     def _get_data_from_request(self, request):
-        # Server received a file
         data = {}
+        # Server received a file
         if 'file' in request.files:
             f = request.files['file']
             received_mt = f.mimetype
@@ -33,7 +33,7 @@ class Clip(Resource):
                 json = request.get_json()
                 data['content'] = json['clip']
                 data['mimetype'] = json['mimetype']
-                
+
             else:
                 data['content'] = request.form['clip']
                 data['mimetype'] = request.form['mimetype']
@@ -48,7 +48,8 @@ class Clip(Resource):
         else:
             preferred_type = None
             if request.accept_mimetypes.best != '*/*':  # Default value
-                preferred_type = request.accept_mimetypes # Already sorted by Werkzeug
+                # Already sorted by Werkzeug
+                preferred_type = request.accept_mimetypes
 
             clip = self.server.get_clip_by_id(clip_id, preferred_type)
 
@@ -89,8 +90,9 @@ class Clip(Resource):
             error = new_item['error']
             if type(error) is ParentNotFoundException:
                 return ({
-                    'error': 'Parent specified by request not found on server'},
-                    412    
+                    'error': 'Parent specified by request not found on server'
+                    },
+                    412
                 )
             elif type(error) is SameMimetypeException:
                 return ({

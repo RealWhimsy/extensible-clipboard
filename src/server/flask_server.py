@@ -39,6 +39,7 @@ class FlaskQt(QtCore.QObject):
         :param _id: If specified, the object with this id will be updated
         :return: the newly created entry
         """
+
         #self.hooks.call_hooks(data)
         new_clip = {}
         try:
@@ -47,7 +48,9 @@ class FlaskQt(QtCore.QObject):
             else:
                 new_clip = self.db.update_clip(_id, data)
             self.emit_data(data)
-        except (GrandchildException, ParentNotFoundException, SameMimetypeException) as e:
+        except (GrandchildException,
+                ParentNotFoundException,
+                SameMimetypeException) as e:
             new_clip['error'] = e
 
         return new_clip

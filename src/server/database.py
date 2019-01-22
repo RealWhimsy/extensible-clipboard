@@ -194,9 +194,9 @@ class ClipDatabase:
                  if no object with the id could be found in the database
         """
         bin_id = self._create_binary_uuid(object_id)
-        new_doc = self.clip_collection.find_one_and_replace(
+        new_doc = self.clip_collection.find_one_and_update(
                 {'_id': bin_id},
-                {'data': data['data']},
+                {'$set': {'data': data['data']}},
                 return_document=ReturnDocument.AFTER
         )
 

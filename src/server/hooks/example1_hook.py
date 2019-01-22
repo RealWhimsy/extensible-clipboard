@@ -8,6 +8,6 @@ class ExampleHook(BaseHook):
             print(obj)
             new_object = {}
             new_object['parent'] = obj['_id']
-            new_object['mimetype'] = 'text/html'
-            new_object['content'] = '<h1>' + obj['content'] + '</h1>'
+            new_object['mimetype'] = 'text/xml'
+            new_object['data'] = '<h1>' + obj['data'] + '</h1>'
             handle(new_object)

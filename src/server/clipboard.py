@@ -37,7 +37,7 @@ class Clipboard:
         mime_type = data['mimetype']
         mime_data = QMimeData()
 
-        prepared_data = self._prepare_data(data['content'])
+        prepared_data = self._prepare_data(data['data'])
 
         mime_data.setData(mime_type, prepared_data)
 

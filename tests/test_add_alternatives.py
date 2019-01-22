@@ -163,8 +163,6 @@ class SimpleTextServerTest(unittest.TestCase):
 
         self.assertIn(parent_id, r.text)
         self.assertIn(child_id, r.text)
-        json = loads(r.json())
-        self.assertEqual(len(json), 2)
 
     def test_unrelated_clip_is_not_returned(self):
         parent_id = self.create_parent()

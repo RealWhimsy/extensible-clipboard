@@ -10,7 +10,7 @@ class FlaskQt(QtCore.QObject):
     Also responsible for passing data to the database and the clipboard
     """
 
-    data = QtCore.pyqtSignal(object)
+    data_signal = QtCore.pyqtSignal(object)
 
     def __init__(self, flask_app, database):
         super(QtCore.QObject, self).__init__()
@@ -30,9 +30,8 @@ class FlaskQt(QtCore.QObject):
         Passes data to the Q-Application so it can put them into the clipboard
         :param data: The data (text, binary) received by the Resource
         """
-        #self.native_hooks.call_hooks(data, self.db.save_clip)
-        #print(data)
-        #self.data.emit(data)
+        self.native_hooks.call_hooks(data, self.db.save_clip)
+        self.data_signal.emit(data)
 
     def save_in_database(self, data, _id=None):
         """
@@ -48,7 +47,8 @@ class FlaskQt(QtCore.QObject):
                 new_clip = self.db.save_clip(data)
             else:
                 new_clip = self.db.update_clip(_id, data)
-            self.emit_data(new_clip)
+            if new_clip:
+                self.emit_data(new_clip)
         except (GrandchildException,
                 ParentNotFoundException,
                 SameMimetypeException) as e:

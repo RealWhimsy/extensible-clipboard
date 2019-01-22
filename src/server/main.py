@@ -49,7 +49,7 @@ class MainApp(QtWidgets.QApplication):
         # Makes C-c usable in console, because QT would block it normally
         signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-        self.server_qt.data.connect(self.dummy)
+        self.server_qt.data_signal.connect(self.dummy)
         self.add_resources()
         self.server_thread.start()
 

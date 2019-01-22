@@ -129,7 +129,7 @@ class ClipDatabase:
             new_clip['parent'] = self._create_binary_uuid(data['parent'])
 
         new_clip['_id'] = _id
-        new_clip['data'] = data['content']
+        new_clip['data'] = data['data']
         new_clip['mimetype'] = data['mimetype']
         new_clip['creation_date'] = modified_date.isoformat()
         new_clip['last_modified'] = modified_date.isoformat()
@@ -139,7 +139,7 @@ class ClipDatabase:
 
         insert_result = self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
-        return dumps(self._build_json_response_clip(new_clip))
+        return self._build_json_response_clip(new_clip)
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
         """
@@ -161,7 +161,7 @@ class ClipDatabase:
                 if not clip['mimetype'] == preferred_types[0]:
                     clip = self._find_best_match(clip, preferred_types)
 
-            clip = dumps(self._build_json_response_clip(clip))
+            clip = self._build_json_response_clip(clip)
         return clip
 
     def get_all_clips(self):
@@ -170,7 +170,7 @@ class ClipDatabase:
         """
         results = list(self.clip_collection.find({}))
         json_result = [self._build_json_response_clip(i) for i in results]
-        return dumps(json_result)
+        return json_result
 
     def get_latest(self):
         results = self.clip_collection.find({
@@ -179,7 +179,7 @@ class ClipDatabase:
         results.sort('creation_date', ASCENDING)
         if results.count():
             r = results[0]
-            return dumps(self._build_json_response_clip(r))
+            return self._build_json_response_clip(r)
         else:
             return None
 
@@ -196,12 +196,12 @@ class ClipDatabase:
         bin_id = self._create_binary_uuid(object_id)
         new_doc = self.clip_collection.find_one_and_replace(
                 {'_id': bin_id},
-                {'data': data['content']},
+                {'data': data['data']},
                 return_document=ReturnDocument.AFTER
         )
 
         if new_doc is not None:  # When replace actually did take place
-            new_doc = dumps(self._build_json_response_clip(new_doc))
+            new_doc = self._build_json_response_clip(new_doc)
 
         return new_doc
 
@@ -240,4 +240,4 @@ class ClipDatabase:
                     'mimetype': clip['mimetype']
                 })
             print(results)
-            return dumps(results)
+            return results

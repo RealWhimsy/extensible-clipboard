@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class BaseHook(ABC):
 
     @abstractmethod
-    def do_work(self, obj):
+    def do_work(self, obj, handle):
         """
         This method gets called when a hook should do his work.
         It will get passed the object sent to the server by the client

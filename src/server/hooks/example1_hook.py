@@ -3,6 +3,11 @@ from .basehook import BaseHook
 
 class ExampleHook(BaseHook):
 
-    def do_work(self, obj=None):
+    def do_work(self, obj, handle):
         if obj['mimetype'] in 'text/plain' and 'filename' not in obj:
-            obj['content'] = obj['content'] + ' modified'
+            print(obj)
+            new_object = {}
+            new_object['parent'] = obj['_id']
+            new_object['mimetype'] = 'text/html'
+            new_object['content'] = '<h1>' + obj['content'] + '</h1>'
+            handle(new_object)

@@ -1,3 +1,4 @@
+from json import dumps
 from mimetypes import guess_type
 
 from flask import request
@@ -24,18 +25,18 @@ class Clip(Resource):
                 return abort(400)
 
             data['filename'] = f.filename
-            data['content'] = f.stream.read()
+            data['data'] = f.stream.read()
             data['mimetype'] = guessed_mt
 
         # Server received an object (text)
         else:
             if request.headers.get('CONTENT_TYPE') in 'application/json':
                 json = request.get_json()
-                data['content'] = json['clip']
+                data['data'] = json['clip']
                 data['mimetype'] = json['mimetype']
 
             else:
-                data['content'] = request.form['clip']
+                data['data'] = request.form['clip']
                 data['mimetype'] = request.form['mimetype']
 
         return data
@@ -59,7 +60,7 @@ class Clip(Resource):
         if clip is None:
             return abort(404)
 
-        return clip
+        return dumps(clip)
 
     def put(self, clip_id=None):
         if clip_id is None:
@@ -70,7 +71,7 @@ class Clip(Resource):
         clip = self.server.save_in_database(_id=clip_id, data=data)
 
         if clip is not None:
-            return clip
+            return dumps(clip)
         else:
             return abort(404)
 
@@ -108,7 +109,7 @@ class Clip(Resource):
                     422
                 )
 
-        return new_item, 201
+        return dumps(new_item), 201
 
     def delete(self, clip_id=None):
         if clip_id is None:

@@ -16,7 +16,7 @@ class FlaskQt(QtCore.QObject):
         super(QtCore.QObject, self).__init__()
         self.app = flask_app
         self.db = database
-        self.hooks = HookManager()
+        self.native_hooks = HookManager()
 
     def start_server(self):
         """
@@ -30,7 +30,9 @@ class FlaskQt(QtCore.QObject):
         Passes data to the Q-Application so it can put them into the clipboard
         :param data: The data (text, binary) received by the Resource
         """
-        self.data.emit(data)
+        #self.native_hooks.call_hooks(data, self.db.save_clip)
+        #print(data)
+        #self.data.emit(data)
 
     def save_in_database(self, data, _id=None):
         """
@@ -40,14 +42,13 @@ class FlaskQt(QtCore.QObject):
         :return: the newly created entry
         """
 
-        #self.hooks.call_hooks(data)
         new_clip = {}
         try:
             if _id is None:
                 new_clip = self.db.save_clip(data)
             else:
                 new_clip = self.db.update_clip(_id, data)
-            self.emit_data(data)
+            self.emit_data(new_clip)
         except (GrandchildException,
                 ParentNotFoundException,
                 SameMimetypeException) as e:

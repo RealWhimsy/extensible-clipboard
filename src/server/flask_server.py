@@ -70,6 +70,9 @@ class FlaskQt(QtCore.QObject):
         """
         return self.db.get_all_clips()
 
+    def get_latest_clip(self):
+        return self.db.get_latest()
+
     def delete_entry_by_id(self, clip_id):
         """
         Deletes a clip from the collection.

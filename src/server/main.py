@@ -31,6 +31,7 @@ class MainApp(QtWidgets.QApplication):
         # Creates endpoint for REST-Api
         self.api.add_resource(Clip,
                               '/clip/',
+                              '/clip/latest/',
                               '/clip/<uuid:clip_id>',
                               '/clip/<uuid:clip_id>/add_child',
                               '/clip/<uuid:clip_id>/get_alternatives/',

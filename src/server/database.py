@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 from bson.binary import Binary, UUID_SUBTYPE
 from bson.json_util import default, dumps
 from bson.objectid import ObjectId
-from pymongo import MongoClient
+from pymongo import ASCENDING, DESCENDING, MongoClient
 from pymongo.collection import ReturnDocument
 
 from exceptions import *
@@ -131,6 +131,7 @@ class ClipDatabase:
         new_clip['_id'] = _id
         new_clip['data'] = data['content']
         new_clip['mimetype'] = data['mimetype']
+        new_clip['creation_date'] = modified_date.isoformat()
         new_clip['last_modified'] = modified_date.isoformat()
 
         if 'filename' in data:
@@ -170,6 +171,17 @@ class ClipDatabase:
         results = list(self.clip_collection.find({}))
         json_result = [self._build_json_response_clip(i) for i in results]
         return dumps(json_result)
+
+    def get_latest(self):
+        results = self.clip_collection.find({
+                "parent": {"$exists": False}
+            })
+        results.sort('creation_date', ASCENDING)
+        if results.count():
+            r = results[0]
+            return dumps(self._build_json_response_clip(r))
+        else:
+            return None
 
     def update_clip(self, object_id, data):
         """

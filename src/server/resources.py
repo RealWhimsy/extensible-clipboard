@@ -42,12 +42,12 @@ class Clip(Resource):
 
     def get(self, clip_id=None):
         clip = None
-
-        if clip_id is None:
-            # Returns all visible clips
+        if request.url.endswith('/clip/'):
             clip = self.server.get_all_clips()
         elif request.url.endswith('/get_alternatives/'):
             clip = self.server.get_alternatives(clip_id)
+        elif request.url.endswith('/latest/'):
+            clip = self.server.get_latest_clip()
         else:
             preferred_type = None
             if request.accept_mimetypes.best != '*/*':  # Default value

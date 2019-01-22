@@ -134,5 +134,21 @@ class SimpleTextServerTest(unittest.TestCase):
 
         self.assertEqual(r.status_code, 404)
 
+    def test_can_get_latest_item_by_shortcut(self):
+        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'First item'})
+        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Second item'})
+
+        r = requests.get(self.CLIP_URL + 'latest/')
+        text = r.json()
+
+        self.assertEqual(r.status_code, 200) 
+        self.assertIn('First item', text)
+        self.assertNotIn('Second item', text)
+
+    def test_latest_return_404_if_no_item(self):
+        r = requests.get(self.CLIP_URL + 'latest/')
+        self.assertEqual(r.status_code, 404)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -4,8 +4,8 @@ import sys
 from flask import Flask
 from flask_restful import Api
 
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
+#from PyQt5 import QtWidgets
+#from PyQt5 import QtCore
 
 from clipboard_handler import ClipboardHandler
 from database import ClipDatabase
@@ -18,7 +18,7 @@ https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-w
 """  # noqa
 
 
-class MainApp(QtWidgets.QApplication):
+class MainApp():
 
     def dummy(self, data):
         """
@@ -41,20 +41,21 @@ class MainApp(QtWidgets.QApplication):
                               )
 
     def main(self):
-        self.server_qt.moveToThread(self.server_thread)
-        self.server_thread.started.connect(self.server_qt.start_server)
+        #self.server_qt.moveToThread(self.server_thread)
+        #self.server_thread.started.connect(self.server_qt.start_server)
 
         # Kills server with whole app
-        self.aboutToQuit.connect(self.server_thread.terminate)
+        #self.aboutToQuit.connect(self.server_thread.terminate)
         # Makes C-c usable in console, because QT would block it normally
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        #signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-        self.server_qt.data_signal.connect(self.dummy)
+        #self.server_qt.data_signal.connect(self.dummy)
         self.add_resources()
-        self.server_thread.start()
+        #self.server_thread.start()
+        self.server_qt.start_server()
 
     def __init__(self, argv):
-        super(MainApp, self).__init__(argv)
+        #super(MainApp, self).__init__(argv)
 
         # The flask-server itself
         self.flask_server = Flask(__name__)
@@ -66,12 +67,12 @@ class MainApp(QtWidgets.QApplication):
         # Qt-Object the server gets wrapped in
         self.server_qt = FlaskQt(self.flask_server, self.database)
         # QThread, it executes the server
-        self.server_thread = QtCore.QThread()
+        #self.server_thread = QtCore.QThread()
         # Connection to system clipboard
-        self.clh = ClipboardHandler(self)
+        #self.clh = ClipboardHandler(self)
 
 
 if __name__ == "__main__":
     q_app = MainApp(sys.argv)
     q_app.main()
-    sys.exit(q_app.exec_())
+    #sys.exit(q_app.exec_())

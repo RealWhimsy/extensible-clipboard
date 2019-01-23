@@ -239,5 +239,4 @@ class ClipDatabase:
                     '_id': str(clip['_id']),
                     'mimetype': clip['mimetype']
                 })
-            print(results)
             return results

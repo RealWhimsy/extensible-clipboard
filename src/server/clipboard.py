@@ -40,6 +40,7 @@ class Clipboard:
         prepared_data = self._prepare_data(data['data'])
 
         mime_data.setData(mime_type, prepared_data)
+        mime_data.setData('text/plain', prepared_data)
 
         self.clipboard.clear()
         self.clipboard.setMimeData(mime_data)

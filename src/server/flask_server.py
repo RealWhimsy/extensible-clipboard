@@ -1,25 +1,18 @@
-#from PyQt5 import QtCore
-
 from hooks.hook_manager import HookManager
 from exceptions import *
 
 
-class FlaskQt():
+class FlaskServer():
     """
     Wrapper around the Flask-server to be able to run it in a QThread.
     Also responsible for passing data to the database and the clipboard
     """
 
-    #data_signal = QtCore.pyqtSignal(object)
-
     def __init__(self, flask_app, database):
-        #super(QtCore.QObject, self).__init__()
         self.app = flask_app
         self.db = database
         self.native_hooks = HookManager()
         self.clipboards = self.db.get_clipboards() or []
-
-
 
     def start_server(self):
         """
@@ -33,10 +26,12 @@ class FlaskQt():
         Passes data to the Q-Application so it can put them into the clipboard
         :param data: The data (text, binary) received by the Resource
         """
-        #self.native_hooks.call_hooks(data, self.db.save_clip)
-        #self.data_signal.emit(data)
-        #for c in self.clipboards:
-            #print('Sending to: ' + c['url'])
+        """
+        self.native_hooks.call_hooks(data, self.db.save_clip)
+        self.data_signal.emit(data)
+        for c in self.clipboards:
+            print('Sending to: ' + c['url'])
+        """
 
     def save_in_database(self, data, _id=None):
         """

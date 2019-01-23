@@ -22,8 +22,12 @@ class ClipDatabase:
                 database_conf['url'],
                 int(database_conf['port']))
         self.db = getattr(self.client, database_conf['database'])
-        self.clip_collection = self.db[database_conf['collection']]
-        self.clipboard_collection = self.db[database_conf['clipboard_collection']]
+        self.clip_collection = self.db[
+                database_conf['collection']
+        ]
+        self.clipboard_collection = self.db[
+                database_conf['clipboard_collection']
+        ]
 
     def _create_binary_uuid(self, _id):
         """
@@ -245,7 +249,7 @@ class ClipDatabase:
     def add_clipboard(self, url):
         if self.clipboard_collection.find_one({'url': url}) is not None:
             return None
-        
+
         _id = uuid4()
         _id = self._create_binary_uuid(str(_id))
         new_clipboard = {}
@@ -255,7 +259,7 @@ class ClipDatabase:
 
         insert_result = self.clipboard_collection.insert_one(new_clipboard)
         new_clipboard = self.clipboard_collection.find_one({'_id': _id})
-        
+
         return self._build_json_response_clip(new_clipboard)
 
     def get_clipboards(self):

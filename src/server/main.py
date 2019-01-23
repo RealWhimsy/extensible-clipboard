@@ -4,9 +4,8 @@ import sys
 from flask import Flask
 from flask_restful import Api
 
-#from clipboard_handler import ClipboardHandler
 from database import ClipDatabase
-from flask_server import FlaskQt
+from flask_server import FlaskServer
 from resources import Clip, Clipboard
 
 """
@@ -37,28 +36,16 @@ class MainApp():
                               })
 
         self.api.add_resource(Clipboard,
-                               '/clipboard/register',
-                               resource_class_kwargs={
-                                    'server': self.server_qt    
+                              '/clipboard/register',
+                              resource_class_kwargs={
+                                    'server': self.server_qt
                                })
 
     def main(self):
-        #self.server_qt.moveToThread(self.server_thread)
-        #self.server_thread.started.connect(self.server_qt.start_server)
-
-        # Kills server with whole app
-        #self.aboutToQuit.connect(self.server_thread.terminate)
-        # Makes C-c usable in console, because QT would block it normally
-        #signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-        #self.server_qt.data_signal.connect(self.dummy)
         self.add_resources()
-        #self.server_thread.start()
         self.server_qt.start_server()
 
     def __init__(self, argv):
-        #super(MainApp, self).__init__(argv)
-
         # The flask-server itself
         self.flask_server = Flask(__name__)
         # Restful-Flask server
@@ -66,15 +53,10 @@ class MainApp():
         # Database for saving clips, currently mongo
         self.database = ClipDatabase()
 
-        # Qt-Object the server gets wrapped in
-        self.server_qt = FlaskQt(self.flask_server, self.database)
-        # QThread, it executes the server
-        #self.server_thread = QtCore.QThread()
-        # Connection to system clipboard
-        #self.clh = ClipboardHandler(self)
+        # The Flask-Server itself
+        self.server_qt = FlaskServer(self.flask_server, self.database)
 
 
 if __name__ == "__main__":
     q_app = MainApp(sys.argv)
     q_app.main()
-    #sys.exit(q_app.exec_())

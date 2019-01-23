@@ -121,3 +121,9 @@ class Clip(Resource):
             return ('', 204)
         else:
             return abort(404)
+
+
+class Clipboard(Resource):
+
+    def __init__(self, **kwargs):
+        self.server = kwargs['server']

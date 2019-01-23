@@ -50,3 +50,4 @@ class Clipboard:
         :param clip: The QClipboard of the current QApplication
         """
         self.clipboard = clip
+        print('initing clipboard')

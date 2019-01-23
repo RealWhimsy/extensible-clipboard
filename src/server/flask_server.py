@@ -17,7 +17,9 @@ class FlaskQt():
         self.app = flask_app
         self.db = database
         self.native_hooks = HookManager()
-        self.clipboards = []
+        self.clipboards = self.db.get_clipboards() or []
+
+
 
     def start_server(self):
         """
@@ -31,8 +33,10 @@ class FlaskQt():
         Passes data to the Q-Application so it can put them into the clipboard
         :param data: The data (text, binary) received by the Resource
         """
-        self.native_hooks.call_hooks(data, self.db.save_clip)
+        #self.native_hooks.call_hooks(data, self.db.save_clip)
         #self.data_signal.emit(data)
+        #for c in self.clipboards:
+            #print('Sending to: ' + c['url'])
 
     def save_in_database(self, data, _id=None):
         """
@@ -92,6 +96,8 @@ class FlaskQt():
 
     def add_clipboard(self, url):
         clipboard = {}
-        clipboard['url'] = url
+        if self.db.add_clipboard(url) is None:
+            return -1
+
         self.clipboards.append(clipboard)
         return len(self.clipboards) - 1

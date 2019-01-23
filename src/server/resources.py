@@ -1,5 +1,6 @@
 from json import dumps
 from mimetypes import guess_type
+import re
 
 from flask import request
 
@@ -127,10 +128,21 @@ class Clipboard(Resource):
 
     def __init__(self, **kwargs):
         self.server = kwargs['server']
+        self.pattern = re.compile(r'http://\w+')
+
+    def _is_url(self, url):
+        return self.pattern.match(url)
 
     def post(self):
         if request.headers.get('CONTENT_TYPE') not in 'application/json':
             return ('Please send aplication/json', 415)
         data = request.get_json()
-        _id = self.server.add_clipboard(data['url'])
-        return ({'_id': _id}, 201)
+        url = data['url']
+        if self._is_url(url):
+            _id = self.server.add_clipboard(data['url'])
+            if _id >= 0:
+                return ({'_id': _id}, 201)
+            else:
+                return ('URL already registered', 422)
+        else:
+            return ('Sent value for url was not an acceptable url', 422)

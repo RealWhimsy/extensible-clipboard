@@ -19,14 +19,17 @@ class SimpleTextServerTest(unittest.TestCase):
         cls.client = MongoClient()
         cls.db = cls.client.clipboard
         cls.clip_collection = cls.db['clip-collection']
+        cls.clipboard_collection = cls.db['clipboards']
 
     @classmethod
     def tearDownClass(cls):
         cls.clip_collection.delete_many({})
+        cls.clipboard_collection.delete_many({})
 
     def tearDown(self):
         # Removes all previously saved documents
         self.clip_collection.delete_many({})
+        self.clipboard_collection.delete_many({})
 
     def test_get_returns_json(self):
         r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain', 'clip': 'Clip 1'})
@@ -46,3 +49,14 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(self.CLIPBOARD_URL + 'register', data={'url': 'http://localhost:5555/'})
         self.assertEqual(r.status_code, 415)
 
+    def test_server_refuses_non_url(self):
+        headers = {'content-type': 'application/json'}
+        r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'notAnURL'})
+        self.assertEqual(r.status_code, 422)
+
+    def test_url_need_to_be_unique(self):
+        headers = {'content-type': 'application/json'}
+        r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'http://localhost:5555/'})
+        r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'http://localhost:5555/'})
+        self.assertEqual(r.status_code, 422)
+        self.assertIn('URL already registered', r.text)

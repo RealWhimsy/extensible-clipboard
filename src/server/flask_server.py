@@ -17,6 +17,7 @@ class FlaskQt():
         self.app = flask_app
         self.db = database
         self.native_hooks = HookManager()
+        self.clipboards = []
 
     def start_server(self):
         """
@@ -88,3 +89,9 @@ class FlaskQt():
         :returns: Said array or None, if clip_id not found in db
         """
         return self.db.get_alternatives(clip_id)
+
+    def add_clipboard(self, url):
+        clipboard = {}
+        clipboard['url'] = url
+        self.clipboards.append(clipboard)
+        return len(self.clipboards) - 1

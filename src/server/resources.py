@@ -127,3 +127,10 @@ class Clipboard(Resource):
 
     def __init__(self, **kwargs):
         self.server = kwargs['server']
+
+    def post(self):
+        if request.headers.get('CONTENT_TYPE') not in 'application/json':
+            return ('Please send aplication/json', 415)
+        data = request.get_json()
+        _id = self.server.add_clipboard(data['url'])
+        return ({'_id': _id}, 201)

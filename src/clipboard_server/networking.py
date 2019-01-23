@@ -13,11 +13,13 @@ class ConnectionHandler():
     def handle_response(self, reply):
         print('in handling')
         print(reply.error())
+        print(reply.readAll())
 
     def register_to_server(self):
         print('registering')
         req = QNetworkRequest(QUrl('http://localhost:5000/clipboard/register'))
-        data = {'hello': 'world'}
+        req.setRawHeader('content-type'.encode(encoding='utf8'), 'application/json'.encode(encoding='utf8'))
+        data = {'url': 'world'}
         data = dumps(data)
         data = data.encode(encoding='utf8')
         ba = QByteArray(data)

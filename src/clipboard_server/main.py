@@ -1,6 +1,7 @@
 import signal
 import sys
 
+from flask import Flask
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
@@ -24,26 +25,26 @@ class MainApp(QtWidgets.QApplication):
         self.clh.put_into_storage(data)
 
     def main(self):
-        #self.server_qt.moveToThread(self.server_thread)
-        #self.server_thread.started.connect(self.server_qt.start_server)
+        self.flask_qt.moveToThread(self.server_thread)
+        self.server_thread.started.connect(self.flask_qt.start_server)
 
         # Kills server with whole app
-        #self.aboutToQuit.connect(self.server_thread.terminate)
+        self.aboutToQuit.connect(self.server_thread.terminate)
         # Makes C-c usable in console, because QT would block it normally
         signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-        #self.server_qt.data_signal.connect(self.dummy)
-        #self.add_resources()
-        #self.server_thread.start()
-        #self.server_qt.start_server()
-        self.connections.register_to_server()
+        # self.server_qt.data_signal.connect(self.dummy)
+        self.server_thread.start()
 
     def __init__(self, argv):
         super(MainApp, self).__init__(argv)
 
+        self.flask_server = Flask(__name__)
+        self.flask_qt = ConnectionHandler(self.flask_server)
+        self.server_thread = QtCore.QThread()
+
         # Connection to system clipboard
         self.clh = ClipboardHandler(self)
-        self.connections = ConnectionHandler()
 
 
 if __name__ == "__main__":

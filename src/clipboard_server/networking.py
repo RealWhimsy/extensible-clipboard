@@ -1,29 +1,46 @@
 from json import dumps, dump
+import sys
 
-from PyQt5.QtCore import QByteArray, QUrl, QBuffer
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
+import requests
+from requests import exceptions as req_exceptions
 
-class ConnectionHandler():
+from PyQt5.QtCore import QObject
 
-    def __init__(self):
-        print('initing networks')
-        self.network_manager = QNetworkAccessManager()
-        self.network_manager.finished.connect(self.handle_response)
 
-    def handle_response(self, reply):
-        print('in handling')
-        print(reply.error())
-        print(reply.readAll())
+class ConnectionHandler(QObject):
+
+    def __init__(self, flask_app):
+        super(QObject, self).__init__()
+        self.flask_app = flask_app
+
+    def start_server(self):
+        self.register_to_server()
+        print('Starting server')
+        self.flask_app.run(
+                debug=True,
+                use_reloader=False,
+                port=12345
+        )
 
     def register_to_server(self):
         print('registering')
-        req = QNetworkRequest(QUrl('http://localhost:5000/clipboard/register'))
-        req.setRawHeader('content-type'.encode(encoding='utf8'), 'application/json'.encode(encoding='utf8'))
-        data = {'url': 'world'}
-        data = dumps(data)
-        data = data.encode(encoding='utf8')
-        ba = QByteArray(data)
-        _buffer = QBuffer(ba)
-        print(data)
-        self.network_manager.post(req, data)
-
+        headers = {'content-type': 'application/json'}
+        try:
+            response = requests.post(
+                    'http://localhost:5000/clipboard/register',
+                    headers=headers,
+                    json={'url': 'http://localhost:12345/'},
+                    timeout=5
+            )
+        except req_exceptions.ConnectionError as e:
+            print('Connection refused by remote server')
+            sys.exit(1)
+        try:
+            response.raise_for_status()
+            print('okay')
+        except req_exceptions.HTTPError as e:
+            print('Remote server responded with statuscode {}'.format(
+                response.status_code
+            ))
+            print('Message from server: {}'.format(response.text))
+            sys.exit(1)

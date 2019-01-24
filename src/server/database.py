@@ -263,4 +263,8 @@ class ClipDatabase:
         return self._build_json_response_clip(new_clipboard)
 
     def get_clipboards(self):
+        if self.clipboard_collection.count_documents({}) is 0:
+            print('no clipboards' )
+            return None
+        results = self.clipboard_collection.find({})
         return list(self.clipboard_collection.find({}))

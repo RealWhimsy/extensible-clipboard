@@ -1,3 +1,5 @@
+import requests
+
 from hooks.hook_manager import HookManager
 from exceptions import *
 
@@ -28,10 +30,14 @@ class FlaskServer():
         """
         """
         self.native_hooks.call_hooks(data, self.db.save_clip)
-        self.data_signal.emit(data)
-        for c in self.clipboards:
-            print('Sending to: ' + c['url'])
         """
+        print(self.clipboards)
+        for c in self.clipboards:
+            try:
+                requests.post(c['url'], json=data)
+            except:
+                print('Could not send data to {}'.format(c['url']))
+                pass
 
     def save_in_database(self, data, _id=None):
         """
@@ -94,5 +100,5 @@ class FlaskServer():
         if self.db.add_clipboard(url) is None:
             return -1
 
-        self.clipboards.append(clipboard)
+        self.clipboards = self.db.get_clipboards()
         return len(self.clipboards) - 1

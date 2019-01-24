@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import signal
 import sys
 
@@ -38,9 +39,19 @@ class MainApp(QtWidgets.QApplication):
 
     def __init__(self, argv):
         super(MainApp, self).__init__(argv)
+        parser = ArgumentParser()
+        parser.add_argument('-p', '--port', type=int, dest='port',
+                help='Port THIS server shall listen on, defaults to 12345', default=12345)
+        parser.add_argument('-d', '--domain', type=str, dest='domain',
+                help='URL THIS server can be reached under, must contain specified port, defaults to localhost',
+                default='http://localhost')
+        parser.add_argument('-c', '--clipserver', type=str, dest='clipserver',
+                help='URL this server can register itself to the clipboard-server', required=True)
+        self.args = parser.parse_args()
+        print(self.args)
 
         self.flask_server = Flask(__name__)
-        self.flask_qt = ConnectionHandler(self.flask_server)
+        self.flask_qt = ConnectionHandler(self.flask_server, self.args.port, self.args.clipserver, self.args.domain)
         self.server_thread = QtCore.QThread()
 
         # Connection to system clipboard

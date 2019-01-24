@@ -13,11 +13,16 @@ class ConnectionHandler(QObject):
 
     new_item_signal = pyqtSignal(dict)
 
-    def __init__(self, flask_app):
+    def __init__(self, flask_app, port, clipserver, domain):
         super(QObject, self).__init__()
         self.flask_app = flask_app
+        self.port = port
+        self.clipserver = clipserver
+        if domain == 'http://localhost':
+            domain = domain + ':' + str(self.port) + '/'
+        self.domain = domain
 
-        @self.flask_app.route('/', methods=['GET', 'POST'])
+        @self.flask_app.route('/', methods=['POST'])
         def new_item_incoming():
             return self.handle_request(request)
 
@@ -37,7 +42,7 @@ class ConnectionHandler(QObject):
         self.flask_app.run(
                 debug=True,
                 use_reloader=False,
-                port=12345
+                port=self.port
         )
 
     def handle_request(self, request):
@@ -47,17 +52,15 @@ class ConnectionHandler(QObject):
         if self._check_data(data):
             print(data)
             self.new_item_signal.emit(data)
-            return 'new request handled', 204
+            return '', 204
         else:
             return 'Malformed request', 400
 
     def register_to_server(self):
-        headers = {'content-type': 'application/json'}
         try:
             response = requests.post(
-                    'http://localhost:5000/clipboard/register',
-                    headers=headers,
-                    json={'url': 'http://localhost:12345/'},
+                    self.clipserver,
+                    json={'url': self.domain},
                     timeout=5
             )
             response.raise_for_status()

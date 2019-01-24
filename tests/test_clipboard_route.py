@@ -58,5 +58,4 @@ class SimpleTextServerTest(unittest.TestCase):
         headers = {'content-type': 'application/json'}
         r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'http://localhost:5555/'})
         r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'http://localhost:5555/'})
-        self.assertEqual(r.status_code, 422)
-        self.assertIn('URL already registered', r.text)
+        self.assertEqual(r.status_code, 204)

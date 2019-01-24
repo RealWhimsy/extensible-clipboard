@@ -33,7 +33,7 @@ class MainApp(QtWidgets.QApplication):
         # Makes C-c usable in console, because QT would block it normally
         signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-        # self.server_qt.data_signal.connect(self.dummy)
+        self.flask_qt.new_item_signal.connect(self.dummy)
         self.server_thread.start()
 
     def __init__(self, argv):

@@ -143,6 +143,6 @@ class Clipboard(Resource):
             if _id >= 0:
                 return ({'_id': _id}, 201)
             else:
-                return ('URL already registered', 422)
+                return ('', 204)
         else:
             return ('Sent value for url was not an acceptable url', 422)

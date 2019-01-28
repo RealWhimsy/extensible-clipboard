@@ -6,7 +6,7 @@ from flask import request, url_for
 
 from flask_restful import abort, Resource
 
-from src.server.exceptions import *
+from exceptions import *
 
 
 class Clip(Resource):

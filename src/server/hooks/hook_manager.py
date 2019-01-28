@@ -11,12 +11,12 @@ class HookManager:
         if self.hooks:
             self.hooks = []
 
-        files = listdir('src/server/hooks/')
+        files = listdir('hooks/')
         # Remove all files not ending on _hook.py
         hook_files = [f for f in files if f.endswith('_hook.py')]
 
         for file_name in hook_files:
-            module = import_module('src.server.hooks.' + file_name[:-3])
+            module = import_module('hooks.' + file_name[:-3])
             members = dir(module)
             for m in members:
                 # Do not even check underscored stuff and Parent class

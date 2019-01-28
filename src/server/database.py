@@ -1,3 +1,5 @@
+import os
+
 from base64 import b64encode
 from datetime import datetime
 from configparser import ConfigParser
@@ -9,7 +11,7 @@ from bson.objectid import ObjectId
 from pymongo import ASCENDING, DESCENDING, MongoClient
 from pymongo.collection import ReturnDocument
 
-from src.server.exceptions import *
+from exceptions import *
 
 
 class ClipDatabase:

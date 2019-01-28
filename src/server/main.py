@@ -1,12 +1,13 @@
 import signal
+import os
 import sys
 
 from flask import Flask
 from flask_restful import Api
 
-from src.server.database import ClipDatabase
-from src.server.flask_server import FlaskServer
-from src.server.resources import Clip, Recipient
+from database import ClipDatabase
+from flask_server import FlaskServer
+from resources import Clip, Recipient
 
 """
 Built after https://codereview.stackexchange.com/questions/114221/python-gui-by-qtwebkit-and-flask
@@ -52,5 +53,6 @@ class MainApp():
 
 
 if __name__ == "__main__":
+    os.chdir(os.path.abspath(os.path.dirname(__file__)))
     q_app = MainApp(sys.argv)
     q_app.main()

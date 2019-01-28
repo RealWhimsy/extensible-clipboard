@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 from pymongo import ASCENDING, DESCENDING, MongoClient
 from pymongo.collection import ReturnDocument
 
-from exceptions import *
+from src.server.exceptions import *
 
 
 class ClipDatabase:

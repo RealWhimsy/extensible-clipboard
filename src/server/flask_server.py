@@ -2,8 +2,8 @@ import requests
 
 from flask import url_for
 
-from hooks.hook_manager import HookManager
-from exceptions import *
+from src.server.hooks.hook_manager import HookManager
+from src.server.exceptions import *
 
 
 class FlaskServer():

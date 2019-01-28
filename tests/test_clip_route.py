@@ -28,7 +28,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.clip_collection.delete_many({})
 
     def test_get_returns_json(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain', 'clip': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain', 'data': 'Clip 1'})
 
         _id = loads(r.json())['_id']
 
@@ -37,7 +37,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(header, 'application/json')
 
     def test_can_save_and_retrieve_single_item(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 1'})
         self.assertEqual(r.status_code, requests.codes.created)
 
         object_id = loads(r.json())['_id']
@@ -47,11 +47,11 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertIn('Clip 1', r.text)
 
     def test_can_save_and_retrieve_multiple_items(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 1'})
         self.assertEqual(r.status_code, requests.codes.created)
         object_id_1 = loads(r.json())['_id']
 
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Clip 2'})
+        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 2'})
         self.assertEqual(r.status_code, requests.codes.created)
         object_id_2 = loads(r.json())['_id']
         
@@ -78,8 +78,8 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, requests.codes.method_not_allowed)
 
     def test_GET_without_id_returns_all_clips(self):
-        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Clip 1'})
-        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Clip 2'})
+        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 1'})
+        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 2'})
 
         r = requests.get(self.CLIP_URL)
         objects = r.json()
@@ -92,15 +92,15 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def test_PUT_needs_existing_url(self):
         _id = uuid4()
-        r = requests.put(self.CLIP_URL + str(_id), data={'mimetype': 'text/plain','clip': 'clip new'})
+        r = requests.put(self.CLIP_URL + str(_id), data={'mimetype': 'text/plain','data': 'clip new'})
 
         self.assertEqual(r.status_code, requests.codes.not_found)
 
     def test_correct_PUT_returns_updated_clip(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'old clip'})
+        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'old clip'})
         _id = loads(r.json())['_id']
 
-        r = requests.put(self.CLIP_URL + _id, data={'mimetype': 'text/plain','clip': 'new clip'})
+        r = requests.put(self.CLIP_URL + _id, data={'mimetype': 'text/plain','data': 'new clip'})
         r = r.json()
 
         self.assertIn(_id, r)
@@ -108,7 +108,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertIn('new clip', r)
 
     def test_delete_item_returns_no_content_on_success(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Test delete'})
+        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Test delete'})
         _id = loads(r.json())['_id']
 
         r = requests.delete(self.CLIP_URL + _id)
@@ -120,7 +120,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, 405)
 
     def test_deleted_item_get_no_longer_returned(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Test delete'})
+        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Test delete'})
         _id = loads(r.json())['_id']
 
         r = requests.delete(self.CLIP_URL + _id)
@@ -135,8 +135,8 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, 404)
 
     def test_can_get_latest_item_by_shortcut(self):
-        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'First item'})
-        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','clip': 'Second item'})
+        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'First item'})
+        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Second item'})
 
         r = requests.get(self.CLIP_URL + 'latest/')
         text = r.json()

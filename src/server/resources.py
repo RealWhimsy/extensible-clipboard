@@ -2,7 +2,7 @@ from json import dumps
 from mimetypes import guess_type
 import re
 
-from flask import request
+from flask import request, url_for
 
 from flask_restful import abort, Resource
 
@@ -23,7 +23,7 @@ class Clip(Resource):
             guessed_mt = guess_type(f.filename)[0]
 
             if received_mt != guessed_mt:
-                return abort(400)
+                abort(400)
 
             data['filename'] = f.filename
             data['data'] = f.stream.read()
@@ -33,17 +33,20 @@ class Clip(Resource):
         else:
             if request.headers.get('CONTENT_TYPE') in 'application/json':
                 json = request.get_json()
-                data['data'] = json['clip']
+                data['data'] = json['data']
                 data['mimetype'] = json['mimetype']
 
             else:
-                data['data'] = request.form['clip']
+                data['data'] = request.form['data']
                 data['mimetype'] = request.form['mimetype']
 
         return data
 
-    def _not_from_hook(self, requst):
-        return False
+    def _not_from_hook(self, request):
+        if request and 'from_hook' in request:
+            return False
+        else:
+            return True
 
     def get(self, clip_id=None):
         clip = None
@@ -62,7 +65,7 @@ class Clip(Resource):
             clip = self.server.get_clip_by_id(clip_id, preferred_type)
 
         if clip is None:
-            return abort(404)
+            return 'No clip with specified id' , 404
 
         return dumps(clip)
 
@@ -77,16 +80,15 @@ class Clip(Resource):
         if clip is not None:
             return dumps(clip)
         else:
-            return abort(404)
+            return 'No clip with specified id', 404
 
     def post(self, clip_id=None):
-        print('Caller: {}'.format(request.remote_addr))
 
         if clip_id is not None and not request.url.endswith('add_child'):
             return ({'error': 'Use PUT to update existing objects'},
                     405)
 
-        propagate = self._not_from_hook(request)
+        propagate = self._not_from_hook(request.get_json())
         data = self._get_data_from_request(request)
 
         if request.url.endswith('add_child'):
@@ -126,7 +128,7 @@ class Clip(Resource):
         if item is not 0:
             return ('', 204)
         else:
-            return abort(404)
+            return 'No clip with specified id', 404
 
 
 class Recipient(Resource):
@@ -139,18 +141,18 @@ class Recipient(Resource):
         return self.pattern.match(url)
 
     def post(self):
-        print('Caller: {}'.format(request.remote_addr))
         if request.headers.get('CONTENT_TYPE') not in 'application/json':
             return ('Please send aplication/json', 415)
+
         data = request.get_json()
         url = data['url']
         if self._is_url(url):
             is_hook = 'hook' in request.url
             _id = self.server.add_recipient(data['url'], is_hook)
-            if _id >= 0:
-                return ({'_id': _id}, 201)
-            else:
-                return ('', 204)
+            #if _id >= 0:
+            return ({'response_url': url_for('clip', _external=True)}, 201)
+            #else:
+            #    return ('', 204)
         else:
             return ('Sent value for url was not an acceptable url', 422)
 

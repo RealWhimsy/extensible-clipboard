@@ -1,5 +1,7 @@
 import requests
 
+from flask import url_for
+
 from hooks.hook_manager import HookManager
 from exceptions import *
 
@@ -31,7 +33,6 @@ class FlaskServer():
         """
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
-        print(self.recipients)
         for c in self.recipients:
             if not c['is_hook']:
                 try:
@@ -48,15 +49,12 @@ class FlaskServer():
         """
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
-        print(self.recipients)
         for c in self.recipients:
             if c['is_hook']:
                 try:
-                    response = requests.post(c['url'], json=data)
-                    # TODO handle resonse, i.e. create new object
+                    requests.post(c['url'], json=data)
                 except:
                     print('Could not send data to {}'.format(c['url']))
-                    pass
 
     def save_in_database(self, data, _id=None, propagate=False):
         """
@@ -65,7 +63,6 @@ class FlaskServer():
         :param _id: If specified, the object with this id will be updated
         :return: the newly created entry
         """
-
         new_clip = {}
         try:
             if _id is None:

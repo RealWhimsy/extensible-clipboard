@@ -32,7 +32,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.clipboard_collection.delete_many({})
 
     def test_get_returns_json(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain', 'clip': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain', 'data': 'Clip 1'})
 
         _id = loads(r.json())['_id']
 
@@ -53,9 +53,3 @@ class SimpleTextServerTest(unittest.TestCase):
         headers = {'content-type': 'application/json'}
         r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'notAnURL'})
         self.assertEqual(r.status_code, 422)
-
-    def test_url_need_to_be_unique(self):
-        headers = {'content-type': 'application/json'}
-        r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'http://localhost:5555/'})
-        r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'http://localhost:5555/'})
-        self.assertEqual(r.status_code, 204)

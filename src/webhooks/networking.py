@@ -1,10 +1,22 @@
 from json import dumps, dump
 import sys
+import time, _thread
 
 from flask import request
 
 import requests
 from requests import exceptions as req_exceptions
+
+class HookWorker():
+
+    def do_work(self, data, mimetype):
+        result = {}
+        if mimetype == 'text/plain':
+            result['data'] = 'Worker doing his work'
+            result['mimetype'] = 'application/xml'
+            return result
+        else:
+            return None
 
 
 class ConnectionHandler():
@@ -16,6 +28,8 @@ class ConnectionHandler():
         if domain == 'http://localhost':
             domain = domain + ':' + str(self.port) + '/'
         self.domain = domain
+        self.respons_url = ''
+        self.hook = HookWorker()
 
         @self.flask_app.route('/', methods=['POST'])
         def new_item_incoming():
@@ -40,13 +54,24 @@ class ConnectionHandler():
                 port=self.port
         )
 
+    def delegate_work(self, data):
+        time.sleep(5)
+        print('wakey wakey')
+        result = self.hook.do_work(data['data'], data['mimetype'])
+        if result:
+            data['parent'] = data.pop('_id')
+            data['data'] = result['data']
+            data['mimetype'] = result['mimetype']
+            data['from_hook'] = True
+            r = requests.post(self.response_url, json=data)
+            print(r.json())
+
     def handle_new_data(self, request):
         if not request.is_json:
             return 'Supplied content not application/json', 415
         data = request.get_json()
         if self._check_data(data):
-            print(data)
-            # Do stuff here TODO
+            _thread.start_new_thread(self.delegate_work, (data,))
             return '', 204
         else:
             return 'Malformed request', 400
@@ -59,6 +84,7 @@ class ConnectionHandler():
                     timeout=5
             )
             response.raise_for_status()
+            self.response_url = response.json()['response_url']
         except req_exceptions.ConnectionError as e:
             self._die('Connection refused by remote server')
         except req_exceptions.Timeout as e:

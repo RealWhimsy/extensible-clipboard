@@ -31,7 +31,7 @@ class SimpleTextServerTest(unittest.TestCase):
     def create_parent(self):
         r = requests.post(self.CLIP_URL,
                       data={'mimetype': 'text/plain',
-                            'clip': 'parentClip'
+                            'data': 'parentClip'
                            })
 
         return loads(r.json())['_id']
@@ -40,7 +40,7 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(
                 self.CLIP_URL + parent_id + '/add_child',
                 data={'mimetype': 'text/html',
-                      'clip': '<h1>Child text</h1>',
+                      'data': '<h1>Child text</h1>',
                       'parent': parent_id
                      })
         return r
@@ -51,7 +51,7 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(
                 self.CLIP_URL + str(fake_id) + '/add_child',
                 data={'mimetype': 'text/plain',
-                      'clip': 'ClipChild',
+                      'data': 'ClipChild',
                       'parent': str(fake_id)
                      })
 
@@ -78,7 +78,7 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(
                 self.CLIP_URL + parent_id + '/add_child',
                 data={'mimetype': 'text/plain',
-                      'clip': 'ClipChild',
+                      'data': 'ClipChild',
                       'parent': parent_id
                      })
         self.assertEqual(r.status_code, 422)
@@ -103,7 +103,7 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(
                 self.CLIP_URL + parent_id + '/add_child',
                 data={'mimetype': 'application/json',
-                      'clip': '{"key": "json-child"}',
+                      'data': '{"key": "json-child"}',
                       'parent': parent_id
                      })
 
@@ -170,7 +170,7 @@ class SimpleTextServerTest(unittest.TestCase):
         child_id = loads(child.json())['_id']
         r = requests.post(self.CLIP_URL,
                       data={'mimetype': 'text/plain',
-                            'clip': 'WrongTurn'
+                            'data': 'WrongTurn'
                            })
         wrong_id = loads(r.json())['_id']
         r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')

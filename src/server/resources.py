@@ -42,6 +42,9 @@ class Clip(Resource):
 
         return data
 
+    def _not_from_hook(self, requst):
+        return False
+
     def get(self, clip_id=None):
         clip = None
         if request.url.endswith('/clip/'):
@@ -69,7 +72,7 @@ class Clip(Resource):
                     405)
 
         data = self._get_data_from_request(request)
-        clip = self.server.save_in_database(_id=clip_id, data=data)
+        clip = self.server.save_in_database(_id=clip_id, data=data, propagate=False)
 
         if clip is not None:
             return dumps(clip)
@@ -77,17 +80,19 @@ class Clip(Resource):
             return abort(404)
 
     def post(self, clip_id=None):
+        print('Caller: {}'.format(request.remote_addr))
 
         if clip_id is not None and not request.url.endswith('add_child'):
             return ({'error': 'Use PUT to update existing objects'},
                     405)
 
+        propagate = self._not_from_hook(request)
         data = self._get_data_from_request(request)
 
         if request.url.endswith('add_child'):
             data['parent'] = clip_id
 
-        new_item = self.server.save_in_database(data=data)
+        new_item = self.server.save_in_database(data=data, propagate=propagate)
 
         # Checks if any errors occured during lookup;
         # Works similar to passing of errors in Django
@@ -124,7 +129,7 @@ class Clip(Resource):
             return abort(404)
 
 
-class Clipboard(Resource):
+class Recipient(Resource):
 
     def __init__(self, **kwargs):
         self.server = kwargs['server']
@@ -134,15 +139,18 @@ class Clipboard(Resource):
         return self.pattern.match(url)
 
     def post(self):
+        print('Caller: {}'.format(request.remote_addr))
         if request.headers.get('CONTENT_TYPE') not in 'application/json':
             return ('Please send aplication/json', 415)
         data = request.get_json()
         url = data['url']
         if self._is_url(url):
-            _id = self.server.add_clipboard(data['url'])
+            is_hook = 'hook' in request.url
+            _id = self.server.add_recipient(data['url'], is_hook)
             if _id >= 0:
                 return ({'_id': _id}, 201)
             else:
                 return ('', 204)
         else:
             return ('Sent value for url was not an acceptable url', 422)
+

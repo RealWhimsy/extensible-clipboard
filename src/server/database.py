@@ -246,7 +246,7 @@ class ClipDatabase:
                 })
             return results
 
-    def add_clipboard(self, url):
+    def add_recipient(self, url, is_hook):
         if self.clipboard_collection.find_one({'url': url}) is not None:
             return None
 
@@ -256,15 +256,15 @@ class ClipDatabase:
 
         new_clipboard['_id'] = _id
         new_clipboard['url'] = url
+        new_clipboard['is_hook'] = is_hook
 
         insert_result = self.clipboard_collection.insert_one(new_clipboard)
         new_clipboard = self.clipboard_collection.find_one({'_id': _id})
 
         return self._build_json_response_clip(new_clipboard)
 
-    def get_clipboards(self):
+    def get_recipients(self):
         if self.clipboard_collection.count_documents({}) is 0:
-            print('no clipboards' )
             return None
         results = self.clipboard_collection.find({})
         return list(self.clipboard_collection.find({}))

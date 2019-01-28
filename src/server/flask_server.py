@@ -14,7 +14,7 @@ class FlaskServer():
         self.app = flask_app
         self.db = database
         self.native_hooks = HookManager()
-        self.clipboards = self.db.get_clipboards() or []
+        self.recipients = self.db.get_recipients() or []
 
     def start_server(self):
         """
@@ -23,7 +23,7 @@ class FlaskServer():
         """
         self.app.run(debug=True, use_reloader=False)
 
-    def emit_data(self, data):
+    def send_to_clipboards(self, data):
         """
         Passes data to the Q-Application so it can put them into the clipboard
         :param data: The data (text, binary) received by the Resource
@@ -31,15 +31,34 @@ class FlaskServer():
         """
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
-        print(self.clipboards)
-        for c in self.clipboards:
-            try:
-                requests.post(c['url'], json=data)
-            except:
-                print('Could not send data to {}'.format(c['url']))
-                pass
+        print(self.recipients)
+        for c in self.recipients:
+            if not c['is_hook']:
+                try:
+                    requests.post(c['url'], json=data)
+                except:
+                    print('Could not send data to {}'.format(c['url']))
+                    pass
 
-    def save_in_database(self, data, _id=None):
+    def send_to_hooks(self, data):
+        """
+        Passes data to the Q-Application so it can put them into the clipboard
+        :param data: The data (text, binary) received by the Resource
+        """
+        """
+        self.native_hooks.call_hooks(data, self.db.save_clip)
+        """
+        print(self.recipients)
+        for c in self.recipients:
+            if c['is_hook']:
+                try:
+                    response = requests.post(c['url'], json=data)
+                    # TODO handle resonse, i.e. create new object
+                except:
+                    print('Could not send data to {}'.format(c['url']))
+                    pass
+
+    def save_in_database(self, data, _id=None, propagate=False):
         """
         Saves the clip it got from the resource in the database and
         :param data: The data (text, binary) received by the Resource
@@ -53,8 +72,11 @@ class FlaskServer():
                 new_clip = self.db.save_clip(data)
             else:
                 new_clip = self.db.update_clip(_id, data)
+
             if new_clip:
-                self.emit_data(new_clip)
+                if propagate:
+                    self.send_to_hooks(new_clip)
+                self.send_to_clipboards(new_clip)
         except (GrandchildException,
                 ParentNotFoundException,
                 SameMimetypeException) as e:
@@ -95,10 +117,9 @@ class FlaskServer():
         """
         return self.db.get_alternatives(clip_id)
 
-    def add_clipboard(self, url):
-        clipboard = {}
-        if self.db.add_clipboard(url) is None:
+    def add_recipient(self, url, is_hook):
+        if self.db.add_recipient(url, is_hook) is None:
             return -1
 
-        self.clipboards = self.db.get_clipboards()
-        return len(self.clipboards) - 1
+        self.recipients = self.db.get_recipients()
+        return len(self.recipients) - 1

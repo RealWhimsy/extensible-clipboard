@@ -9,6 +9,7 @@ from pymongo import MongoClient
 class SimpleTextServerTest(unittest.TestCase):
 
     CLIP_URL = 'http://localhost:5000/clip/'
+    CLIP_ID_URL = 'http://localhost:5000/clip/{}/'
     client = None
     db = None
     collection = None
@@ -74,7 +75,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, requests.codes.not_found)
 
     def test_POST_with_uuid_returns_405(self):
-        r = requests.post(self.CLIP_URL + str(uuid4()))
+        r = requests.post(self.CLIP_ID_URL.format(str(uuid4())))
         self.assertEqual(r.status_code, requests.codes.method_not_allowed)
 
     def test_GET_without_id_returns_all_clips(self):
@@ -92,7 +93,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def test_PUT_needs_existing_url(self):
         _id = uuid4()
-        r = requests.put(self.CLIP_URL + str(_id), data={'mimetype': 'text/plain','data': 'clip new'})
+        r = requests.put(self.CLIP_ID_URL.format(str(_id)), data={'mimetype': 'text/plain','data': 'clip new'})
 
         self.assertEqual(r.status_code, requests.codes.not_found)
 
@@ -100,7 +101,7 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'old clip'})
         _id = loads(r.json())['_id']
 
-        r = requests.put(self.CLIP_URL + _id, data={'mimetype': 'text/plain','data': 'new clip'})
+        r = requests.put(self.CLIP_ID_URL.format(_id), data={'mimetype': 'text/plain','data': 'new clip'})
         r = r.json()
 
         self.assertIn(_id, r)
@@ -111,7 +112,7 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Test delete'})
         _id = loads(r.json())['_id']
 
-        r = requests.delete(self.CLIP_URL + _id)
+        r = requests.delete(self.CLIP_ID_URL.format(_id))
 
         self.assertEqual(r.status_code, 204)
 
@@ -122,15 +123,14 @@ class SimpleTextServerTest(unittest.TestCase):
     def test_deleted_item_get_no_longer_returned(self):
         r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Test delete'})
         _id = loads(r.json())['_id']
-
-        r = requests.delete(self.CLIP_URL + _id)
-        r = requests.get(self.CLIP_URL + _id)
+        r = requests.delete(self.CLIP_ID_URL.format(_id))
+        r = requests.get(self.CLIP_ID_URL.format(_id))
 
         self.assertEqual(r.status_code, 404)
 
     def test_cannot_delete_non_existing_item(self):
         _id = str(uuid4())
-        r = requests.delete(self.CLIP_URL + _id)
+        r = requests.delete(self.CLIP_ID_URL.format(_id))
 
         self.assertEqual(r.status_code, 404)
 

@@ -22,7 +22,7 @@ class MainApp():
         self.api.add_resource(Clip,
                               '/clip/',
                               '/clip/latest/',
-                              '/clip/<uuid:clip_id>',
+                              '/clip/<uuid:clip_id>/',
                               '/clip/<uuid:clip_id>/add_child',
                               '/clip/<uuid:clip_id>/get_alternatives/',
                               resource_class_kwargs={

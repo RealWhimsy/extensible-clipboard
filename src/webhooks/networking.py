@@ -55,16 +55,14 @@ class ConnectionHandler():
         )
 
     def delegate_work(self, data):
-        time.sleep(5)
-        print('wakey wakey')
+        time.sleep(2)
         result = self.hook.do_work(data['data'], data['mimetype'])
         if result:
-            data['parent'] = data.pop('_id')
             data['data'] = result['data']
             data['mimetype'] = result['mimetype']
             data['from_hook'] = True
-            r = requests.post(self.response_url, json=data)
-            print(r.json())
+            send_url = self.response_url + '{}/add_child'.format(data['_id'])
+            r = requests.post(send_url, json=data)
 
     def handle_new_data(self, request):
         if not request.is_json:

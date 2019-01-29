@@ -26,7 +26,7 @@ class FlaskServer():
         self.app.run(debug=True, use_reloader=False)
 
     def _send_failed(self, url):
-        print('Could not send data to {}'.format(c['url']))
+        print('Could not send data to {}'.format('url'))
 
 
     def send_to_clipboards(self, data):

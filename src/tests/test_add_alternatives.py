@@ -9,6 +9,7 @@ from pymongo import MongoClient
 class SimpleTextServerTest(unittest.TestCase):
 
     CLIP_URL = 'http://localhost:5000/clip/'
+    CLIP_ID_URL = 'http://localhost:5000/clip/{}/'
     ADD_CHILD_URL = CLIP_URL + 'add_child'
     client = None
     db = None
@@ -148,7 +149,7 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.get(self.CLIP_URL + child_id)
         self.assertEqual(r.status_code, 200)
 
-        r = requests.delete(self.CLIP_URL + parent_id)
+        r = requests.delete(self.CLIP_ID_URL.format(parent_id))
         self.assertEqual(r.status_code, 204)
 
         r = requests.get(self.CLIP_URL + child_id)

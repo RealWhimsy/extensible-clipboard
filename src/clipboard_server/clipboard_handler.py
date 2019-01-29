@@ -29,7 +29,11 @@ class ClipboardHandler(QObject):
         data in your clipboard and on the server simultaneously
         :param data: The data to be saved
         """
-        self._save_to_local_clipboard(data)
+        if data.get('parent') and data['parent'] == self.clipboard.current_id:
+            # Child of current item, add alternative
+            self.clipboard.update(data)
+        else:
+            self._save_to_local_clipboard(data)
 
     def retrieve_from_storage(self, callback):
         """

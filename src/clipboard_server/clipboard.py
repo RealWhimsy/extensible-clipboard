@@ -18,9 +18,6 @@ class Clipboard:
     so those changes can be synced up with the remote-clipboard
     """
 
-    # The QClipboard
-    clipboard = None
-
     def _prepare_data(self, data):
         if type(data) is str:
             data = data.encode(encoding='utf8')
@@ -35,19 +32,32 @@ class Clipboard:
         :param data: The data that will be saved in the clipboard
         """
         mime_type = data['mimetype']
-        mime_data = QMimeData()
+        self.mime_data = QMimeData()
 
         prepared_data = self._prepare_data(data['data'])
 
-        mime_data.setData(mime_type, prepared_data)
-        mime_data.setData('text/plain', prepared_data)
+        self.mime_data.setData(mime_type, prepared_data)
 
         self.clipboard.clear()
-        self.clipboard.setMimeData(mime_data)
+        self.clipboard.setMimeData(self.mime_data)
+
+        if data.get('parent'):  # If child gotten first, should not happen
+            self.current_id = data['parent']
+        else:
+            self.current_id = data['_id']
+
+    def update(self, data):
+        mime_type = data['mimetype']
+
+        prepared_data = self._prepare_data(data['data'])
+        self.mime_data.setData(mime_type, prepared_data)
+
+        self.clipboard.setMimeData(self.mime_data)
 
     def __init__(self, clip):
         """
         :param clip: The QClipboard of the current QApplication
         """
         self.clipboard = clip
-        print('initing clipboard')
+        self.current_id = ''
+        self.mime_data = QMimeData()

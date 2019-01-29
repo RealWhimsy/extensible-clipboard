@@ -68,3 +68,6 @@ class FileUploadTest(unittest.TestCase):
 
             f.seek(0)
             self.assertEqual(received_data, f.read())
+
+if __name__ == '__main__':
+    unittest.main()

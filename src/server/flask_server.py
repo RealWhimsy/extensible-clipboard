@@ -25,6 +25,10 @@ class FlaskServer():
         """
         self.app.run(debug=True, use_reloader=False)
 
+    def _send_failed(self, url):
+        print('Could not send data to {}'.format(c['url']))
+
+
     def send_to_clipboards(self, data):
         """
         Passes data to the Q-Application so it can put them into the clipboard
@@ -36,10 +40,9 @@ class FlaskServer():
         for c in self.recipients:
             if not c['is_hook']:
                 try:
-                    requests.post(c['url'], json=data)
+                    requests.post(c['url'], json=data, timeout=0.5)
                 except:
-                    print('Could not send data to {}'.format(c['url']))
-                    pass
+                    self._send_failed(c['url'])
 
     def send_to_hooks(self, data):
         """
@@ -52,9 +55,9 @@ class FlaskServer():
         for c in self.recipients:
             if c['is_hook']:
                 try:
-                    requests.post(c['url'], json=data)
+                    requests.post(c['url'], json=data, timeout=0.5)
                 except:
-                    print('Could not send data to {}'.format(c['url']))
+                    self._send_failed(c['url'])
 
     def save_in_database(self, data, _id=None, propagate=False):
         """

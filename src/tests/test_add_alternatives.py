@@ -178,3 +178,6 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertIn(parent_id, r.text)
         self.assertIn(child_id, r.text)
         self.assertNotIn(wrong_id, r.text)
+
+if __name__ == '__main__':
+    unittest.main()

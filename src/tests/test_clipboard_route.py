@@ -53,3 +53,6 @@ class SimpleTextServerTest(unittest.TestCase):
         headers = {'content-type': 'application/json'}
         r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'notAnURL'})
         self.assertEqual(r.status_code, 422)
+
+if __name__ == '__main__':
+    unittest.main()

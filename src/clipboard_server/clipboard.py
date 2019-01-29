@@ -47,6 +47,8 @@ class Clipboard:
             self.current_id = data['_id']
 
     def update(self, data):
+        # Refresh object b/c it gets deleted sometimes
+        self.mime_data = self.clipboard.mimeData()
         mime_type = data['mimetype']
 
         prepared_data = self._prepare_data(data['data'])

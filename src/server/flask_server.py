@@ -16,7 +16,8 @@ class FlaskServer():
         self.app = flask_app
         self.db = database
         self.native_hooks = HookManager()
-        self.recipients = self.db.get_recipients() or []
+        self.recipients = self._build_recipients()
+        self.current_clip = ''
 
     def start_server(self):
         """
@@ -25,8 +26,16 @@ class FlaskServer():
         """
         self.app.run(debug=True, use_reloader=False)
 
-    def _send_failed(self, url):
-        print('Could not send data to {}'.format('url'))
+    def _build_recipients(self):
+        result = self.db.get_recipients() or []
+        for r in result:
+            r['error_count'] = 0
+        return result
+
+    def _send_failed(self, recipient):
+        recipient['error_count'] += 1
+        print('Could not send data to {}'.format(recipient['url']))
+        print('Errors for {}: {}'.format(recipient['url'], recipient['error_count']))
 
 
     def send_to_clipboards(self, data):
@@ -37,12 +46,19 @@ class FlaskServer():
         """
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
+        parent = data.get('parent')
+        if parent and self.current_clip != parent:
+            # Update was not to current clip
+            return
+        elif not parent:  # Completely new clip
+            self.current_clip = data['_id']
+
         for c in self.recipients:
             if not c['is_hook']:
                 try:
                     requests.post(c['url'], json=data, timeout=0.5)
                 except:
-                    self._send_failed(c['url'])
+                    self._send_failed(c)
 
     def send_to_hooks(self, data):
         """
@@ -57,7 +73,7 @@ class FlaskServer():
                 try:
                     requests.post(c['url'], json=data, timeout=0.5)
                 except:
-                    self._send_failed(c['url'])
+                    self._send_failed(c)
 
     def save_in_database(self, data, _id=None, propagate=False):
         """
@@ -121,5 +137,5 @@ class FlaskServer():
         if self.db.add_recipient(url, is_hook) is None:
             return -1
 
-        self.recipients = self.db.get_recipients()
+        self.recipients = self._build_recipients()
         return len(self.recipients) - 1

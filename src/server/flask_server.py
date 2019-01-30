@@ -91,6 +91,8 @@ class FlaskServer():
 
             if new_clip:
                 if propagate:
+                    response_url = url_for('adder', clip_id=new_clip['_id'], _external=True)
+                    new_clip['response_url'] = response_url.format(new_clip['_id'])
                     self.send_to_hooks(new_clip)
                 self.send_to_clipboards(new_clip)
         except (GrandchildException,

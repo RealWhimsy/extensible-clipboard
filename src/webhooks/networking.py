@@ -61,8 +61,7 @@ class ConnectionHandler():
             data['data'] = result['data']
             data['mimetype'] = result['mimetype']
             data['from_hook'] = True
-            send_url = self.response_url + '{}/add_child'.format(data['_id'])
-            r = requests.post(send_url, json=data)
+            r = requests.post(data['response_url'], json=data)
 
     def handle_new_data(self, request):
         if not request.is_json:

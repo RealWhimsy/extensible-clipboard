@@ -1,4 +1,3 @@
-from json import loads
 import requests
 import unittest
 from uuid import uuid4, UUID
@@ -31,16 +30,16 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def create_parent(self):
         r = requests.post(self.CLIP_URL,
-                      data={'mimetype': 'text/plain',
+                      json={'mimetype': 'text/plain',
                             'data': 'parentClip'
                            })
 
-        return loads(r.json())['_id']
+        return r.json()['_id']
 
     def add_child(self, parent_id):
         r = requests.post(
                 self.CLIP_URL + parent_id + '/add_child',
-                data={'mimetype': 'text/html',
+                json={'mimetype': 'text/html',
                       'data': '<h1>Child text</h1>',
                       'parent': parent_id
                      })
@@ -51,7 +50,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
         r = requests.post(
                 self.CLIP_URL + str(fake_id) + '/add_child',
-                data={'mimetype': 'text/plain',
+                json={'mimetype': 'text/plain',
                       'data': 'ClipChild',
                       'parent': str(fake_id)
                      })
@@ -64,7 +63,7 @@ class SimpleTextServerTest(unittest.TestCase):
         r = self.add_child(parent_id)
 
         self.assertEqual(r.status_code, 201)
-        json = loads(r.json())
+        json = r.json()
         self.assertIn('parent', json)
 
         try:
@@ -78,7 +77,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
         r = requests.post(
                 self.CLIP_URL + parent_id + '/add_child',
-                data={'mimetype': 'text/plain',
+                json={'mimetype': 'text/plain',
                       'data': 'ClipChild',
                       'parent': parent_id
                      })
@@ -94,7 +93,7 @@ class SimpleTextServerTest(unittest.TestCase):
             headers=header
         )
 
-        json = loads(r.json())
+        json = r.json()
         self.assertIn('<h1>Child text</h1>', json['data'])
 
     def test_wildcard_in_ACCEPT_header_honored(self):
@@ -103,7 +102,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
         r = requests.post(
                 self.CLIP_URL + parent_id + '/add_child',
-                data={'mimetype': 'application/json',
+                json={'mimetype': 'application/json',
                       'data': '{"key": "json-child"}',
                       'parent': parent_id
                      })
@@ -114,13 +113,13 @@ class SimpleTextServerTest(unittest.TestCase):
             headers=header
         )
 
-        json = loads(r.json())
+        json = r.json()
         self.assertIn('json-child', json['data'])
 
     def test_cannot_create_grandchildren(self):
         parent_id = self.create_parent()
         child = self.add_child(parent_id)
-        child_id = loads(child.json())['_id']
+        child_id = child.json()['_id']
         grandchild = self.add_child(child_id)
 
         self.assertEqual(grandchild.status_code, 422)
@@ -130,7 +129,7 @@ class SimpleTextServerTest(unittest.TestCase):
         # parent: plain, child: html, query:child but prefers plains > parent delivered
         parent_id = self.create_parent()
         child = self.add_child(parent_id)
-        child_id = loads(child.json())['_id']
+        child_id = child.json()['_id']
 
         header = {'accept': 'text/plain;q=0.8, text/html;q=0.3'}
 
@@ -139,13 +138,13 @@ class SimpleTextServerTest(unittest.TestCase):
                 headers=header
         )
 
-        json = loads(r.json())
+        json = r.json()
         self.assertIn('parentClip', json['data'])
 
     def test_delete_parent_will_delete_children(self):
         parent_id = self.create_parent()
         child = self.add_child(parent_id)
-        child_id = loads(child.json())['_id']
+        child_id = child.json()['_id']
         r = requests.get(self.CLIP_URL + child_id)
         self.assertEqual(r.status_code, 200)
 
@@ -158,7 +157,7 @@ class SimpleTextServerTest(unittest.TestCase):
     def test_can_get_list_of_alternatives(self):
         parent_id = self.create_parent()
         child = self.add_child(parent_id)
-        child_id = loads(child.json())['_id']
+        child_id = child.json()['_id']
         r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')
         self.assertEqual(r.status_code, 200)
 
@@ -168,12 +167,12 @@ class SimpleTextServerTest(unittest.TestCase):
     def test_unrelated_clip_is_not_returned(self):
         parent_id = self.create_parent()
         child = self.add_child(parent_id)
-        child_id = loads(child.json())['_id']
+        child_id = child.json()['_id']
         r = requests.post(self.CLIP_URL,
-                      data={'mimetype': 'text/plain',
+                      json={'mimetype': 'text/plain',
                             'data': 'WrongTurn'
                            })
-        wrong_id = loads(r.json())['_id']
+        wrong_id = r.json()['_id']
         r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')
 
         self.assertIn(parent_id, r.text)

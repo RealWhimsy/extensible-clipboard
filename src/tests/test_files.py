@@ -1,5 +1,4 @@
 from base64  import b64decode
-from json import loads
 
 import requests
 import unittest
@@ -47,8 +46,8 @@ class FileUploadTest(unittest.TestCase):
             files = {'file': ('example.txt', f, 'text/plain')}
             r = requests.post(self.CLIP_URL, files=files)
 
-            filename = loads(r.json())['filename']
-            received_data = loads(r.json())['data']
+            filename = r.json()['filename']
+            received_data = r.json()['data']
 
             received_data = b64decode(received_data)
 
@@ -61,8 +60,8 @@ class FileUploadTest(unittest.TestCase):
             files = {'file': ('example.jpg', f, 'image/jpeg')}
             r = requests.post(self.CLIP_URL, files=files)
 
-            filename = loads(r.json())['filename']
-            received_data = loads(r.json())['data']
+            filename = r.json()['filename']
+            received_data = r.json()['data']
 
             received_data = b64decode(received_data)
 

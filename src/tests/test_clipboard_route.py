@@ -1,4 +1,3 @@
-from json import loads
 import requests
 import unittest
 from uuid import uuid4
@@ -32,9 +31,9 @@ class SimpleTextServerTest(unittest.TestCase):
         self.clipboard_collection.delete_many({})
 
     def test_get_returns_json(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain', 'data': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain', 'data': 'Clip 1'})
 
-        _id = loads(r.json())['_id']
+        _id = r.json()['_id']
 
         r = requests.get(self.CLIP_URL + _id)
         header = r.headers.get('content-type')

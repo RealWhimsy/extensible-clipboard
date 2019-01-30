@@ -21,12 +21,9 @@ class RequestParser():
         else:
             if request.headers.get('CONTENT_TYPE') in 'application/json':
                 json = request.get_json()
-                data['data'] = json['data']
-                data['mimetype'] = json['mimetype']
-
-            else:
-                data['data'] = request.form['data']
-                data['mimetype'] = request.form['mimetype']
+                if json.get('data') and json.get('mimetype'):
+                    data['data'] = json['data']
+                    data['mimetype'] = json['mimetype']
 
         return data
 

@@ -1,4 +1,3 @@
-from json import dumps
 from mimetypes import guess_type
 import re
 
@@ -66,7 +65,7 @@ class Clip(BaseClip):
         if clip is None:
             return 'No clip with specified id' , 404
 
-        return dumps(clip)
+        return clip
 
     def put(self, clip_id=None):
         if clip_id is None:
@@ -79,7 +78,7 @@ class Clip(BaseClip):
         clip = self.server.save_in_database(_id=clip_id, data=data, propagate=False)
 
         if clip is not None:
-            return dumps(clip)
+            return clip
         else:
             return 'No clip with specified id', 404
 
@@ -112,7 +111,7 @@ class Clips(BaseClip):
         
         new_item = self.server.save_in_database(data=data, propagate=propagate)
 
-        return dumps(new_item), 201
+        return new_item, 201
 
     def get(self):
         """
@@ -123,7 +122,7 @@ class Clips(BaseClip):
         if clip is None:
             return 'No clip with specified id' , 404
 
-        return dumps(clip)
+        return clip
 
 class ChildClipAdder(BaseClip):
     """
@@ -143,7 +142,7 @@ class ChildClipAdder(BaseClip):
         if errors:
             return errors
         else:
-            return dumps(new_item), 201
+            return new_item, 201
 
 class Recipient(Resource):
 

@@ -1,4 +1,3 @@
-from json import loads
 import requests
 import unittest
 from uuid import uuid4
@@ -29,32 +28,32 @@ class SimpleTextServerTest(unittest.TestCase):
         self.clip_collection.delete_many({})
 
     def test_get_returns_json(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain', 'data': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain', 'data': 'Clip 1'})
 
-        _id = loads(r.json())['_id']
+        _id = r.json()['_id']
 
         r = requests.get(self.CLIP_URL + _id)
         header = r.headers.get('content-type')
         self.assertEqual(header, 'application/json')
 
     def test_can_save_and_retrieve_single_item(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'Clip 1'})
         self.assertEqual(r.status_code, requests.codes.created)
 
-        object_id = loads(r.json())['_id']
+        object_id = r.json()['_id']
         
         r = requests.get(self.CLIP_URL + object_id)
         self.assertEqual(r.status_code, requests.codes.ok)
         self.assertIn('Clip 1', r.text)
 
     def test_can_save_and_retrieve_multiple_items(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'Clip 1'})
         self.assertEqual(r.status_code, requests.codes.created)
-        object_id_1 = loads(r.json())['_id']
+        object_id_1 = r.json()['_id']
 
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 2'})
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'Clip 2'})
         self.assertEqual(r.status_code, requests.codes.created)
-        object_id_2 = loads(r.json())['_id']
+        object_id_2 = r.json()['_id']
         
         object_1 = requests.get(self.CLIP_URL + object_id_1)
         object_2 = requests.get(self.CLIP_URL + object_id_2)
@@ -66,7 +65,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertNotIn('Clip 1', object_2.text)
 
     def test_POST_need_correct_key(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','wrong': 'key'})
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','wrong': 'key'})
         self.assertEqual(r.status_code, requests.codes.bad_request)
 
     def test_not_existing_id_raises_404(self):
@@ -79,13 +78,13 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, requests.codes.method_not_allowed)
 
     def test_GET_without_id_returns_all_clips(self):
-        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 1'})
-        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Clip 2'})
+        requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'Clip 1'})
+        requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'Clip 2'})
 
         r = requests.get(self.CLIP_URL)
         objects = r.json()
-        self.assertIn('Clip 1', objects)
-        self.assertIn('Clip 2', objects)
+
+        self.assertEqual(len(objects), 2)
 
     def test_PUT_needs_id(self):
         r = requests.put(self.CLIP_URL)
@@ -93,24 +92,24 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def test_PUT_needs_existing_url(self):
         _id = uuid4()
-        r = requests.put(self.CLIP_ID_URL.format(str(_id)), data={'mimetype': 'text/plain','data': 'clip new'})
+        r = requests.put(self.CLIP_ID_URL.format(str(_id)), json={'mimetype': 'text/plain','data': 'clip new'})
 
         self.assertEqual(r.status_code, requests.codes.not_found)
 
     def test_correct_PUT_returns_updated_clip(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'old clip'})
-        _id = loads(r.json())['_id']
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'old clip'})
+        _id = r.json()['_id']
 
-        r = requests.put(self.CLIP_ID_URL.format(_id), data={'mimetype': 'text/plain','data': 'new clip'})
+        r = requests.put(self.CLIP_ID_URL.format(_id), json={'mimetype': 'text/plain','data': 'new clip'})
         r = r.json()
 
-        self.assertIn(_id, r)
-        self.assertNotIn('old clip', r)
-        self.assertIn('new clip', r)
+        self.assertIn(_id, r['_id'])
+        self.assertNotIn('old clip', r['data'])
+        self.assertIn('new clip', r['data'])
 
     def test_delete_item_returns_no_content_on_success(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Test delete'})
-        _id = loads(r.json())['_id']
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'Test delete'})
+        _id = r.json()['_id']
 
         r = requests.delete(self.CLIP_ID_URL.format(_id))
 
@@ -121,8 +120,8 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, 405)
 
     def test_deleted_item_get_no_longer_returned(self):
-        r = requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Test delete'})
-        _id = loads(r.json())['_id']
+        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'Test delete'})
+        _id = r.json()['_id']
         r = requests.delete(self.CLIP_ID_URL.format(_id))
         r = requests.get(self.CLIP_ID_URL.format(_id))
 
@@ -135,11 +134,11 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, 404)
 
     def test_can_get_latest_item_by_shortcut(self):
-        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'First item'})
-        requests.post(self.CLIP_URL, data={'mimetype': 'text/plain','data': 'Second item'})
+        requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'First item'})
+        requests.post(self.CLIP_URL, json={'mimetype': 'text/plain','data': 'Second item'})
 
         r = requests.get(self.CLIP_URL + 'latest/')
-        text = r.json()
+        text = r.json()['data']
 
         self.assertEqual(r.status_code, 200) 
         self.assertIn('First item', text)

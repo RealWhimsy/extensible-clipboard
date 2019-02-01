@@ -6,11 +6,17 @@
         height: 30px;
         width: 30px;
         outline: none;
-      }
     </style>
   </head>
   <body>
-    <button id="changeColor"></button>
+    <button id="syncButton">
+        <img src="images/sync.svg"/>
+    </button>
+    <ul id="clipList">
+    </ul>
+    <script src="libs/jquery-3.3.1.min.js"></script>
+    <script src="requestBuilder.js"></script>
+    <script src="clipboard_api.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

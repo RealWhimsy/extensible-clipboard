@@ -15,6 +15,15 @@ var clipboardApi = (function(){
     function onClipsGet(){
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200){
             console.log(this.response)
+            let clipList = document.getElementById('clipList');
+            for (var i = 0; i < this.response.length; i++){
+                r = this.response[i].data.toString();
+                console.log(r)
+                r = r.replace('<a ', '<a target="_blank" ')
+                r = r.replace('</a>', 'Item</a>')
+                console.log(r)
+                $('#clipList').append('<li>'+r+'</li>')
+            }
         }
         
     }
@@ -31,6 +40,7 @@ var clipboardApi = (function(){
     }
 
     function getAllClips(){
+        console.log('getting clips')
         xhr = requestBuilder.buildRequest('GET', BASE_CLIP_URL, onClipsGet);
         requestBuilder.sendRequest(xhr)
     }

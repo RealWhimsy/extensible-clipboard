@@ -1,6 +1,8 @@
-let changeColor = document.getElementById('changeColor');
-changeColor.onclick = function(){
-    chrome.runtime.sendMessage({greeting: "hello"}, function(response) {
-        console.log(response.farewell);
-    });
+function onSyncButtonClick(){
+    console.log('blub')
+    clipboardApi.getAllClips()
 }
+
+let syncButton = $('#syncButton')
+console.log(syncButton)
+syncButton.click(onSyncButtonClick)

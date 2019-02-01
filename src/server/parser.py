@@ -4,7 +4,11 @@ class RequestParser():
 
     def get_data_from_request(self, request):
         data = {}
-        # Server received a file
+        """
+        Server received a file
+        This path might get deleted and user be forced
+        To send files as base64 inside json-request
+        """
         if 'file' in request.files:
             f = request.files['file']
             received_mt = f.mimetype
@@ -24,6 +28,7 @@ class RequestParser():
                 if json.get('data') and json.get('mimetype'):
                     data['data'] = json['data']
                     data['mimetype'] = json['mimetype']
-
+                    data['src_url'] = json.get('src_url', 'n/a')
+                    data['src_app'] = json.get('src_app', 'n/a')
         return data
 

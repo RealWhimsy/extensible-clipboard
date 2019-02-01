@@ -1,11 +1,10 @@
-function onMessageInc(request, sender, sendResponse){
-        console.log(sender.tab ?
-                    "from a content script:" + sender.tab.url :
-                    "from the extension");
-        if (request.greeting == "hello"){
-            sendResponse({farewell: "goodbye"});
-            clipboardApi.getAllClips()
-        }
+function onMessageInc(request, sender, callback){
+    if (request.msg == "sync"){
+        console.log('app received call')
+        console.log(callback)
+        callback()
+        clipboardApi.getAllClips()
+    }
 }
 
 function onContextClick(info, tabs){
@@ -20,7 +19,6 @@ function onContextClick(info, tabs){
         mimetype = 'text/html';
     }
     else if ('mediaType' in info){
-    
         console.log(info);
         return
     }

@@ -124,7 +124,7 @@ class ClipDatabase:
         new_clip = {}
 
         if 'parent' in data:
-            parent_id = self._create_binary_uuid(data['parent'])
+            parent_id = self._create_binary_uuid(data.pop('parent'))
             parent = self.clip_collection.find_one({'_id': parent_id})
             # Abandon insert, when parent-id not in db
             if parent is None:
@@ -133,16 +133,13 @@ class ClipDatabase:
                 raise GrandchildException
             if parent['mimetype'] == data['mimetype']:
                 raise SameMimetypeException
-            new_clip['parent'] = self._create_binary_uuid(data['parent'])
+            new_clip['parent'] = parent_id
 
         new_clip['_id'] = _id
-        new_clip['data'] = data['data']
-        new_clip['mimetype'] = data['mimetype']
         new_clip['creation_date'] = modified_date.isoformat()
         new_clip['last_modified'] = modified_date.isoformat()
-
-        if 'filename' in data:
-            new_clip['filename'] = data['filename']
+        for key, value in data.items():
+            new_clip[key] = value
 
         insert_result = self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})

@@ -15,9 +15,7 @@ var requestBuilder = (function(){
             data = JSON.stringify(data)
         }
         console.log(xhr)
-        console.log(data)
         xhr.send(data)        
-        console.log('sent')
     }
 
     that.buildRequest = buildRequest

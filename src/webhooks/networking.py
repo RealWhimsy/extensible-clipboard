@@ -1,6 +1,6 @@
-from json import dumps, dump
+import re
 import sys
-import time, _thread
+import _thread
 
 from flask import request
 
@@ -11,9 +11,15 @@ class HookWorker():
 
     def do_work(self, data, mimetype):
         result = {}
-        if mimetype == 'text/plain':
-            result['data'] = 'Worker doing his work'
-            result['mimetype'] = 'application/xml'
+        if mimetype == 'text/html':
+            if data.startswith('<a') and data.endswith('/a>'):
+                # Extracts link from single a-Element
+                pattern = re.compile(r'href=[\'\"](\S*)[\'\"]')
+                result['data'] = pattern.search(data).group(1)
+            else:
+                result['data'] = str(data)
+
+            result['mimetype'] = 'text/plain'
             return result
         else:
             return None
@@ -55,7 +61,6 @@ class ConnectionHandler():
         )
 
     def delegate_work(self, data):
-        time.sleep(2)
         result = self.hook.do_work(data['data'], data['mimetype'])
         if result:
             data['data'] = result['data']

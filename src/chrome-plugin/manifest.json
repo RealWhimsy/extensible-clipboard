@@ -6,7 +6,9 @@
                   "http://localhost/"  
                  ],
   "background": {
-      "scripts": ["app.js"],
+      "scripts": ["app.js", 
+                  "clipboard_api.js",
+                  "requestBuilder.js"],
       "persistent": false
   },
   "browser_action":{

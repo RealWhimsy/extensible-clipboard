@@ -1,30 +1,49 @@
-function genericOnClick(info, tabs){
-    //https://stackoverflow.com/questions/6418220/javascript-send-json-object-with-ajax
-    console.log(info)
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://localhost:5000/clip/", true);
-    xhr.setRequestHeader("Content-Type", "application/json", "charset=utf-8");
-    xhr.responseType = 'json';
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-            obj = xhr.response
+function onMessageInc(request, sender, sendResponse){
+        console.log(sender.tab ?
+                    "from a content script:" + sender.tab.url :
+                    "from the extension");
+        if (request.greeting == "hello"){
+            sendResponse({farewell: "goodbye"});
+            clipboardApi.getAllClips()
         }
+}
+
+function onContextClick(info, tabs){
+    let data, mimetype, src_url, src_app
+    if ('selectionText' in info){
+        console.log(info);
+        data = info.selectionText;
+        mimetype = 'text/plain';
     }
-    xhr.send(JSON.stringify({'data': info.selectionText, 'mimetype': 'text/plain'}));
+    else if ('linkUrl' in info){
+        data = '<a href="' + info.linkUrl + '"></a>';
+        mimetype = 'text/html';
+    }
+    else if ('mediaType' in info){
+    
+        console.log(info);
+        return
+    }
+    
+    src_url = info.pageUrl
+    src_app = "Web browser"
+    clipboardApi.saveClip(data, mimetype, src_url, src_app)
+}
+
+function initContextMenu(){
+    var context_select = chrome.contextMenus.create({
+        "id": "context_selection",
+        "title": "Send to C2", 
+        "contexts":["selection", "link", "image", "video", "audio"]
+    });
 }
 
 function initListeners(){
-    var context_entry = chrome.contextMenus.create({
-        "id": "context_selection",
-        "title": "Send to C2", 
-        "contexts":["selection"]});
+    chrome.runtime.onMessage.addListener(onMessageInc)
+    chrome.contextMenus.onClicked.addListener(onContextClick)
 }
 
 chrome.runtime.onInstalled.addListener(function() {
-    console.log('installed');
+    initContextMenu();
     initListeners();
-
-    chrome.contextMenus.onClicked.addListener(
-        genericOnClick
-    )
 });

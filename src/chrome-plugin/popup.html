@@ -1,22 +1,42 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <style>
-      button {
-        height: 30px;
-        width: 30px;
-        outline: none;
-    </style>
+      <link rel="stylesheet" href="popup.css">
   </head>
-  <body>
-    <button id="syncButton">
-        <img src="images/sync.svg"/>
-    </button>
+  <body onload="initApp()">
+      <div id="heading">Extended Clipboard - C<sup>2</sup></div>
+    <div id="controls">
+        <div id="syncButton">
+            <img src="images/sync.svg"/>
+        </div>
+    </div>
     <ul id="clipList">
+
     </ul>
+    <table id="clipTable">
+        <tbody>
+        </tbody>
+    </table>
+
+    <script id="clipTemplate" type="text/x-handlebars-template">
+        {{#each clips}}
+            <tr>
+                <td class="clipContent">{{{clipText}}}</td>
+                <td class="clipType">{{clipType}}</td>
+                <td><img class="clipDelete" src="images/times.svg"/></td>
+            </tr>
+        {{/each}}
+    </script>
+
+    <script src="libs/handlebars-v4.0.12.js"></script>
     <script src="libs/jquery-3.3.1.min.js"></script>
     <script src="requestBuilder.js"></script>
     <script src="clipboard_api.js"></script>
     <script src="popup.js"></script>
+    <script>
+        function initApp() {
+            app.init()
+        }
+    </script>
   </body>
 </html>

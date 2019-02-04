@@ -1,0 +1,60 @@
+body {
+    min-height: 16em;
+    min-width: 32em;
+    margin: unset;
+}
+
+#heading{
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    background: #444;
+    color: #fff;
+}
+
+#controls {
+    float: right;
+    background-color: #eee;
+    min-width: 100%;
+    margin: 0em 0em 0.5em 0em;
+}
+
+#controls div {
+    height: 2em;
+    width: 2em;
+    padding: 0.2em;
+    outline: none;
+    float: inherit;
+    cursor: pointer;
+}
+
+#clipList {
+    clear: both;
+}
+
+#clipTable {
+    clear: both;
+    table-layout: fixed;
+    max-width: 100%;
+}
+
+#clipTable td {
+    white-space: nowrap;
+    max-width: 50em;
+}
+
+.clipContent {
+    background: #aaa; 
+    overflow: hidden;
+}
+
+.clipType {
+    width: 20%;
+    background: #ddd;
+}
+
+.clipDelete{
+    width: 10%;
+    height: 2em;
+    background: url("images/times.svg");
+}

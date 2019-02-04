@@ -5,8 +5,17 @@ var app = (function(){
     var $table = null;
 
     function onSyncButtonClick(){
-        $("#clipList").empty()
+        $("#clipTable tbody").empty()
         clipboardApi.getAllClips(app, onClipsGet)
+    }
+
+    function mimetypeSupported(mimetype){
+        if (mimetype.indexOf('text/') !== -1 || mimetype.indexOf('application/') !== -1){
+            return true
+        }
+        else{
+            return false
+        }
     }
 
     function onClipsGet(data, textStatus, jqXHR){
@@ -14,6 +23,9 @@ var app = (function(){
             var clips = [];
             var clipList = document.getElementById('clipList');
             for (var i = 0; i < data.length; i++){
+                if (mimetypeSupported(data[i].mimetype) === false){
+                    continue;
+                }
                 clip = {};
                 clip.clipText = data[i].data.toString()
                 clip.clipType = data[i].mimetype
@@ -37,6 +49,8 @@ var app = (function(){
 
         this.syncButton = $('#syncButton')
         this.syncButton.click(onSyncButtonClick)
+
+        onSyncButtonClick()
     }
 
     that.init = init;

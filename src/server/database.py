@@ -54,7 +54,6 @@ class ClipDatabase:
 
         if 'filename' in clip:
             data = b64encode(clip['data'])
-
             clip['data'] = str(data)[2:-1]
 
         if 'parent' in clip:

@@ -68,5 +68,17 @@ class FileUploadTest(unittest.TestCase):
             f.seek(0)
             self.assertEqual(received_data, f.read())
 
+    def test_url_upload_returns_correct_file(self):
+        image_url = 'http://www.google.com/favicon.ico'
+        data = {'mimetype': 'text/plain', 'data': image_url, 'download_request': True}
+        r = requests.post(self.CLIP_URL, json=data)
+        r1 = requests.get(image_url, allow_redirects=True)
+        server_data = b64decode(r.json()['data'])
+        # shows you, it's working :p
+        f = open('tests/res/favicon.ico', 'wb')
+        f.write(server_data)
+        f.close()
+        self.assertEqual(server_data, r1.content)
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,8 +1,17 @@
+import re
 import requests
 
 from mimetypes import guess_type
 
 class RequestParser():
+
+    def get_filename_from_url(self, url):
+        end = url.rsplit('/', 1)[-1]
+        if self.filename_pattern.match(end):
+            return end
+        else:
+            return None
+
 
     def get_filename_from_cd(self, cd):
         """
@@ -19,7 +28,9 @@ class RequestParser():
         # https://www.codementor.io/aviaryan/downloading-files-from-urls-in-python-77q3bs0un 
         r = requests.get(url, allow_redirects=True)
         file_content = r.content
-        filename = self.get_filename_from_cd(r.headers.get('content-disposition')) or 'default.ico'
+        filename = self.get_filename_from_url(url)
+        if not filename:
+            filename = self.get_filename_from_cd(r.headers.get('content-disposition'))
         mimetype = r.headers.get('content-type')
 
         return (file_content, filename, mimetype)
@@ -58,5 +69,8 @@ class RequestParser():
                     data['mimetype'] = json['mimetype']
                     data['src_url'] = json.get('src_url', 'n/a')
                     data['src_app'] = json.get('src_app', 'n/a')
+
         return data
 
+    def __init__(self):
+        self.filename_pattern = re.compile('^.*\..*$')

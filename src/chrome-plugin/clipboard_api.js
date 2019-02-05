@@ -12,7 +12,13 @@ var clipboardApi = (function(){
         }
     }
 
-    function saveClip(clip){
+    function saveClip(data, mimetype, src_url=null, src_app=null, download_request=false){
+        let clip = {};
+        clip.data = data;
+        clip.mimetype = mimetype;
+        if (src_url) { clip.src_url = src_url };
+        if (src_app) { clip.src_app = src_app };
+        if (download_request) { clip.download_request = download_request };
         console.log(clip)
         $.ajax(BASE_CLIP_URL, {
             contentType: 'application/json',

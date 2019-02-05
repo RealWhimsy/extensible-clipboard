@@ -1,23 +1,21 @@
 function onContextClick(info, tabs){
-    clip = {}
-    console.log(info)
+    let data, mimetype, src_app, src_url, dlr
     if ('selectionText' in info){
-        console.log(info);
-        clip.data = info.selectionText;
-        clip.mimetype = 'text/plain';
+        data = info.selectionText;
+        mimetype = 'text/plain';
     }
     else if ('mediaType' in info){
-        clip.data = info.srcUrl;
-        clip.mimetype = 'text/plain';
-        clip.download_request = 'true';
+        data = info.srcUrl;
+        mimetype = 'text/plain';
+        dlr = 'true';
     }
     else if ('linkUrl' in info){
-        clip.data = '<a href="' + info.linkUrl + '"></a>';
-        clip.mimetype = 'text/html';
+        data = '<a href="' + info.linkUrl + '"></a>';
+        mimetype = 'text/html';
     }
-    clip.src_url = info.pageUrl
-    clip.src_app = "Web browser"
-    clipboardApi.saveClip(clip)
+    src_url = info.pageUrl
+    src_app = "Web browser"
+    clipboardApi.saveClip(data, mimetype, src_url, src_app, dlr)
 }
 
 function initContextMenu(){

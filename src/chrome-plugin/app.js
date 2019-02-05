@@ -1,31 +1,23 @@
-function onMessageInc(request, sender, callback){
-    if (request.msg == "sync"){
-        console.log('app received call')
-        console.log(callback)
-        callback()
-        clipboardApi.getAllClips()
-    }
-}
-
 function onContextClick(info, tabs){
-    let data, mimetype, src_url, src_app
+    clip = {}
+    console.log(info)
     if ('selectionText' in info){
         console.log(info);
-        data = info.selectionText;
-        mimetype = 'text/plain';
-    }
-    else if ('linkUrl' in info){
-        data = '<a href="' + info.linkUrl + '"></a>';
-        mimetype = 'text/html';
+        clip.data = info.selectionText;
+        clip.mimetype = 'text/plain';
     }
     else if ('mediaType' in info){
-        console.log(info);
-        return
+        clip.data = info.srcUrl;
+        clip.mimetype = 'text/plain';
+        clip.download_request = 'true';
     }
-    
-    src_url = info.pageUrl
-    src_app = "Web browser"
-    clipboardApi.saveClip(data, mimetype, src_url, src_app)
+    else if ('linkUrl' in info){
+        clip.data = '<a href="' + info.linkUrl + '"></a>';
+        clip.mimetype = 'text/html';
+    }
+    clip.src_url = info.pageUrl
+    clip.src_app = "Web browser"
+    clipboardApi.saveClip(clip)
 }
 
 function initContextMenu(){
@@ -37,7 +29,6 @@ function initContextMenu(){
 }
 
 function initListeners(){
-    chrome.runtime.onMessage.addListener(onMessageInc)
     chrome.contextMenus.onClicked.addListener(onContextClick)
 }
 

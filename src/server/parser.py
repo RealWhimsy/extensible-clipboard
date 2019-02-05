@@ -1,6 +1,29 @@
+import requests
+
 from mimetypes import guess_type
 
 class RequestParser():
+
+    def get_filename_from_cd(self, cd):
+        """
+        Get filename from content-disposition
+        """
+        if not cd:
+            return None
+        fname = re.findall('filename=(.+)', cd)
+        if len(fname) == 0:
+            return None
+        return fname[0]
+
+    def download_file(self, url):
+        # https://www.codementor.io/aviaryan/downloading-files-from-urls-in-python-77q3bs0un 
+        r = requests.get(url, allow_redirects=True)
+        file_content = r.content
+        filename = self.get_filename_from_cd(r.headers.get('content-disposition')) or 'default.ico'
+        mimetype = r.headers.get('content-type')
+
+        return (file_content, filename, mimetype)
+
 
     def get_data_from_request(self, request):
         data = {}
@@ -26,6 +49,11 @@ class RequestParser():
             if request.headers.get('CONTENT_TYPE') in 'application/json':
                 json = request.get_json()
                 if json.get('data') and json.get('mimetype'):
+                    if json.pop('download_request', None):
+                        _file = self.download_file(str(json['data']))
+                        data['filename'] = _file[1]
+                        json['mimetype'] = _file[2]
+                        json['data'] = _file[0]
                     data['data'] = json['data']
                     data['mimetype'] = json['mimetype']
                     data['src_url'] = json.get('src_url', 'n/a')

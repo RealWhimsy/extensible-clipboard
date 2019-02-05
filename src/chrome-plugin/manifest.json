@@ -8,7 +8,8 @@
   "background": {
       "scripts": ["app.js", 
                   "clipboard_api.js",
-                  "requestBuilder.js"],
+                  "requestBuilder.js",
+                  "libs/jquery-3.3.1.min.js"],
       "persistent": false
   },
   "browser_action":{

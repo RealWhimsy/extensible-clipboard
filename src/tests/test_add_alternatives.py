@@ -149,7 +149,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
 
         r = requests.delete(self.CLIP_ID_URL.format(parent_id))
-        self.assertEqual(r.status_code, 204)
+        self.assertEqual(r.status_code, 200)
 
         r = requests.get(self.CLIP_URL + child_id)
         self.assertEqual(r.status_code, 404)

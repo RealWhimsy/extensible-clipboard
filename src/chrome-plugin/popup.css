@@ -1,6 +1,6 @@
 body {
-    min-height: 10em;
-    min-width: 32em;
+    /*min-height: 5em;
+    min-width: 32em;*/
     margin: unset;
 }
 
@@ -40,12 +40,12 @@ body {
 
 #clipTable td {
     white-space: nowrap;
-    max-width: 50em;
 }
 
 .clipContent {
     background: #aaa; 
     overflow: hidden;
+    width: 70%;
 }
 
 .clipType {
@@ -56,5 +56,5 @@ body {
 .clipDelete{
     width: 10%;
     height: 2em;
-    background: url("images/times.svg");
+    cursor: pointer;
 }

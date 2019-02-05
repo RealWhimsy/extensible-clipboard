@@ -34,8 +34,16 @@ var clipboardApi = (function(){
         }).done(callback)
     }
 
+    function deleteClip(_id, callback) {
+        $.ajax(BASE_CLIP_URL + _id + '/', {
+            contentType: 'application/json',
+            method: 'DELETE',
+        }).done(callback)
+    }
+
     that.saveClip = saveClip;
     that.getAllClips = getAllClips;
+    that.deleteClip = deleteClip;
 
 
     return that;

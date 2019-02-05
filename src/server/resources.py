@@ -89,7 +89,7 @@ class Clip(BaseClip):
         item = self.server.delete_entry_by_id(clip_id=clip_id)
 
         if item is not 0:
-            return ('', 204)
+            return str(clip_id), 200
         else:
             return 'No clip with specified id', 404
 

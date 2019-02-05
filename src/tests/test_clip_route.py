@@ -113,7 +113,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
         r = requests.delete(self.CLIP_ID_URL.format(_id))
 
-        self.assertEqual(r.status_code, 204)
+        self.assertEqual(r.status_code, 200)
 
     def test_delete_needs_id(self):
         r = requests.delete(self.CLIP_URL)

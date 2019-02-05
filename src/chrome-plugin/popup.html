@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html>
   <head>
-      <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="popup.css">
   </head>
   <body onload="initApp()">
-      <div id="heading">Extended Clipboard - C<sup>2</sup></div>
+    <div id="heading">Extended Clipboard - C<sup>2</sup></div>
     <div id="controls">
-        <div id="syncButton">
-            <img src="images/sync.svg"/>
-        </div>
+      <div id="syncButton">
+        <img src="images/sync.svg"/>
+      </div>
     </div>
     <table id="clipTable">
-        <tbody>
-        </tbody>
+      <thead>
+        <tr>
+          <th class="clipContent">Content</th>
+          <th class="clipType">Mimetype</th>
+          <th class="clipDelte">X</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
     </table>
 
     <script id="clipTemplate" type="text/x-handlebars-template">
-        {{#each clips}}
-            <tr>
-                <td class="clipContent">{{{clipText}}}</td>
-                <td class="clipType">{{clipType}}</td>
-                <td><img class="clipDelete" src="images/times.svg"/></td>
-            </tr>
-        {{/each}}
+      {{#each clips}}
+        <tr class="clipRow" data-id={{_id}}>
+          <td class="clipContent">{{{clipText}}}</td>
+          <td class="clipType">{{clipType}}</td>
+          <td class="clipDelete"><img src="images/times.svg"/></td>
+        </tr>
+      {{/each}}
     </script>
 
     <script src="libs/handlebars-v4.0.12.js"></script>

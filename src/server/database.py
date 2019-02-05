@@ -220,7 +220,7 @@ class ClipDatabase:
         if 'parent' in clip:  # Only delete entry when child
             return self.clip_collection.delete_one({
                     '_id': bin_id
-                }).deleted_count
+                }).raw_result
         else:  # Cascade when parent
             deleted = self.clip_collection.delete_many(
                     {'$or': [

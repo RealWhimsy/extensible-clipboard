@@ -11,6 +11,7 @@ class FlaskServer():
     Wrapper around the Flask-server to be able to run it in a QThread.
     Also responsible for passing data to the database and the clipboard
     """
+    MAX_CONTENT_LENGTH = 15 * 1024 * 1024
 
     def __init__(self, flask_app, database):
         self.app = flask_app
@@ -18,6 +19,8 @@ class FlaskServer():
         self.native_hooks = HookManager()
         self.recipients = self._build_recipients()
         self.current_clip = ''
+
+        self.app.config['MAX_CONTENT_LENGTH'] = self.MAX_CONTENT_LENGTH
 
     def start_server(self):
         """

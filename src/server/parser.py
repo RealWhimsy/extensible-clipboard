@@ -3,7 +3,17 @@ import requests
 
 from mimetypes import guess_type
 
+from flask_server import FlaskServer as server
+
 class RequestParser():
+
+    def file_too_large(self, url):
+        r = requests.head(url)
+        cl = r.headers.get('content-length')
+        if cl and int(cl) <= server.MAX_CONTENT_LENGTH:
+            return False
+        else:
+            return True
 
     def get_filename_from_url(self, url):
         end = url.rsplit('/', 1)[-1]
@@ -26,6 +36,9 @@ class RequestParser():
 
     def download_file(self, url):
         # https://www.codementor.io/aviaryan/downloading-files-from-urls-in-python-77q3bs0un 
+        if self.file_too_large(url):
+            return None
+
         r = requests.get(url, allow_redirects=True)
         file_content = r.content
         filename = self.get_filename_from_url(url)
@@ -62,9 +75,12 @@ class RequestParser():
                 if json.get('data') and json.get('mimetype'):
                     if json.pop('download_request', None):
                         _file = self.download_file(str(json['data']))
-                        data['filename'] = _file[1]
-                        json['mimetype'] = _file[2]
-                        json['data'] = _file[0]
+                        if _file:
+                            data['filename'] = _file[1]
+                            json['mimetype'] = _file[2]
+                            json['data'] = _file[0]
+                        else:
+                            return {}
                     data['data'] = json['data']
                     data['mimetype'] = json['mimetype']
                     data['src_url'] = json.get('src_url', 'n/a')

@@ -52,6 +52,9 @@ let app = (function(){
             this.$table.append(_new)
             $('.clipDelete').click(onDeleteClick)
         }
+        else {
+            console.log(data)
+        }
     }
 
     function onClipDeleted(data, textStatus, jqXHR) {

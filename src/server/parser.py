@@ -39,7 +39,14 @@ class RequestParser():
         if self.file_too_large(url):
             return None
 
-        r = requests.get(url, allow_redirects=True)
+        try:
+            r = requests.get(url, allow_redirects=True)
+        except:
+            print('Error during download')
+            return None
+        if int(r.headers.get('content-length')) >= server.MAX_CONTENT_LENGTH:
+            # HEAD to url war not indicating large file
+            return None
         file_content = r.content
         filename = self.get_filename_from_url(url)
         if not filename:
@@ -80,7 +87,7 @@ class RequestParser():
                             json['mimetype'] = _file[2]
                             json['data'] = _file[0]
                         else:
-                            return {}
+                            return {'error': 'Error during download. Check if file is accessible and smaller than 15MB'}
                     data['data'] = json['data']
                     data['mimetype'] = json['mimetype']
                     data['src_url'] = json.get('src_url', 'n/a')

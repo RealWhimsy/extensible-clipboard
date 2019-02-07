@@ -63,7 +63,7 @@ class Clip(BaseClip):
             clip = self.server.get_clip_by_id(clip_id, preferred_type)
 
         if clip is None:
-            return 'No clip with specified id' , 404
+            return {'error': 'No clip with specified id'} , 404
 
         return clip
 
@@ -80,7 +80,7 @@ class Clip(BaseClip):
         if clip is not None:
             return clip
         else:
-            return 'No clip with specified id', 404
+            return {'error': 'No clip with specified id'} , 404
 
     def delete(self, clip_id=None):
         if clip_id is None:
@@ -91,7 +91,7 @@ class Clip(BaseClip):
         if item is not 0:
             return str(clip_id), 200
         else:
-            return 'No clip with specified id', 404
+            return {'error': 'No clip with specified id'} , 404
 
 class Clips(BaseClip):
     """
@@ -106,8 +106,10 @@ class Clips(BaseClip):
         propagate = self._not_from_hook(data)
         if not data:
             abort(400)
+        elif 'error' in data:
+            return {'error': data['error']}, 413
         elif 'parent' in data:
-            abort(422)
+            return {'error': 'Please send to url of intended parent'}, 422
         
         new_item = self.server.save_in_database(data=data, propagate=propagate)
 
@@ -120,7 +122,7 @@ class Clips(BaseClip):
         clip = self.server.get_all_clips()
 
         if clip is None:
-            return 'No clip with specified id' , 404
+            return {'error': 'No clip with specified id'} , 404
 
         return clip
 

@@ -27,7 +27,7 @@ class FlaskServer():
         Starts the Flask development-server. Cannot use autoreload
         because it runs in a seperate thread
         """
-        self.app.run(debug=True, use_reloader=False, host='0.0.0.0')
+        self.app.run(debug=False, use_reloader=False, host='0.0.0.0')
 
     def _build_recipients(self):
         result = self.db.get_recipients() or []

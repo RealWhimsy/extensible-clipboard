@@ -171,7 +171,7 @@ class ClipDatabase:
         """
         :return: Json-like string containing all clips
         """
-        results = list(self.clip_collection.find({}))
+        results = list(self.clip_collection.find({}).sort('creation_date', ASCENDING))
         json_result = [self._build_json_response_clip(i) for i in results]
         return json_result
 

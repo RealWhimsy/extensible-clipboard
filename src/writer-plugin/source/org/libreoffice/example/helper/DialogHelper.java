@@ -4,7 +4,6 @@ import java.io.File;
 
 import com.sun.star.awt.MessageBoxType;
 import com.sun.star.awt.Point;
-import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;

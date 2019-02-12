@@ -16,6 +16,7 @@ public final class StarterProjectImpl extends WeakBase
    implements com.sun.star.lang.XServiceInfo,
               com.sun.star.task.XJobExecutor
 {
+	private ActionOneDialog actionOneDialog;
     private final XComponentContext m_xContext;
     private static final String m_implementationName = StarterProjectImpl.class.getName();
     private static final String[] m_serviceNames = {
@@ -66,9 +67,12 @@ public final class StarterProjectImpl extends WeakBase
     	switch (action) {
     	case "insert":
     		System.out.println("inserting");
-    		ActionOneDialog actionOneDialog;
+    		
 			try {
-				actionOneDialog = new ActionOneDialog(m_xContext);
+				if ( actionOneDialog == null ) {
+					System.out.println("Creating new dialog");
+					actionOneDialog = new ActionOneDialog(m_xContext);
+	    		}
 	    		actionOneDialog.show();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

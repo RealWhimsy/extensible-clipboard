@@ -4,6 +4,7 @@ import java.io.File;
 
 import com.sun.star.awt.MessageBoxType;
 import com.sun.star.awt.Point;
+import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.awt.XButton;
 import com.sun.star.awt.XComboBox;
 import com.sun.star.awt.XControl;
@@ -104,6 +105,14 @@ public class DialogHelper {
 				dialog);
 		Object control = xDlgContainer.getControl(componentId);
 		return (XFixedText) UnoRuntime.queryInterface(XFixedText.class, control);
+	}
+	
+	/** Returns a tree (XTreeControl) from a dialog */
+	public static XControl getTree(XDialog dialog, String componentId) {
+		XControlContainer xDlgContainer = (XControlContainer) UnoRuntime.queryInterface(XControlContainer.class,
+				dialog);
+		XControl control = xDlgContainer.getControl(componentId);
+		return (XControl) UnoRuntime.queryInterface(XControl.class, control);
 	}
 
 	public static void EnableButton(XDialog dialog, String componentId, boolean enable) {

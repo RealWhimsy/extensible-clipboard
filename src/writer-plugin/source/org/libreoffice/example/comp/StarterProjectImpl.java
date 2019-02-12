@@ -1,5 +1,6 @@
 package org.libreoffice.example.comp;
 
+import com.sun.star.uno.Exception;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.lib.uno.helper.Factory;
 
@@ -63,9 +64,16 @@ public final class StarterProjectImpl extends WeakBase
     public void trigger(String action)
     {
     	switch (action) {
-    	case "actionOne":
-    		ActionOneDialog actionOneDialog = new ActionOneDialog(m_xContext);
-    		actionOneDialog.show();
+    	case "insert":
+    		System.out.println("inserting");
+    		ActionOneDialog actionOneDialog;
+			try {
+				actionOneDialog = new ActionOneDialog(m_xContext);
+	    		actionOneDialog.show();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     		break;
     	default:
     		DialogHelper.showErrorMessage(m_xContext, null, "Unknown action: " + action);

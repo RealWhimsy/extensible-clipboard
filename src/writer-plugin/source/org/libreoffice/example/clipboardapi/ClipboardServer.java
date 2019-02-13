@@ -1,9 +1,12 @@
 package org.libreoffice.example.clipboardapi;
 
 import java.net.MalformedURLException;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
-import org.json.simple.JSONObject;
+import java.util.LinkedHashMap;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;;
 
 public class ClipboardServer {
 	
@@ -23,12 +26,32 @@ public class ClipboardServer {
 		}
 	}
 	
-	public List<ClipEntry> getAllClips() {
-		JSONObject[] clips = rqHandler.getAllClips();
-		// Make hashmap with _id as key & ClipEntry as value
-		// if parent -> add as child
-		// else map[key] == null: enter
-		// needs to be sorted by creation-date
-		return null;
+	private ClipEntry fillEntry(JSONObject c) {
+		ClipEntry<String> toReturn = new ClipEntry<String>(c);
+		toReturn.setMimetype((String) c.get("mimetype"));
+		toReturn.setData((String) c.get("data"));
+		
+		return toReturn;
+	}
+	
+	public Collection<ClipEntry> getAllClips() {
+		JSONArray rawClips = rqHandler.getAllClips();
+		LinkedHashMap<String, ClipEntry> clips = new LinkedHashMap<String, ClipEntry>(200, 0.75f);
+		for (int i = 0; i < rawClips.size(); i++) {
+			JSONObject c = (JSONObject) rawClips.get(i);
+			ClipEntry<String> ce = fillEntry(c);
+			String parentId = (String) c.get("parent");
+			if ( parentId != null) {
+				System.out.println("insertign child");
+				clips.get(parentId).addChild(ce);
+				System.out.println("done inserting child");
+			}
+			else {
+				System.out.println("inserting parent");
+				clips.put(ce.getId().toString(), ce);
+			}
+		}
+		System.out.println("before returning");
+		return (clips.values());
 	}
 }

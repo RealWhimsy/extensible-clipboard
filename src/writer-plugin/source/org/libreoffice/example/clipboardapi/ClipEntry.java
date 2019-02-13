@@ -1,6 +1,7 @@
 package org.libreoffice.example.clipboardapi;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ public class ClipEntry<E> {
 	private String mimetype;
 	private E data;
 	private String filename;
-	private List<ClipEntry> children;
+	private List<ClipEntry> children = new LinkedList<ClipEntry>();
 	
 	public ClipEntry(String uuid) {
 		_id = UUID.fromString(uuid);
@@ -64,7 +65,7 @@ public class ClipEntry<E> {
 	}
 	
 	public void addChild(ClipEntry child) {
-		this.children.add(child);
+		children.add(child);
 	}
 	
 }

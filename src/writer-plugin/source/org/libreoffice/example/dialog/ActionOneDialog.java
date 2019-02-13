@@ -1,5 +1,6 @@
 package org.libreoffice.example.dialog;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.libreoffice.example.clipboardapi.ClipboardServer;
@@ -33,7 +34,7 @@ public class ActionOneDialog implements XDialogEventHandler {
 		this.dialog = DialogHelper.createDialog("ActionOneDialog.xdl", this.xContext, this);		
 	}
 	
-	public void fillTree(List<ClipEntry> clips) throws Exception{
+	public void fillTree(Collection<ClipEntry> clips) throws Exception{
 		//https://forum.openoffice.org/en/forum/viewtopic.php?f=20&t=7348
 		XControl tree = DialogHelper.getTree(this.dialog, "ClipTree");
 		XControlModel model = tree.getModel();
@@ -43,9 +44,19 @@ public class ActionOneDialog implements XDialogEventHandler {
 		XMutableTreeDataModel mxTreeDataModel = (XMutableTreeDataModel) UnoRuntime.queryInterface(
            XMutableTreeDataModel.class, xTreeData);
 
-		XMutableTreeNode xNode = mxTreeDataModel.createNode("Clips", false);
+		XMutableTreeNode root = mxTreeDataModel.createNode("Clips", false);
+		
+		for (ClipEntry c : clips) {
+			XMutableTreeNode parent = mxTreeDataModel.createNode(c.getData(), false);
+			root.appendChild(parent);
+			List<ClipEntry> children = c.getChildren();
+			for (ClipEntry child : children) {
+				XMutableTreeNode childNode = mxTreeDataModel.createNode(child.getData(), false);
+				parent.appendChild(childNode);
+			}
+		}
 
-		mxTreeDataModel.setRoot(xNode);
+		mxTreeDataModel.setRoot(root);
 		XPropertySet xTreeModelProperty = (XPropertySet) UnoRuntime.queryInterface(
 				XPropertySet.class, model);
 		xTreeModelProperty.setPropertyValue("DataModel", mxTreeDataModel);
@@ -68,8 +79,9 @@ public class ActionOneDialog implements XDialogEventHandler {
 			System.out.println("Invalid url");
 		}
 		
-		List<ClipEntry> clips = cbServer.getAllClips();
+		Collection<ClipEntry> clips = cbServer.getAllClips();
 		try {
+			System.out.println("in try");
 			fillTree(clips);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

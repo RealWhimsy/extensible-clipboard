@@ -33,6 +33,7 @@ public class ActionOneDialog implements XDialogEventHandler {
 	private static final String actionSync = "actionSync";
 	private String[] supportedActions = new String[] { actionOk, actionSync };
 	private ClipboardServer cbServer;
+	private Collection<ClipEntry> currentItems;
 
 	public ActionOneDialog(XComponentContext xContext) throws Exception {
 		this.xContext = xContext;
@@ -69,7 +70,10 @@ public class ActionOneDialog implements XDialogEventHandler {
 	}
 
 
-	public void fillTree(Collection<ClipEntry> clips) throws Exception {
+	public void fillTree() throws Exception {
+		if ( currentItems == null ) {
+			return;
+		}
 		// https://forum.openoffice.org/en/forum/viewtopic.php?f=20&t=7348
 		XControl tree = DialogHelper.getTree(this.dialog, "ClipTree");
 		XControlModel model = tree.getModel();
@@ -81,7 +85,7 @@ public class ActionOneDialog implements XDialogEventHandler {
 
 		XMutableTreeNode root = mxTreeDataModel.createNode("Clips", true);
 
-		for (ClipEntry c : clips) {
+		for (ClipEntry c : currentItems) {
 			XMutableTreeNode parent = mxTreeDataModel.createNode(c.getData(), false);
 			root.appendChild(parent);
 			List<ClipEntry> children = c.getChildren();
@@ -111,16 +115,24 @@ public class ActionOneDialog implements XDialogEventHandler {
 			cbServer = new ClipboardServer();
 		}
 		if (!cbServer.setServerURL(url)) {
-			System.out.println("Invalid url");
+			DialogHelper.showErrorMessage(xContext, dialog, "Invalid URL");
 		}
 
-		Collection<ClipEntry> clips = cbServer.getAllClips();
+		currentItems = cbServer.getAllClips();
 		try {
-			System.out.println("in try");
-			fillTree(clips);
+			fillTree();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private ClipEntry findEntry(String value) {
+		for (ClipEntry curr : currentItems) {
+			if (value.contains(curr.getData().toString())) {
+				return curr;
+			}
+		}
+		return null;
 	}
 	
 	private void onInsertPressed() {
@@ -129,6 +141,18 @@ public class ActionOneDialog implements XDialogEventHandler {
 		Any selection = (Any) ss.getSelection();
 		XTreeNode tn = (XTreeNode) selection.getObject();
 		System.out.println(tn.getDisplayValue());
+		DataInserter.insertIntoGUICursor(xContext,tn.getDisplayValue().toString());
+		onOkButtonPressed();
+		/*
+		ClipEntry e = findEntry(tn.getDisplayValue().toString());
+		if (e != null) {
+			DataInserter.insertIntoGUICursor(e);
+		}
+		/*
+		 * Create class to insert selected object
+		 * > Get TextViewCursor
+		 * > Insert Data
+		 */
 	}
 
 	@Override

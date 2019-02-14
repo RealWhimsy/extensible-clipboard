@@ -11,7 +11,7 @@
   </dlg:button>
   <dlg:treecontrol dlg:id="ClipTree" dlg:tab-index="2" dlg:left="15" dlg:top="58" dlg:width="203" dlg:height="126"/>
   <dlg:button dlg:id="InsertButton" dlg:tab-index="3" dlg:left="122" dlg:top="192" dlg:width="51" dlg:height="13" dlg:value="Insert">
-   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:actionOk" script:language="UNO"/>
+   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:actionInsert" script:language="UNO"/>
   </dlg:button>
   <dlg:text dlg:style-id="0" dlg:id="ServerUrlLabel" dlg:tab-index="5" dlg:left="15" dlg:top="23" dlg:width="144" dlg:height="9" dlg:value="ServerUrl"/>
   <dlg:textfield dlg:id="ServerUrlInput" dlg:tab-index="4" dlg:left="15" dlg:top="33" dlg:width="203" dlg:height="12" dlg:value="http://192.168.178.21:5000/"/>

@@ -4,6 +4,7 @@ import com.sun.star.uno.Exception;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.lib.uno.helper.Factory;
 
+import org.libreoffice.example.clipboardapi.ClipboardServer;
 import org.libreoffice.example.dialog.ActionOneDialog;
 import org.libreoffice.example.helper.DialogHelper;
 
@@ -18,6 +19,7 @@ public final class StarterProjectImpl extends WeakBase
 {
 	private ActionOneDialog actionOneDialog;
     private final XComponentContext m_xContext;
+    private ClipboardServer cbServer;
     private static final String m_implementationName = StarterProjectImpl.class.getName();
     private static final String[] m_serviceNames = {
         "org.libreoffice.example.StarterProject" };
@@ -64,6 +66,13 @@ public final class StarterProjectImpl extends WeakBase
     // com.sun.star.task.XJobExecutor:
     public void trigger(String action)
     {
+    	if (cbServer == null) {
+    		/* Intended to cache entries here but after closing the dialog
+    		 * the whole this-object seems to get deleted
+    		 */
+    		System.out.println("Creating new server");
+    		cbServer = new ClipboardServer();
+    	}
     	switch (action) {
     	case "insert":
     		System.out.println("inserting");
@@ -71,7 +80,7 @@ public final class StarterProjectImpl extends WeakBase
 			try {
 				if ( actionOneDialog == null ) {
 					System.out.println("Creating new dialog");
-					actionOneDialog = new ActionOneDialog(m_xContext);
+					actionOneDialog = new ActionOneDialog(m_xContext, cbServer);
 	    		}
 	    		actionOneDialog.show();
 			} catch (Exception e) {

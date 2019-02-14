@@ -35,10 +35,16 @@ public class ActionOneDialog implements XDialogEventHandler {
 	private ClipboardServer cbServer;
 	private Collection<ClipEntry> currentItems;
 
-	public ActionOneDialog(XComponentContext xContext) throws Exception {
+	public ActionOneDialog(XComponentContext xContext, ClipboardServer cbServer) throws Exception {
 		this.xContext = xContext;
+		this.cbServer = cbServer;
 		this.dialog = DialogHelper.createDialog("ClipSelectDialog.xdl", this.xContext, this);
-		testTree();
+		initCachedTree();
+	}
+	
+	private void initCachedTree() throws Exception{
+		currentItems = cbServer.getCachedClips();
+		fillTree();
 	}
 
 	public void testTree() throws Exception{
@@ -82,15 +88,18 @@ public class ActionOneDialog implements XDialogEventHandler {
 				.createInstanceWithContext("com.sun.star.awt.tree.MutableTreeDataModel", this.xContext);
 		XMutableTreeDataModel mxTreeDataModel = (XMutableTreeDataModel) UnoRuntime
 				.queryInterface(XMutableTreeDataModel.class, xTreeData);
-
-		XMutableTreeNode root = mxTreeDataModel.createNode("Clips", true);
+		Type type = new Type(java.lang.String.class);
+		Any any = new Any(type, "Root");
+		XMutableTreeNode root = mxTreeDataModel.createNode(any, true);
 
 		for (ClipEntry c : currentItems) {
-			XMutableTreeNode parent = mxTreeDataModel.createNode(c.getData(), false);
+			any = new Any(type, c.getData());
+			XMutableTreeNode parent = mxTreeDataModel.createNode(any, true);
 			root.appendChild(parent);
 			List<ClipEntry> children = c.getChildren();
 			for (ClipEntry child : children) {
-				XMutableTreeNode childNode = mxTreeDataModel.createNode(child.getData(), false);
+				any = new Any(type, child.getData());
+				XMutableTreeNode childNode = mxTreeDataModel.createNode(any, true);
 				parent.appendChild(childNode);
 			}
 		}
@@ -118,7 +127,7 @@ public class ActionOneDialog implements XDialogEventHandler {
 			DialogHelper.showErrorMessage(xContext, dialog, "Invalid URL");
 		}
 
-		currentItems = cbServer.getAllClips();
+		currentItems = cbServer.getClipsFromServer();
 		try {
 			fillTree();
 		} catch (Exception e) {
@@ -131,6 +140,11 @@ public class ActionOneDialog implements XDialogEventHandler {
 			if (value.contains(curr.getData().toString())) {
 				return curr;
 			}
+			for (ClipEntry child : curr.getChildren()) {
+				if (value.contains(curr.getData().toString())) {
+					return curr;
+				}
+			}
 		}
 		return null;
 	}
@@ -140,19 +154,10 @@ public class ActionOneDialog implements XDialogEventHandler {
 		XSelectionSupplier ss = (XSelectionSupplier) xtreeControl;
 		Any selection = (Any) ss.getSelection();
 		XTreeNode tn = (XTreeNode) selection.getObject();
-		System.out.println(tn.getDisplayValue());
-		DataInserter.insertIntoGUICursor(xContext,tn.getDisplayValue().toString());
+		ClipEntry c = findEntry(tn.getDisplayValue().toString());
+		DataInserter.insertIntoGUICursor(xContext, c);
+		// End dialog
 		onOkButtonPressed();
-		/*
-		ClipEntry e = findEntry(tn.getDisplayValue().toString());
-		if (e != null) {
-			DataInserter.insertIntoGUICursor(e);
-		}
-		/*
-		 * Create class to insert selected object
-		 * > Get TextViewCursor
-		 * > Insert Data
-		 */
 	}
 
 	@Override
@@ -163,10 +168,12 @@ public class ActionOneDialog implements XDialogEventHandler {
 			return true; // Event was handled
 		}
 		if (methodName.equals(actionInsert)) {
+			System.out.println("Inserting");
 			onInsertPressed();
 			return true;
 		}
 		if (methodName.equals(actionSync)) {
+			System.out.println("Syncing");
 			onSyncButtonPressed();
 			return true;
 		}

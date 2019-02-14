@@ -13,6 +13,7 @@ import org.json.simple.JSONObject;;
 public class ClipboardServer {
 	
 	private RequestHandler rqHandler;
+	private List<ClipEntry> cachedEntries;
 
 	public boolean setServerURL(String baseUrl) {
 		try {
@@ -29,19 +30,19 @@ public class ClipboardServer {
 	}
 	
 	private ClipEntry fillEntry(JSONObject c) {
-		ClipEntry<String> toReturn = new ClipEntry<String>(c);
+		ClipEntry toReturn = new ClipEntry(c);
 		toReturn.setMimetype((String) c.get("mimetype"));
 		toReturn.setData((String) c.get("data"));
 		
 		return toReturn;
 	}
 	
-	public Collection<ClipEntry> getAllClips() {
+	public Collection<ClipEntry> getClipsFromServer() {
 		JSONArray rawClips = rqHandler.getAllClips();
 		LinkedHashMap<String, ClipEntry> clips = new LinkedHashMap<String, ClipEntry>(200, 0.75f);
 		for (int i = 0; i < rawClips.size(); i++) {
 			JSONObject c = (JSONObject) rawClips.get(i);
-			ClipEntry<String> ce = fillEntry(c);
+			ClipEntry ce = fillEntry(c);
 			String parentId = (String) c.get("parent");
 			if ( parentId != null) {
 				clips.get(parentId).addChild(ce);
@@ -50,8 +51,12 @@ public class ClipboardServer {
 				clips.put(ce.getId().toString(), ce);
 			}
 		}
-		List<ClipEntry> l = new LinkedList<ClipEntry>(clips.values());
-		Collections.reverse(l);
-		return l;
+		cachedEntries = new LinkedList<ClipEntry>(clips.values());
+		Collections.reverse(cachedEntries);
+		return cachedEntries;
+	}
+	
+	public Collection<ClipEntry> getCachedClips() {
+		return cachedEntries;
 	}
 }

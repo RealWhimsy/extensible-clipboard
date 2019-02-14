@@ -16,6 +16,8 @@
   <dlg:text dlg:style-id="0" dlg:id="ServerUrlLabel" dlg:tab-index="5" dlg:left="15" dlg:top="23" dlg:width="144" dlg:height="9" dlg:value="ServerUrl"/>
   <dlg:textfield dlg:id="ServerUrlInput" dlg:tab-index="4" dlg:left="15" dlg:top="33" dlg:width="203" dlg:height="12" dlg:value="http://192.168.178.21:5000/"/>
   <dlg:text dlg:style-id="0" dlg:id="ClipLabel" dlg:tab-index="6" dlg:left="15" dlg:top="48" dlg:width="94" dlg:height="10" dlg:value="Available Clips"/>
-  <dlg:button dlg:id="SyncButton" dlg:tab-index="7" dlg:left="191" dlg:top="5" dlg:width="29" dlg:height="27" dlg:value="Sync"/>
+  <dlg:button dlg:id="SyncButton" dlg:tab-index="7" dlg:left="191" dlg:top="5" dlg:width="29" dlg:height="27" dlg:value="Sync">
+  	<script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:actionSync" script:language="UNO"/>
+  </dlg:button>
  </dlg:bulletinboard>
 </dlg:window>

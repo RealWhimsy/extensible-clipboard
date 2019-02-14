@@ -7,12 +7,12 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
-public class ClipEntry<E> {
+public class ClipEntry {
 
 	private UUID _id;
 	private Date creationDate;
 	private String mimetype;
-	private E data;
+	private Object data;
 	private String filename;
 	private List<ClipEntry> children = new LinkedList<ClipEntry>();
 	
@@ -52,11 +52,11 @@ public class ClipEntry<E> {
 		this.mimetype = mimetype;
 	}
 	
-	public E getData() {
+	public Object getData() {
 		return data;
 	}
 	
-	public void setData(E data) {
+	public void setData(Object data) {
 		this.data = data;
 	}
 	

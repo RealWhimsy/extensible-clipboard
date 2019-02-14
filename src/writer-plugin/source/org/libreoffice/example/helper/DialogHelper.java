@@ -20,6 +20,7 @@ import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
 import com.sun.star.awt.XWindowPeer;
+import com.sun.star.awt.tree.XTreeControl;
 import com.sun.star.beans.PropertyVetoException;
 import com.sun.star.beans.UnknownPropertyException;
 import com.sun.star.beans.XPropertySet;
@@ -112,6 +113,13 @@ public class DialogHelper {
 				dialog);
 		XControl control = xDlgContainer.getControl(componentId);
 		return (XControl) UnoRuntime.queryInterface(XControl.class, control);
+	}
+	
+	public static XTreeControl getTreeControl(XDialog dialog, String componentId) {
+		XControlContainer xDlgContainer = (XControlContainer) UnoRuntime.queryInterface(XControlContainer.class,
+				dialog);
+		XControl control = xDlgContainer.getControl(componentId);
+		return (XTreeControl) UnoRuntime.queryInterface(XTreeControl.class, control);
 	}
 
 	public static void EnableButton(XDialog dialog, String componentId, boolean enable) {

@@ -54,7 +54,6 @@ public class RequestHandler {
 			conn.setConnectTimeout(3000);
 			
 			String result = buildStringFromConnection(conn);
-			System.out.println(result);
 			json = (JSONArray) parser.parse(result);
 			
 			

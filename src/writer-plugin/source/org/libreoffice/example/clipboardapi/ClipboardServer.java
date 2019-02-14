@@ -2,8 +2,10 @@ package org.libreoffice.example.clipboardapi;
 
 import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;;
@@ -42,16 +44,14 @@ public class ClipboardServer {
 			ClipEntry<String> ce = fillEntry(c);
 			String parentId = (String) c.get("parent");
 			if ( parentId != null) {
-				System.out.println("insertign child");
 				clips.get(parentId).addChild(ce);
-				System.out.println("done inserting child");
 			}
 			else {
-				System.out.println("inserting parent");
 				clips.put(ce.getId().toString(), ce);
 			}
 		}
-		System.out.println("before returning");
-		return (clips.values());
+		List<ClipEntry> l = new LinkedList<ClipEntry>(clips.values());
+		Collections.reverse(l);
+		return l;
 	}
 }

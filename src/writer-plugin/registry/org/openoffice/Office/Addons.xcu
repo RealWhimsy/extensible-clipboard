@@ -1,32 +1,41 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<oor:component-data oor:package="org.openoffice.Office" oor:name="Addons"
-	xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<oor:component-data
+	oor:package="org.openoffice.Office" oor:name="Addons"
+	xmlns:oor="http://openoffice.org/2001/registry"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<node oor:name="AddonUI">
 
 		<node oor:name="Images">
-			<node oor:name="org.libreoffice.example.StarterProject.imageActionOne" oor:op="replace">
+			<node
+				oor:name="org.libreoffice.example.StarterProject.imageActionOne"
+				oor:op="replace">
 				<prop oor:name="URL" oor:type="xs:string">
-					<value>service:org.libreoffice.example.StarterProject?actionOne</value>
+					<value>service:org.libreoffice.example.StarterProject?actionOne
+					</value>
 				</prop>
 				<node oor:name="UserDefinedImages">
 					<prop oor:name="ImageSmallURL">
-						<value>vnd.sun.star.extension://org.libreoffice.example.starterproject/images/actionOne_16.png</value>
+						<value>vnd.sun.star.extension://org.libreoffice.example.starterproject/images/actionOne_16.png
+						</value>
 					</prop>
 					<prop oor:name="ImageBigURL">
-						<value>vnd.sun.star.extension://org.libreoffice.example.starterproject/images/actionOne_26.png</value>
+						<value>vnd.sun.star.extension://org.libreoffice.example.starterproject/images/actionOne_26.png
+						</value>
 					</prop>
 				</node>
 			</node>
 		</node>
 
 		<node oor:name="OfficeToolBar">
-			<node oor:name="org.libreoffice.example.StarterProject.toolbar" oor:op="replace">
+			<node oor:name="org.libreoffice.example.StarterProject.toolbar"
+				oor:op="replace">
 				<prop oor:name="Title" oor:type="xs:string">
 					<value>Extended Clipboard</value>
 				</prop>
 				<node oor:name="t02" oor:op="replace">
 					<prop oor:name="URL" oor:type="xs:string">
-						<value>service:org.libreoffice.example.StarterProject?insert</value>
+						<value>service:org.libreoffice.example.StarterProject?insert
+						</value>
 					</prop>
 					<prop oor:name="Target" oor:type="xs:string">
 						<value>_self</value>
@@ -35,14 +44,15 @@
 						<value>com.sun.star.text.TextDocument</value>
 					</prop>
 					<prop oor:name="Title" oor:type="xs:string">
-						<value xml:lang="en-US">Insert action</value>
+						<value xml:lang="en-US">Insert from C^2</value>
 					</prop>
 				</node>
 			</node>
 		</node>
 
 		<node oor:name="OfficeMenuBar">
-			<node oor:name="org.libreoffice.example.StarterProject.menubar" oor:op="replace">
+			<node oor:name="org.libreoffice.example.StarterProject.menubar"
+	oor:op="replace">
 				<prop oor:name="Title" oor:type="xs:string">
 					<value xml:lang="en-US">Extended Clipboard</value>
 				</prop>
@@ -50,12 +60,37 @@
 					<value>com.sun.star.text.TextDocument</value>
 				</prop>
 				<node oor:name="Submenu">
-					<node oor:name="M2" oor:op="replace">
+					<node oor:name="MenuInsert" oor:op="replace">
 						<prop oor:name="Title">
-							<value xml:lang="en-US">Insert Action</value>
+							<value xml:lang="en-US">Insert</value>
 						</prop>
 						<prop oor:name="URL">
-							<value>service:org.libreoffice.example.StarterProject?insert</value>
+							<value>service:org.libreoffice.example.StarterProject?insert
+							</value>
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+					</node>
+					<node oor:name="MenuCopy" oor:op="replace">
+						<prop oor:name="Title">
+							<value xml:lang="en-US">Send to server</value>
+						</prop>
+						<prop oor:name="URL">
+							<value>service:org.libreoffice.example.StarterProject?copy
+							</value>
+						</prop>
+						<prop oor:name="Target" oor:type="xs:string">
+							<value>_self</value>
+						</prop>
+					</node>
+					<node oor:name="MenuOption" oor:op="replace">
+						<prop oor:name="Title" oor:type="xs:string">
+							<value xml:lang="en">Options Menu</value>
+						</prop>
+						<prop oor:name="URL">
+							<value>service:org.libreoffice.example.StarterProject?option
+							</value>
 						</prop>
 						<prop oor:name="Target" oor:type="xs:string">
 							<value>_self</value>
@@ -64,6 +99,5 @@
 				</node>
 			</node>
 		</node>
-
 	</node>
 </oor:component-data>

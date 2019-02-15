@@ -56,10 +56,18 @@ class Clipboard:
 
         self.clipboard.setMimeData(self.mime_data)
 
-    def __init__(self, clip):
+    def onDataChanged(self):
+        print("Data has changed")
+        mime_data = self.clipboard.mimeData()
+        for dt in mime_data.formats():
+            print("Type {} with data {}".format(dt, str(mime_data.data(dt))))
+
+    def __init__(self, clip, sync_clipboard):
         """
         :param clip: The QClipboard of the current QApplication
         """
         self.clipboard = clip
         self.current_id = ''
         self.mime_data = QMimeData()
+        if sync_clipboard:
+            self.clipboard.dataChanged.connect(self.onDataChanged)

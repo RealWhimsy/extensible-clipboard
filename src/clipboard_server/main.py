@@ -45,6 +45,9 @@ class MainApp(QtWidgets.QApplication):
         parser.add_argument('-d', '--domain', type=str, dest='domain',
                 help='URL THIS server can be reached under, must contain specified port, defaults to localhost',
                 default='http://localhost')
+        parser.add_argument('-s', '--sync-clipboard', type=bool, dest='sync_clipboard', default=False,
+                help='If True, content of clipboard will be monitored and changes will be sent to server. \
+                      Defaults to False')
         parser.add_argument('-c', '--clipserver', type=str, dest='clipserver',
                 help='URL this server can register itself to the clipboard-server', required=True)
         self.args = parser.parse_args()
@@ -55,7 +58,7 @@ class MainApp(QtWidgets.QApplication):
         self.server_thread = QtCore.QThread()
 
         # Connection to system clipboard
-        self.clh = ClipboardHandler(self)
+        self.clh = ClipboardHandler(self, self.args.sync_clipboard)
 
 
 if __name__ == "__main__":

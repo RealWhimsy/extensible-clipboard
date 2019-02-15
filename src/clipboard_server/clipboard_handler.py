@@ -44,10 +44,10 @@ class ClipboardHandler(QObject):
         clipboard_data = self.network_manager.get_data(callback)
         return clipboard_data
 
-    def __init__(self, q_app):
+    def __init__(self, q_app, sync_clipboard):
         """
         :param q_app: The current QApplication this package is part
         of running in
         """
         # start QCoreApp ...
-        self.clipboard = Clipboard(q_app.clipboard())
+        self.clipboard = Clipboard(q_app.clipboard(), sync_clipboard)

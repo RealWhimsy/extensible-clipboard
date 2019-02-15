@@ -11,8 +11,14 @@
 
 package org.libreoffice.example.options;
 
+import org.libreoffice.example.helper.DialogHelper;
+
+import com.sun.star.awt.XControl;
+import com.sun.star.awt.XControlContainer;
+import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyState;
 import com.sun.star.beans.PropertyValue;
+import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
@@ -66,5 +72,25 @@ public class ConfigurationAccess {
 		}
 
 		return access;
+	}
+
+	public static String getServerUrl(XNameAccess accessLeaves) throws com.sun.star.uno.Exception {
+		// This is an implementation which will be used for several options pages
+		// which all have the same controls. m_arStringControls is an array which
+		// contains the names.
+		// load the values from the registry
+		// To access the registry we have previously created a service instance
+		// of com.sun.star.configuration.ConfigurationUpdateAccess which supports
+		// com.sun.star.container.XNameAccess. We obtain now the section
+		// of the registry which is assigned to this options page.
+		XPropertySet xLeaf = (XPropertySet) UnoRuntime.queryInterface(XPropertySet.class,
+				accessLeaves.getByName("FooOptionsPage"));
+		if (xLeaf == null)
+			throw new com.sun.star.uno.Exception("XPropertySet not supported.");
+
+		// The properties in the registry have the same name as the respective
+		// controls. We use the names now to obtain the property values.
+		Object aValue = xLeaf.getPropertyValue("txtUrl");
+		return aValue.toString();
 	}
 }

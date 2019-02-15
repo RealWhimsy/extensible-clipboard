@@ -31,10 +31,12 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 	private static final String[] m_serviceNames = { "org.libreoffice.example.StarterProject" };
 	private static final String[] m_controlNames = { "txtUrl" };
 	private XNameAccess accessLeaves;
+	private String serverUrl;
 
 	public StarterProjectImpl(XComponentContext context) {
 		m_xContext = context;
 
+		// String needs to point to OptionPageDem.xcs in registry/
 		 accessLeaves = ConfigurationAccess.createUpdateAccess( 
 				 context,
 				 "/org.openoffice.Office.OptionsPageDemo/Leaves" 
@@ -83,25 +85,31 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 			System.out.println("Creating new server");
 			cbServer = new ClipboardServer();
 		}
-		switch (action) {
-		case "insert":
-			System.out.println("inserting");
-			try {
-				if (actionOneDialog == null) {
-					actionOneDialog = new ActionOneDialog(m_xContext, cbServer);
-				}
-				actionOneDialog.show();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		try {
+			// When first called
+			if ( serverUrl == null ) {
+				serverUrl = ConfigurationAccess.getServerUrl(accessLeaves);
 			}
-			break;
-		case "copy":
-			System.out.println("copying");
-			break;
-		default:
-			DialogHelper.showErrorMessage(m_xContext, null, "Unknown action: " + action);
+			// Always resets URL in case it has changed
+			cbServer.setServerURL(serverUrl);
+			switch (action) {
+			case "insert":
+				System.out.println("inserting");
+					if (actionOneDialog == null) {
+						actionOneDialog = new ActionOneDialog(m_xContext, cbServer);
+					}
+					actionOneDialog.show();
+				break;
+			case "copy":
+				System.out.println("copying");
+				break;
+			default:
+				DialogHelper.showErrorMessage(m_xContext, null, "Unknown action: " + action);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		
 
 	}
 
@@ -194,6 +202,7 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 				if (m_controlNames[i].startsWith("txt")) {
 					aObj = xProp.getPropertyValue("Text");
 					value[0] = AnyConverter.toString(aObj);
+					serverUrl = value[0].toString();
 				}
 			} catch (com.sun.star.lang.IllegalArgumentException ex) {
 				ex.printStackTrace();
@@ -208,7 +217,6 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 			// com.sun.star.container.XNameAccess. The XNameAccess is used to get the
 			// particular registry node which represents this options page.
 			// Fortunately the name of the window is the same as the registry node.
-			System.out.println("Before saving");
 			XPropertySet xLeaf = (XPropertySet) UnoRuntime.queryInterface(XPropertySet.class,
 					accessLeaves.getByName(sWindowName));
 			if (xLeaf == null)
@@ -281,19 +289,7 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 			// For text controls we set the "Text" property.
 			if (m_controlNames[i].startsWith("txt")) {
 				xProp.setPropertyValue("Text", aValue);
-			}
-			// The available properties for a checkbox are defined in file
-			// offapi/com/sun/star/awt/UnoControlCheckBoxModel.idl
-			else if (m_controlNames[i].startsWith("chk")) {
-				xProp.setPropertyValue("State", aValue);
-			}
-			// The available properties for a checkbox are defined in file
-			// offapi/com/sun/star/awt/UnoControlListBoxModel.idl
-			else if (m_controlNames[i].startsWith("lst")) {
-				xProp.setPropertyValue("StringItemList", aValue);
-
-				aValue = xLeaf.getPropertyValue(m_controlNames[i] + "Selected");
-				xProp.setPropertyValue("SelectedItems", aValue);
+				serverUrl = aValue.toString();
 			}
 		}
 	}

@@ -34,8 +34,7 @@
 				</prop>
 				<node oor:name="t02" oor:op="replace">
 					<prop oor:name="URL" oor:type="xs:string">
-						<value>service:org.libreoffice.example.StarterProject?insert
-						</value>
+						<value>service:org.libreoffice.example.StarterProject?insert</value>
 					</prop>
 					<prop oor:name="Target" oor:type="xs:string">
 						<value>_self</value>
@@ -65,8 +64,7 @@
 							<value xml:lang="en-US">Insert</value>
 						</prop>
 						<prop oor:name="URL">
-							<value>service:org.libreoffice.example.StarterProject?insert
-							</value>
+							<value>service:org.libreoffice.example.StarterProject?insert</value>
 						</prop>
 						<prop oor:name="Target" oor:type="xs:string">
 							<value>_self</value>
@@ -77,8 +75,7 @@
 							<value xml:lang="en-US">Send to server</value>
 						</prop>
 						<prop oor:name="URL">
-							<value>service:org.libreoffice.example.StarterProject?copy
-							</value>
+							<value>service:org.libreoffice.example.StarterProject?copy</value>
 						</prop>
 						<prop oor:name="Target" oor:type="xs:string">
 							<value>_self</value>
@@ -89,8 +86,7 @@
 							<value xml:lang="en">Options Menu</value>
 						</prop>
 						<prop oor:name="URL">
-							<value>service:org.libreoffice.example.StarterProject?option
-							</value>
+							<value>service:org.libreoffice.example.StarterProject?option</value>
 						</prop>
 						<prop oor:name="Target" oor:type="xs:string">
 							<value>_self</value>

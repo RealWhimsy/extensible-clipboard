@@ -119,14 +119,6 @@ public class ActionOneDialog implements XDialogEventHandler {
 	}
 
 	private void onSyncButtonPressed() {
-		String url = DialogHelper.getEditField(dialog, "ServerUrlInput").getText();
-		if (cbServer == null) {
-			cbServer = new ClipboardServer();
-		}
-		if (!cbServer.setServerURL(url)) {
-			DialogHelper.showErrorMessage(xContext, dialog, "Invalid URL");
-		}
-
 		currentItems = cbServer.getClipsFromServer();
 		try {
 			fillTree();

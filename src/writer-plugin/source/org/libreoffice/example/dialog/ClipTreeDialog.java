@@ -24,7 +24,7 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.view.XSelectionSupplier;
 
-public class ActionOneDialog implements XDialogEventHandler {
+public class ClipTreeDialog implements XDialogEventHandler {
 
 	private XComponentContext xContext;
 	private XDialog dialog;
@@ -35,7 +35,7 @@ public class ActionOneDialog implements XDialogEventHandler {
 	private ClipboardServer cbServer;
 	private Collection<ClipEntry> currentItems;
 
-	public ActionOneDialog(XComponentContext xContext, ClipboardServer cbServer) throws Exception {
+	public ClipTreeDialog(XComponentContext xContext, ClipboardServer cbServer) throws Exception {
 		this.xContext = xContext;
 		this.cbServer = cbServer;
 		this.dialog = DialogHelper.createDialog("ClipSelectDialog.xdl", this.xContext, this);
@@ -98,7 +98,7 @@ public class ActionOneDialog implements XDialogEventHandler {
 			root.appendChild(parent);
 			List<ClipEntry> children = c.getChildren();
 			for (ClipEntry child : children) {
-				any = new Any(type, child.getData());
+				any = new Any(type, child.getMimetype() + " | " +child.getData());
 				XMutableTreeNode childNode = mxTreeDataModel.createNode(any, true);
 				parent.appendChild(childNode);
 			}
@@ -133,8 +133,8 @@ public class ActionOneDialog implements XDialogEventHandler {
 				return curr;
 			}
 			for (ClipEntry child : curr.getChildren()) {
-				if (value.contains(curr.getData().toString())) {
-					return curr;
+				if (value.contains(child.getData().toString())) {
+					return child;
 				}
 			}
 		}
@@ -147,7 +147,7 @@ public class ActionOneDialog implements XDialogEventHandler {
 		Any selection = (Any) ss.getSelection();
 		XTreeNode tn = (XTreeNode) selection.getObject();
 		ClipEntry c = findEntry(tn.getDisplayValue().toString());
-		DataInserter.insertIntoGUICursor(xContext, c);
+		DataHelper.insertIntoGUICursor(xContext, c);
 		// End dialog
 		onOkButtonPressed();
 	}

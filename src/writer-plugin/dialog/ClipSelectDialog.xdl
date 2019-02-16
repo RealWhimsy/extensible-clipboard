@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
-<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="ActionOneDialog" dlg:left="87" dlg:top="25" dlg:width="230" dlg:height="205" dlg:closeable="true" dlg:moveable="true" dlg:title="Action One">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="ActionOneDialog" dlg:left="84" dlg:top="27" dlg:width="230" dlg:height="185" dlg:closeable="true" dlg:moveable="true" dlg:title="Action One">
  <dlg:styles>
   <dlg:style dlg:style-id="0" dlg:background-color="0xeeeeee"/>
  </dlg:styles>
  <dlg:bulletinboard>
-  <dlg:text dlg:id="Label2" dlg:tab-index="0" dlg:left="-88" dlg:top="65" dlg:width="11" dlg:height="2" dlg:value="Label2"/>
-  <dlg:button dlg:id="CommandButtonClose" dlg:tab-index="1" dlg:left="177" dlg:top="192" dlg:width="51" dlg:height="13" dlg:value="Close">
+  <dlg:text dlg:id="Label2" dlg:tab-index="0" dlg:left="-85" dlg:top="63" dlg:width="11" dlg:height="2" dlg:value="Label2"/>
+  <dlg:button dlg:id="CommandButtonClose" dlg:tab-index="1" dlg:left="174" dlg:top="170" dlg:width="51" dlg:height="13" dlg:value="Close">
    <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:actionOk" script:language="UNO"/>
   </dlg:button>
-  <dlg:treecontrol dlg:id="ClipTree" dlg:tab-index="2" dlg:left="15" dlg:top="58" dlg:width="203" dlg:height="126"/>
-  <dlg:button dlg:id="InsertButton" dlg:tab-index="3" dlg:left="122" dlg:top="192" dlg:width="51" dlg:height="13" dlg:value="Insert">
+  <dlg:treecontrol dlg:id="ClipTree" dlg:tab-index="2" dlg:left="16" dlg:top="35" dlg:width="203" dlg:height="126"/>
+  <dlg:button dlg:id="InsertButton" dlg:tab-index="3" dlg:left="114" dlg:top="170" dlg:width="51" dlg:height="13" dlg:value="Insert">
    <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:actionInsert" script:language="UNO"/>
   </dlg:button>
-  <dlg:text dlg:style-id="0" dlg:id="ClipLabel" dlg:tab-index="6" dlg:left="15" dlg:top="48" dlg:width="94" dlg:height="10" dlg:value="Available Clips"/>
-  <dlg:button dlg:id="SyncButton" dlg:tab-index="7" dlg:left="191" dlg:top="5" dlg:width="29" dlg:height="27" dlg:value="Sync">
-  	<script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:actionSync" script:language="UNO"/>
+  <dlg:text dlg:style-id="0" dlg:id="ClipLabel" dlg:tab-index="4" dlg:left="16" dlg:top="21" dlg:width="94" dlg:height="10" dlg:value="Available Clips"/>
+  <dlg:button dlg:id="SyncButton" dlg:tab-index="5" dlg:left="194" dlg:top="3" dlg:width="29" dlg:height="27" dlg:value="Sync">
+   <script:event script:event-name="on-performaction" script:macro-name="vnd.sun.star.UNO:actionSync" script:language="UNO"/>
   </dlg:button>
  </dlg:bulletinboard>
 </dlg:window>

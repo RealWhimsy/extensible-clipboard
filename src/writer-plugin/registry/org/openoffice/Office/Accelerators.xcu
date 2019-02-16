@@ -5,9 +5,9 @@
 	<node oor:name="PrimaryKeys">
 		<node oor:name="Modules">
 			<node oor:name="com.sun.star.text.TextDocument">
-				<node oor:name="1_SHIFT_MOD1" oor:op="replace">
+				<node oor:name="V_SHIFT_MOD2" oor:op="replace"><!-- Shift+Alt+v -->
 					<prop oor:name="Command">
-						<value xml:lang="en-US">service:org.libreoffice.example.StarterProject?actionOne</value>
+						<value xml:lang="en-US">service:org.libreoffice.example.StarterProject?insert</value>
 					</prop>
 				</node>
 			</node>

@@ -8,7 +8,8 @@ import com.sun.star.util.XChangesBatch;
 import com.sun.star.lib.uno.helper.Factory;
 
 import org.libreoffice.example.clipboardapi.ClipboardServer;
-import org.libreoffice.example.dialog.ActionOneDialog;
+import org.libreoffice.example.dialog.ClipTreeDialog;
+import org.libreoffice.example.dialog.DataHelper;
 import org.libreoffice.example.helper.DialogHelper;
 import org.libreoffice.example.options.ConfigurationAccess;
 
@@ -20,11 +21,12 @@ import com.sun.star.container.XNameAccess;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.lang.XSingleComponentFactory;
 import com.sun.star.registry.XRegistryKey;
+import com.sun.star.text.XText;
 import com.sun.star.lib.uno.helper.WeakBase;
 
 public final class StarterProjectImpl extends WeakBase implements com.sun.star.awt.XContainerWindowEventHandler,
 		com.sun.star.lang.XServiceInfo, com.sun.star.task.XJobExecutor {
-	private ActionOneDialog actionOneDialog;
+	private ClipTreeDialog actionOneDialog;
 	private final XComponentContext m_xContext;
 	private static ClipboardServer cbServer = new ClipboardServer();
 	private static final String m_implementationName = StarterProjectImpl.class.getName();
@@ -41,6 +43,12 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 				 context,
 				 "/org.openoffice.Office.OptionsPageDemo/Leaves" 
 		);
+		cbServer = new ClipboardServer();
+		try {
+			serverUrl = ConfigurationAccess.getServerUrl(accessLeaves);
+		} catch  (com.sun.star.uno.Exception e){
+			e.printStackTrace();
+		}
 		 
 	};
 
@@ -74,15 +82,16 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 	public String[] getSupportedServiceNames() {
 		return m_serviceNames;
 	}
+	
+	private void onCopyClicked() {
+		XText xSelectedText = DataHelper.getCurrentGUISelection(m_xContext);
+		System.out.println(xSelectedText);
+		System.out.println(xSelectedText.getString());
+	}
 
 	// com.sun.star.task.XJobExecutor:
 	public void trigger(String action) {
 		if (cbServer == null) {
-			/*
-			 * Intended to cache entries here but after closing the dialog the whole
-			 * this-object seems to get deleted
-			 */
-			System.out.println("Creating new server");
 			cbServer = new ClipboardServer();
 		}
 		try {
@@ -94,14 +103,14 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 			cbServer.setServerURL(serverUrl);
 			switch (action) {
 			case "insert":
-				System.out.println("inserting");
 					if (actionOneDialog == null) {
-						actionOneDialog = new ActionOneDialog(m_xContext, cbServer);
+						actionOneDialog = new ClipTreeDialog(m_xContext, cbServer);
 					}
 					actionOneDialog.show();
 				break;
 			case "copy":
-				System.out.println("copying");
+				// Not that useful, copying should probably be done via the QT-clipboard-server
+				onCopyClicked();
 				break;
 			default:
 				DialogHelper.showErrorMessage(m_xContext, null, "Unknown action: " + action);
@@ -113,6 +122,8 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 
 	}
 
+	// Stuff from here on out adapted from 
+	// https://github.com/vmiklos/lo-sdk-examples/tree/master/java/OptionsPageDemo
 	@Override
 	public boolean callHandlerMethod(XWindow aWindow, Object aEventObject, String sMethod)
 			throws WrappedTargetException {
@@ -149,10 +160,8 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 	private void saveData(XWindow aWindow)
 			throws com.sun.star.lang.IllegalArgumentException, com.sun.star.uno.Exception {
 		// Determine the name of the options page. This serves two purposes. First, if
-		// this
-		// options page is supported by this handler and second we use the name two
-		// locate
-		// the corresponding data in the registry.
+		// this options page is supported by this handler and second we use the name two
+		// locate the corresponding data in the registry.
 		String sWindowName = DialogHelper.getWindowName(aWindow);
 		if (sWindowName == null)
 			throw new com.sun.star.lang.IllegalArgumentException("This window is not supported by this handler", this,
@@ -170,7 +179,6 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 		for (int i = 0; i < m_controlNames.length; i++) {
 			// To obtain the data from the controls we need to get their model.
 			// First get the respective control from the XControlContainer.
-			XControl[] s = xContainer.getControls();
 			XControl xControl = xContainer.getControl(m_controlNames[i]);
 
 			// This generic handler and the corresponding registry schema support

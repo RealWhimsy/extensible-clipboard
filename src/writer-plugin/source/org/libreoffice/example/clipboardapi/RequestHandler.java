@@ -3,6 +3,7 @@ package org.libreoffice.example.clipboardapi;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -63,5 +64,27 @@ public class RequestHandler {
 			e.printStackTrace();
 		}
 		return json;
+	}
+	
+	public boolean sendStringToServer(JSONObject toSend) {
+		try {
+			HttpURLConnection conn = (HttpURLConnection) clipUrl.openConnection();
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Contenty-Type", "application/json");
+			conn.setInstanceFollowRedirects(true);
+			conn.setConnectTimeout(3000);
+			
+			OutputStreamWriter wr= new OutputStreamWriter(conn.getOutputStream());
+			wr.write(toSend.toString());
+			wr.close();
+			
+			if (conn.getResponseCode() == 201) {
+				return true;
+			}
+			
+		} catch (Exception e) {
+			return false;
+		}
+		return false; // no 201
 	}
 }

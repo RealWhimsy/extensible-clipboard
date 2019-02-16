@@ -11,11 +11,6 @@
 
 package org.libreoffice.example.options;
 
-import org.libreoffice.example.helper.DialogHelper;
-
-import com.sun.star.awt.XControl;
-import com.sun.star.awt.XControlContainer;
-import com.sun.star.awt.XWindow;
 import com.sun.star.beans.PropertyState;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
@@ -28,6 +23,9 @@ import com.sun.star.uno.XComponentContext;
  * Provides generic factory methods around configuration access.
  * 
  * @author Christian Lins (christian.lins@sun.com)
+ * 
+ * taken from
+ * https://github.com/vmiklos/lo-sdk-examples/tree/master/java/OptionsPageDemo
  */
 public class ConfigurationAccess {
 	/**

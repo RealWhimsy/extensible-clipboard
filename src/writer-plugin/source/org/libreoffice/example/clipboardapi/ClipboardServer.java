@@ -56,6 +56,13 @@ public class ClipboardServer {
 		return cachedEntries;
 	}
 	
+	public boolean sendStringToServer(String text) {
+		JSONObject toSend = new JSONObject();
+		toSend.put("mimetype", "text/plain");
+		toSend.put("data", text);
+		return rqHandler.sendStringToServer(toSend);
+	}
+	
 	public Collection<ClipEntry> getCachedClips() {
 		return cachedEntries;
 	}

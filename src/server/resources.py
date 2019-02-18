@@ -164,10 +164,9 @@ class Recipient(Resource):
         if self._is_url(url):
             is_hook = 'hook' in request.url
             _id = self.server.add_recipient(data['url'], is_hook)
-            #if _id >= 0:
-            return ({'response_url': url_for('clip', _external=True)}, 201)
-            #else:
-            #    return ('', 204)
+            return ({
+                '_id': _id,
+                'response_url': url_for('clip', _external=True)}, 201)
         else:
             return ('Sent value for url was not an acceptable url', 422)
 

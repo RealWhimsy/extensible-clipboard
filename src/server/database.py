@@ -245,8 +245,9 @@ class ClipDatabase:
             return results
 
     def add_recipient(self, url, is_hook):
-        if self.clipboard_collection.find_one({'url': url}) is not None:
-            return None
+        old_instance = self.clipboard_collection.find_one({'url': url})
+        if old_instance is not None:
+            return self._build_json_response_clip(old_instance)
 
         _id = uuid4()
         _id = self._create_binary_uuid(str(_id))

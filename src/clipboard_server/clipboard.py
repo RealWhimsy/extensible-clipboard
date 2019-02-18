@@ -1,10 +1,11 @@
 from mimetypes import guess_type
 from sys import getsizeof
+import re
 
-from PyQt5.QtCore import QMimeData, QByteArray
+from PyQt5.QtCore import pyqtSignal, QMimeData, QByteArray, QObject
 
 
-class Clipboard:
+class Clipboard(QObject):
     """
     This class acts as an intermediary between the core
     and the clipboard of the system.
@@ -17,6 +18,7 @@ class Clipboard:
     of the system-clipboard and notify the core of any occurring changes
     so those changes can be synced up with the remote-clipboard
     """
+    clipboard_changed_signal = pyqtSignal(list)
 
     def _prepare_data(self, data):
         if type(data) is str:
@@ -24,6 +26,13 @@ class Clipboard:
         else:
             data = bytes(data)
         return data
+
+    def _string_from_qByteArray(self, array):
+        return bytes.decode(array.data())
+
+    def _is_mime_type(self, mime_string):
+        return self.mime_pattern.match(mime_string)
+
 
     def save(self, data):
         """
@@ -57,17 +66,33 @@ class Clipboard:
         self.clipboard.setMimeData(self.mime_data)
 
     def onDataChanged(self):
-        print("Data has changed")
+        # if change was triggerd by inserting data received from server
+        if self.clipboard.ownsClipboard():
+            return
         mime_data = self.clipboard.mimeData()
+        data = []
         for dt in mime_data.formats():
-            print("Type {} with data {}".format(dt, str(mime_data.data(dt))))
+            if self._is_mime_type(dt):
+                try:
+                    clip_data = self._string_from_qByteArray(mime_data.data(dt))
+                except UnicodeDecodeError:
+                    clip_data = mime_data.data(dt).data()
+                data.append({
+                    'mimetype': dt,
+                    'data': clip_data
+                })
+        self.clipboard_changed_signal.emit(data)
+
 
     def __init__(self, clip, sync_clipboard):
         """
         :param clip: The QClipboard of the current QApplication
         """
+        super(QObject, self).__init__()
         self.clipboard = clip
         self.current_id = ''
         self.mime_data = QMimeData()
+        #https://tools.ietf.org/html/rfc6838#section-4.2
+        self.mime_pattern = re.compile("^[a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]+/[a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]*$")
         if sync_clipboard:
             self.clipboard.dataChanged.connect(self.onDataChanged)

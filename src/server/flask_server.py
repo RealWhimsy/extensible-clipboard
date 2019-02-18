@@ -1,4 +1,5 @@
 import requests
+from uuid import UUID
 
 from flask import url_for
 
@@ -19,6 +20,7 @@ class FlaskServer():
         self.native_hooks = HookManager()
         self.recipients = self._build_recipients()
         self.current_clip = ''
+        self.last_sender = ''
 
         self.app.config['MAX_CONTENT_LENGTH'] = self.MAX_CONTENT_LENGTH
 
@@ -57,7 +59,7 @@ class FlaskServer():
             self.current_clip = data['_id']
 
         for c in self.recipients:
-            if not c['is_hook']:
+            if not c['is_hook'] and self.last_sender != c['_id']:
                 try:
                     requests.post(c['url'], json=data, timeout=0.5)
                 except:
@@ -72,7 +74,7 @@ class FlaskServer():
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
         for c in self.recipients:
-            if c['is_hook']:
+            if c['is_hook'] and self.last_sender != c['_id']:
                 try:
                     requests.post(c['url'], json=data, timeout=0.5)
                 except:
@@ -86,6 +88,7 @@ class FlaskServer():
         :return: the newly created entry
         """
         new_clip = {}
+        self.last_sender = UUID(data.pop('sender_id', ''))
         try:
             if _id is None:
                 new_clip = self.db.save_clip(data)
@@ -139,8 +142,6 @@ class FlaskServer():
         return self.db.get_alternatives(clip_id)
 
     def add_recipient(self, url, is_hook):
-        if self.db.add_recipient(url, is_hook) is None:
-            return -1
-
+        r = self.db.add_recipient(url, is_hook)
         self.recipients = self._build_recipients()
-        return len(self.recipients) - 1
+        return r['_id']

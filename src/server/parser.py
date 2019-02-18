@@ -92,6 +92,8 @@ class RequestParser():
                     data['mimetype'] = json['mimetype']
                     data['src_url'] = json.get('src_url', 'n/a')
                     data['src_app'] = json.get('src_app', 'n/a')
+                    if 'sender_id' in json:
+                        data['sender_id'] = json['sender_id']
 
         return data
 

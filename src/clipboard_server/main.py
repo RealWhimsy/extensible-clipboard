@@ -8,7 +8,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 from clipboard_handler import ClipboardHandler
-from networking import ConnectionHandler
+from networking import ConnectionHandler, ClipSender
 
 """
 Built after https://codereview.stackexchange.com/questions/114221/python-gui-by-qtwebkit-and-flask
@@ -18,12 +18,19 @@ https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-w
 
 class MainApp(QtWidgets.QApplication):
 
-    def dummy(self, data):
+    def on_data_get(self, data):
         """
         Not really sure, why this method is needed,
         might be related to event-loops
         """
         self.clh.put_into_storage(data)
+
+    def send_clipboard_data(self, clip_list):
+        self.clip_sender.add_clips_to_server(clip_list)
+
+    def on_id_get(self, _id):
+        print('setting id to {}'.format(_id))
+        self.clip_sender._id = _id
 
     def main(self):
         self.flask_qt.moveToThread(self.server_thread)
@@ -34,7 +41,10 @@ class MainApp(QtWidgets.QApplication):
         # Makes C-c usable in console, because QT would block it normally
         signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-        self.flask_qt.new_item_signal.connect(self.dummy)
+        # Cannot put it into self.flask_qt because run() blocks anything
+        self.clh.clipboard.clipboard_changed_signal.connect(self.send_clipboard_data)
+        self.flask_qt.new_item_signal.connect(self.on_data_get)
+        self.flask_qt.recipient_id_got.connect(self.on_id_get)
         self.server_thread.start()
 
     def __init__(self, argv):
@@ -51,7 +61,6 @@ class MainApp(QtWidgets.QApplication):
         parser.add_argument('-c', '--clipserver', type=str, dest='clipserver',
                 help='URL this server can register itself to the clipboard-server', required=True)
         self.args = parser.parse_args()
-        print(self.args)
 
         self.flask_server = Flask(__name__)
         self.flask_qt = ConnectionHandler(self.flask_server, self.args.port, self.args.clipserver, self.args.domain)
@@ -59,6 +68,7 @@ class MainApp(QtWidgets.QApplication):
 
         # Connection to system clipboard
         self.clh = ClipboardHandler(self, self.args.sync_clipboard)
+        self.clip_sender = ClipSender(self.args.clipserver)
 
 
 if __name__ == "__main__":

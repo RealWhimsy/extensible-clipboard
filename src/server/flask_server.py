@@ -80,6 +80,12 @@ class FlaskServer():
                 except:
                     self._send_failed(c)
 
+    def _get_last_sender_or_None(self, sender_id):
+        try:
+            return UUID(sender_id)
+        except:
+            return None
+
     def save_in_database(self, data, _id=None, propagate=False):
         """
         Saves the clip it got from the resource in the database and
@@ -88,7 +94,7 @@ class FlaskServer():
         :return: the newly created entry
         """
         new_clip = {}
-        self.last_sender = UUID(data.pop('sender_id', ''))
+        self.last_sender = self._get_last_sender_or_None(data.pop('sender_id', ''))
         try:
             if _id is None:
                 new_clip = self.db.save_clip(data)

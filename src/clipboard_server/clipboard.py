@@ -75,7 +75,7 @@ class Clipboard(QObject):
         mime_data = self.clipboard.mimeData()
         data = []
         for dt in mime_data.formats():
-            if self._is_mime_type(dt):
+            if self._is_mime_type(dt) and ';charset=' not in dt:
                 try:
                     clip_data = self._string_from_qByteArray(mime_data.data(dt))
                 except UnicodeDecodeError:
@@ -86,7 +86,6 @@ class Clipboard(QObject):
                 })
         self.clipboard_changed_signal.emit(data)
 
-
     def __init__(self, clip, sync_clipboard):
         """
         :param clip: The QClipboard of the current QApplication
@@ -96,6 +95,6 @@ class Clipboard(QObject):
         self.current_id = ''
         self.mime_data = QMimeData()
         #https://tools.ietf.org/html/rfc6838#section-4.2
-        self.mime_pattern = re.compile("^[a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]+/[a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]*$")
+        self.mime_pattern = re.compile("^([a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]{0,126})/([a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]{0,126})$")
         if sync_clipboard:
             self.clipboard.dataChanged.connect(self.onDataChanged)

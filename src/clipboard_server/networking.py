@@ -1,3 +1,4 @@
+from base64 import b64encode
 from json import dumps, dump
 import sys
 
@@ -86,6 +87,8 @@ class ClipSender:
         self.id_updater = id_updater
 
     def _post_clip(self, clip):
+        if type(clip['data']) is bytes:
+            clip['data'] = b64encode(clip['data'])
         r = requests.post(
             self.post_url, 
             json={
@@ -98,13 +101,12 @@ class ClipSender:
         return r
 
     def _add_child(self, clip, parent_id):
+        if type(clip['data']) is bytes:
+            clip['data'] = str(b64encode(clip['data']))
         r = requests.post(
-            self.add_child_url.format(parent_id), 
-            json={
-                'mimetype': clip['mimetype'],
-                'data': clip['data'],
-                'sender_id': self._id
-        })
+           self.add_child_url.format(parent_id), 
+           json = clip
+        )
         _id = r.json()['_id']
         requests.post(self.call_hook_url.format(_id))
         return r

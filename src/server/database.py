@@ -52,8 +52,9 @@ class ClipDatabase:
         """
         clip['_id'] = str(clip['_id'])
 
-        if 'filename' in clip:
+        if 'filename' in clip and not isinstance(clip['data'], str):
             data = b64encode(clip['data'])
+            print(type(clip['data']))
             clip['data'] = str(data)[2:-1]
 
         if 'parent' in clip:

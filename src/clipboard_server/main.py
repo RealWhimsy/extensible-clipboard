@@ -1,6 +1,9 @@
 from argparse import ArgumentParser
+import mimetypes
+import os
 import signal
 import sys
+from urllib.parse import unquote
 
 from flask import Flask
 
@@ -18,6 +21,19 @@ https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-w
 
 class MainApp(QtWidgets.QApplication):
 
+    def get_files(self, uri_list):
+        to_return = []
+        splits = uri_list.splitlines()
+        for s in splits:
+            new_file = {}
+            path = unquote(s)[7:]
+            with open(path, mode='rb') as f:
+                new_file['data'] = f.read()
+                new_file['filename'] = os.path.split(path)[1]
+                new_file['mimetype'] = mimetypes.guess_type(path)[0]
+                to_return.append(new_file)
+        return to_return
+
     def on_data_get(self, data):
         """
         Not really sure, why this method is needed,
@@ -26,6 +42,10 @@ class MainApp(QtWidgets.QApplication):
         self.clh.put_into_storage(data)
 
     def send_clipboard_data(self, clip_list):
+        for clip in clip_list:
+            if 'text/uri-list' in clip['mimetype']:
+                clip_list += self.get_files(clip['data'])
+                break;
         self.clip_sender.add_clips_to_server(clip_list)
 
     def on_id_get(self, _id):

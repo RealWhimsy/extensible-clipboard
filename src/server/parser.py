@@ -1,3 +1,4 @@
+from base64 import b64decode
 import re
 import requests
 
@@ -95,6 +96,8 @@ class RequestParser():
                     #if 'sender_id' in json and 'from_hook' not in json:
                     if 'sender_id' in json:
                         data['sender_id'] = json['sender_id']
+                    if 'filename' in json:
+                        data['filename'] = json['filename']
 
         return data
 

@@ -8,7 +8,6 @@ from flask_restful import abort, Resource
 from exceptions import *
 from parser import RequestParser
 
-
 class BaseClip(Resource):
 
     def __init__(self, **kwargs):
@@ -93,6 +92,13 @@ class Clip(BaseClip):
         else:
             return {'error': 'No clip with specified id'} , 404
 
+    def post(self, clip_id=None):
+        if request.url.endswith('/call_hooks'):
+            self.server.call_hooks(clip_id)
+            return '', 204
+        else:
+            return {'error': 'Please use put to update a clip'}, 400
+
 class Clips(BaseClip):
     """
     Class responsible for handling a set of Clips
@@ -112,7 +118,6 @@ class Clips(BaseClip):
             return {'error': 'Please send to url of intended parent'}, 422
         
         new_item = self.server.save_in_database(data=data, propagate=propagate)
-
         return new_item, 201
 
     def get(self):

@@ -29,8 +29,12 @@ class MainApp(QtWidgets.QApplication):
         self.clip_sender.add_clips_to_server(clip_list)
 
     def on_id_get(self, _id):
-        print('setting id to {}'.format(_id))
+        print('got id {}'.format(_id))
         self.clip_sender._id = _id
+
+    def on_current_clip_id_get(self, _id):
+        self.clh.clipboard.current_id = _id
+        print('updated id to {}'.format(self.clh.clipboard.current_id))
 
     def main(self):
         self.flask_qt.moveToThread(self.server_thread)
@@ -68,7 +72,7 @@ class MainApp(QtWidgets.QApplication):
 
         # Connection to system clipboard
         self.clh = ClipboardHandler(self, self.args.sync_clipboard)
-        self.clip_sender = ClipSender(self.args.clipserver)
+        self.clip_sender = ClipSender(self.args.clipserver, self.on_current_clip_id_get)
 
 
 if __name__ == "__main__":

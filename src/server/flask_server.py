@@ -18,10 +18,12 @@ class FlaskServer():
         self.app = flask_app
         self.db = database
         self.native_hooks = HookManager()
-        self.recipients = self._build_recipients()
+        self.clipboards = []
+        self.post_hooks = []
         self.current_clip = ''
         self.last_sender = ''
 
+        self._build_recipients()
         self.app.config['MAX_CONTENT_LENGTH'] = self.MAX_CONTENT_LENGTH
 
     def start_server(self):
@@ -33,15 +35,19 @@ class FlaskServer():
 
     def _build_recipients(self):
         result = self.db.get_recipients() or []
+        self.post_hooks = [] 
+        self.clipboards = []
         for r in result:
+            if r['is_hook']:
+                self.post_hooks.append(r)
+            else:
+                self.clipboards.append(r)
             r['error_count'] = 0
-        return result
 
     def _send_failed(self, recipient):
         recipient['error_count'] += 1
         print('Could not send data to {}'.format(recipient['url']))
         print('Errors for {}: {}'.format(recipient['url'], recipient['error_count']))
-
 
     def send_to_clipboards(self, data):
         """
@@ -55,15 +61,12 @@ class FlaskServer():
         if parent and self.current_clip != parent:
             # Update was not to current clip
             return
-        elif not parent:  # Completely new clip
-            self.current_clip = data['_id']
 
-        for c in self.recipients:
-            if not c['is_hook'] and self.last_sender != c['_id']:
-                try:
-                    requests.post(c['url'], json=data, timeout=0.5)
-                except:
-                    self._send_failed(c)
+        for c in self.clipboards:
+            try:
+                requests.post(c['url'], json=data, timeout=5)
+            except:
+                self._send_failed(c)
 
     def send_to_hooks(self, data):
         """
@@ -73,12 +76,19 @@ class FlaskServer():
         """
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
-        for c in self.recipients:
-            if c['is_hook'] and self.last_sender != c['_id']:
+        _id = data.get('parent', data['_id'])
+        for c in self.post_hooks:
+            if c['is_hook']:
                 try:
-                    requests.post(c['url'], json=data, timeout=0.5)
+                    data['response_url'] = url_for('adder', clip_id=_id, _external=True)
+                    requests.post(c['url'], json=data, timeout=5)
                 except:
                     self._send_failed(c)
+
+    def call_hooks(self, clip_id):
+        clip = self.db.get_clip_by_id(clip_id)
+        if clip:
+            self.send_to_hooks(clip)
 
     def _get_last_sender_or_None(self, sender_id):
         try:
@@ -95,6 +105,7 @@ class FlaskServer():
         """
         new_clip = {}
         self.last_sender = self._get_last_sender_or_None(data.pop('sender_id', ''))
+        self.propagate = propagate
         try:
             if _id is None:
                 new_clip = self.db.save_clip(data)
@@ -102,11 +113,12 @@ class FlaskServer():
                 new_clip = self.db.update_clip(_id, data)
 
             if new_clip:
-                if propagate:
-                    response_url = url_for('adder', clip_id=new_clip['_id'], _external=True)
-                    new_clip['response_url'] = response_url.format(new_clip['_id'])
-                    self.send_to_hooks(new_clip)
+                if 'parent' not in new_clip:
+                    self.current_clip = new_clip['_id']
+                response_url = url_for('adder', clip_id=new_clip['_id'], _external=True)
+                new_clip['response_url'] = response_url.format(new_clip['_id'])
                 self.send_to_clipboards(new_clip)
+
         except (GrandchildException,
                 ParentNotFoundException,
                 SameMimetypeException) as e:
@@ -149,5 +161,5 @@ class FlaskServer():
 
     def add_recipient(self, url, is_hook):
         r = self.db.add_recipient(url, is_hook)
-        self.recipients = self._build_recipients()
+        self._build_recipients()
         return r['_id']

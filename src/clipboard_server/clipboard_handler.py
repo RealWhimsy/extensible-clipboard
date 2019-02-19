@@ -35,15 +35,6 @@ class ClipboardHandler(QObject):
         else:
             self._save_to_local_clipboard(data)
 
-    def retrieve_from_storage(self, callback):
-        """
-        Queries the server for the current content of the clipboard
-        and returns the data
-        :return: The data sent from the server
-        """
-        clipboard_data = self.network_manager.get_data(callback)
-        return clipboard_data
-
     def __init__(self, q_app, sync_clipboard):
         """
         :param q_app: The current QApplication this package is part

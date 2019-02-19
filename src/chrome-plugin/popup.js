@@ -34,6 +34,7 @@ let app = (function(){
                 clip = {};
                 clip._id = data[i]._id
                 if (isBinary(data[i].data) === true){
+                    console.log(data[i])
                     clip.clipText = data[i].filename.toString()
                 }
                 else {

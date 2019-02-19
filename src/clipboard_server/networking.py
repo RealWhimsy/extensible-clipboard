@@ -18,7 +18,7 @@ class ConnectionHandler(QObject):
         super(QObject, self).__init__()
         self.flask_app = flask_app
         self.port = port
-        self.clip_server_url = clip_server_url + "hook/register"
+        self.clip_server_url = clip_server_url + "clipboard/register"
         if domain == 'http://localhost':
             domain = domain + ':' + str(self.port) + '/'
         self.domain = domain
@@ -46,16 +46,11 @@ class ConnectionHandler(QObject):
                 port=self.port
         )
 
-    def handle_clipboard_data(self, clip_list):
-        for c in clip_list:
-            print(c['mimetype'])
-
     def handle_request(self, request):
         if not request.is_json:
             return 'Supplied content not application/json', 415
         data = request.get_json()
         if self._check_data(data):
-            print(data)
             self.new_item_signal.emit(data)
             return '', 204
         else:
@@ -78,13 +73,17 @@ class ConnectionHandler(QObject):
                 response.status_code)
             m += 'Message from server: {}'.format(response.text)
             self._die(m)
+
         self.recipient_id_got.emit(response.json()['_id'])
 
 
 class ClipSender:
 
-    def __init__(self, clip_server_url):
+    def __init__(self, clip_server_url, id_updater):
         self.post_url = clip_server_url + "clip/"
+        self.call_hook_url = self.post_url + "{}/call_hooks"
+        self.add_child_url = self.post_url + "{}/add_child"
+        self.id_updater = id_updater
 
     def _post_clip(self, clip):
         r = requests.post(
@@ -94,26 +93,28 @@ class ClipSender:
                 'data': clip['data'],
                 'sender_id': self._id
         })
+        _id = r.json()['_id']
+        requests.post(self.call_hook_url.format(_id))
         return r
 
     def _add_child(self, clip, parent_id):
-        child_url = self.post_url + parent_id + "/add_child" 
         r = requests.post(
-            child_url, 
+            self.add_child_url.format(parent_id), 
             json={
                 'mimetype': clip['mimetype'],
                 'data': clip['data'],
                 'sender_id': self._id
         })
+        _id = r.json()['_id']
+        requests.post(self.call_hook_url.format(_id))
         return r
-
 
     def add_clips_to_server(self, clip_list):
         if not clip_list:
             return
-
         r = self._post_clip(clip_list[0])
+        self.id_updater(r.json()['_id'])
         if r.status_code == 201 and len(clip_list) > 1:
             parent_id = r.json()['_id']
             for c in clip_list[1:]:
-               self._add_child(c, parent_id)
+                self._add_child(c, parent_id)

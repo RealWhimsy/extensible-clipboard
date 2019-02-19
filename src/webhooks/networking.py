@@ -21,6 +21,10 @@ class HookWorker():
 
             result['mimetype'] = 'text/plain'
             return result
+        elif mimetype == 'text/plain':
+            result['mimetype'] = 'application/json'
+            result['data'] = {'senttext': str(data)}
+            return result
         else:
             return None
 
@@ -63,10 +67,9 @@ class ConnectionHandler():
     def delegate_work(self, data):
         result = self.hook.do_work(data['data'], data['mimetype'])
         if result:
-            data['data'] = result['data']
-            data['mimetype'] = result['mimetype']
-            data['from_hook'] = True
-            r = requests.post(data['response_url'], json=data)
+            result['from_hook'] = True
+            result['sender_id'] = self._id
+            r = requests.post(data['response_url'], json=result)
 
     def handle_new_data(self, request):
         if not request.is_json:
@@ -87,6 +90,7 @@ class ConnectionHandler():
             )
             response.raise_for_status()
             self.response_url = response.json()['response_url']
+            self._id = response.json()['_id']
         except req_exceptions.ConnectionError as e:
             self._die('Connection refused by remote server')
         except req_exceptions.Timeout as e:

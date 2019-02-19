@@ -1,3 +1,4 @@
+from json import dumps
 from mimetypes import guess_type
 from sys import getsizeof
 import re
@@ -22,6 +23,9 @@ class Clipboard(QObject):
 
     def _prepare_data(self, data):
         if type(data) is str:
+            data = data.encode(encoding='utf8')
+        elif type(data) is dict:
+            data = dumps(data)
             data = data.encode(encoding='utf8')
         else:
             data = bytes(data)
@@ -62,7 +66,6 @@ class Clipboard(QObject):
 
         prepared_data = self._prepare_data(data['data'])
         self.mime_data.setData(mime_type, prepared_data)
-
         self.clipboard.setMimeData(self.mime_data)
 
     def onDataChanged(self):

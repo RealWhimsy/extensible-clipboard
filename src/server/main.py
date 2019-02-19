@@ -29,6 +29,7 @@ class MainApp():
                               '/clip/latest/',
                               '/clip/<uuid:clip_id>/',
                               '/clip/<uuid:clip_id>/get_alternatives/',
+                              '/clip/<uuid:clip_id>/call_hooks',
                               resource_class_kwargs={
                                     'server': self.server_qt
                               })

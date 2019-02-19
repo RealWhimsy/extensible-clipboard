@@ -89,7 +89,11 @@ class RequestParser():
                             json['data'] = _file[0]
                         else:
                             return {'error': 'Error during download. Check if file is accessible and smaller than 15MB'}
-                    data['data'] = json['data']
+                    try:
+                        decoded_data = b64decode(json['data'])
+                        data['data'] = decoded_data
+                    except:
+                        data['data'] = json['data']
                     data['mimetype'] = json['mimetype']
                     data['src_url'] = json.get('src_url', 'n/a')
                     data['src_app'] = json.get('src_app', 'n/a')

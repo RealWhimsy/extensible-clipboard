@@ -1,6 +1,6 @@
 import os
 
-from base64 import b64encode
+from base64 import b64encode, b64decode
 from datetime import datetime
 from configparser import ConfigParser
 from uuid import UUID, uuid4
@@ -51,11 +51,6 @@ class ClipDatabase:
         i.e. convert uuid-objects to their string or handle binary
         """
         clip['_id'] = str(clip['_id'])
-
-        if 'filename' in clip and not isinstance(clip['data'], str):
-            data = b64encode(clip['data'])
-            print(type(clip['data']))
-            clip['data'] = str(data)[2:-1]
 
         if 'parent' in clip:
             clip['parent'] = str(clip['parent'])

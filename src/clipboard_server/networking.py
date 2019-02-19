@@ -107,8 +107,9 @@ class ClipSender:
            self.add_child_url.format(parent_id), 
            json = clip
         )
-        _id = r.json()['_id']
-        requests.post(self.call_hook_url.format(_id))
+        if r.status_code is 201:
+            _id = r.json()['_id']
+            requests.post(self.call_hook_url.format(_id))
         return r
 
     def add_clips_to_server(self, clip_list):

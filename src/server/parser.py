@@ -56,8 +56,7 @@ class RequestParser():
 
         return (file_content, filename, mimetype)
 
-
-    def get_data_from_request(self, request):
+    def get_data_from_request(self, request, decode):
         data = {}
         """
         Server received a file
@@ -89,10 +88,10 @@ class RequestParser():
                             json['data'] = _file[0]
                         else:
                             return {'error': 'Error during download. Check if file is accessible and smaller than 15MB'}
-                    try:
+                    if decode:
                         decoded_data = b64decode(json['data'])
                         data['data'] = decoded_data
-                    except:
+                    else:
                         data['data'] = json['data']
                     data['mimetype'] = json['mimetype']
                     data['src_url'] = json.get('src_url', 'n/a')
@@ -102,7 +101,6 @@ class RequestParser():
                         data['sender_id'] = json['sender_id']
                     if 'filename' in json:
                         data['filename'] = json['filename']
-
         return data
 
     def __init__(self):

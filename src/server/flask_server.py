@@ -85,7 +85,7 @@ class FlaskServer(Flask):
             if c['is_hook']:
                 try:
                     data['response_url'] = url_for(
-                            'adder',
+                            'child_adder',
                             clip_id=_id, _external=True
                     )
                     requests.post(c['url'], json=data, timeout=5)
@@ -103,7 +103,7 @@ class FlaskServer(Flask):
         except:
             return None
 
-    def save_in_database(self, data, _id=None, propagate=False):
+    def save_in_database(self, data, _id=None):
         """
         Saves the clip it got from the resource in the database and
         :param data: The data (text, binary) received by the Resource
@@ -113,8 +113,7 @@ class FlaskServer(Flask):
         new_clip = {}
         self.last_sender = self._get_last_sender_or_None(
                 data.pop('sender_id', '')
-        )
-        self.propagate = propagate
+        )  # Prevents clipboard from uselessly receiving it's own data again
         try:
             if _id is None:
                 new_clip = self.db.save_clip(data)
@@ -125,7 +124,7 @@ class FlaskServer(Flask):
                 if 'parent' not in new_clip:
                     self.current_clip = new_clip['_id']
                 response_url = url_for(
-                        'adder',
+                        'child_adder',
                         clip_id=new_clip['_id'],
                         _external=True
                 )

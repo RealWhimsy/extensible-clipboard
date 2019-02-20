@@ -86,38 +86,46 @@ class ClipSender:
         self.add_child_url = self.post_url + "{}/add_child"
         self.id_updater = id_updater
 
-    def _post_clip(self, clip):
+    def _post_clip(self, clip, parent_id=None):
+        headers = {}
+        if parent_id:
+            url = self.add_child_url.format(parent_id)
+        else:
+            url = self.post_url
         if type(clip['data']) is bytes:
             clip['data'] = b64encode(clip['data'])
-        r = requests.post(
-            self.post_url, 
-            json={
-                'mimetype': clip['mimetype'],
-                'data': clip['data'],
-                'sender_id': self._id
-        })
-        _id = r.json()['_id']
-        requests.post(self.call_hook_url.format(_id))
-        return r
-
-    def _add_child(self, clip, parent_id):
-        if type(clip['data']) is bytes:
-            clip['data'] = str(b64encode(clip['data']))
-        r = requests.post(
-           self.add_child_url.format(parent_id), 
-           json = clip
-        )
-        if r.status_code is 201:
-            _id = r.json()['_id']
-            requests.post(self.call_hook_url.format(_id))
+            headers['Content-Encoding': 'base64']
+        try:
+            r = requests.post(
+                url,
+                headers=headers,
+                json={
+                    'mimetype': clip['mimetype'],
+                    'data': clip['data'],
+                    'sender_id': self._id},
+                timeout=5
+            )
+            r.raise_for_status()
+        except req_exceptions.ConnectionError as e:
+            print('Connection refused by server')
+            r = None
+        except req_exceptions.Timeout as e:
+            print('Server failed to respond in time')
+            r = None
+        except req_exceptions.HTTPError as e:
+            print('Remote server responded with statuscode {}\n'.format(
+                r.status_code))
+            print('Message from server: {}'.format(r.text))
+            r = None
         return r
 
     def add_clips_to_server(self, clip_list):
         if not clip_list:
             return
         r = self._post_clip(clip_list[0])
-        self.id_updater(r.json()['_id'])
-        if r.status_code == 201 and len(clip_list) > 1:
-            parent_id = r.json()['_id']
+        if r and r.status_code == 201 and len(clip_list) > 1:
+            parent_id = r.headers['X-C2-_id']
+            self.id_updater(parent_id)
+            requests.post(self.call_hook_url.format(parent_id))
             for c in clip_list[1:]:
-                self._add_child(c, parent_id)
+                self._post_clip(c, parent_id)

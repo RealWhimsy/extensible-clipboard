@@ -1,11 +1,7 @@
-from mimetypes import guess_type
-import re
+from urllib import parse
 
-from flask import request, url_for
-from flask import current_app as server
+from flask import abort, current_app, jsonify, make_response, request, url_for
 from flask.views import MethodView
-
-from flask_restful import abort, Resource
 
 from exceptions import (GrandchildException, ParentNotFoundException,
                         SameMimetypeException)
@@ -17,12 +13,6 @@ class BaseClip(MethodView):
     def __init__(self):
         self.parser = RequestParser()
 
-    def _not_from_hook(self, request):
-        if request and 'from_hook' in request:
-            return False
-        else:
-            return True
-
     def check_for_errors(self, new_item):
         # Checks if any errors occured during lookup;
         # Works similar to passing of errors in Django
@@ -30,7 +20,7 @@ class BaseClip(MethodView):
             error = new_item['error']
             if isinstance(error, ParentNotFoundException):
                 return ({
-                    'error': 'Parent specified by request not found on server'
+                    'error': 'Parent specified by request not found on current_app.'
                     },
                     412
                 )
@@ -47,22 +37,35 @@ class BaseClip(MethodView):
             else:
                 return None
 
+    def is_base_64_encoded(self, headers):
+        if 'Content-Encoding' not in request.headers:
+            return False
+        elif 'base64' == request.headers['Content-Encoding']:
+            return True
+        else:
+            raise ValueError
+
+    def set_headers(self, res, clip):
+        res.headers['Content-Type'] = clip.pop('mimetype')
+        for key, value in clip.items():
+            res.headers['X-C2-{}'.format(key)] = value
+
 
 class Clip(BaseClip):
 
     def get(self, clip_id=None):
         clip = None
         if request.url.endswith('/get_alternatives/'):
-            clip = server.get_alternatives(clip_id)
+            clip = current_app.get_alternatives(clip_id)
         elif request.url.endswith('/latest/'):
-            clip = server.get_latest_clip()
+            clip = current_app.get_latest_clip()
         else:
             preferred_type = None
             if request.accept_mimetypes.best != '*/*':  # Default value
                 # Already sorted by Werkzeug
                 preferred_type = request.accept_mimetypes
 
-            clip = server.get_clip_by_id(clip_id, preferred_type)
+            clip = current_app.get_clip_by_id(clip_id, preferred_type)
 
         if clip is None:
             return {'error': 'No clip with specified id'} , 404
@@ -77,7 +80,7 @@ class Clip(BaseClip):
         data = self.parser.get_data_from_request(request)
         if not data:
             abort(400)
-        clip = server.save_in_database(_id=clip_id, data=data, propagate=False)
+        clip = current_app.save_in_database(_id=clip_id, data=data, propagate=False)
 
         if clip is not None:
             return clip
@@ -88,7 +91,7 @@ class Clip(BaseClip):
         if clip_id is None:
             return ({'error': 'Please specifiy an existing object to delete'},
                     405)
-        item = server.delete_entry_by_id(clip_id=clip_id)
+        item = current_app.delete_entry_by_id(clip_id=clip_id)
 
         if item is not 0:
             return str(clip_id), 200
@@ -97,10 +100,11 @@ class Clip(BaseClip):
 
     def post(self, clip_id=None):
         if request.url.endswith('/call_hooks'):
-            server.call_hooks(clip_id)
+            current_app.call_hooks(clip_id)
             return '', 204
         else:
             return {'error': 'Please use put to update a clip'}, 400
+
 
 class Clips(BaseClip):
     """
@@ -111,28 +115,35 @@ class Clips(BaseClip):
         """
         Create a new clip
         """
-        data = self.parser.get_data_from_request(request)
-        propagate = self._not_from_hook(data)
+        try:
+            decode = self.is_base_64_encoded(request.headers)
+        except ValueError:
+            return jsonify(error='Content-Encoding must only \
+                    be base64 or none'), 422
+        data = self.parser.get_data_from_request(request, decode)
         if not data:
-            abort(400)
+            return jsonify(error='Unable to parse data'), 400
         elif 'error' in data:
-            return {'error': data['error']}, 413
+            return jsonify(error=data['error']), 413
         elif 'parent' in data:
-            return {'error': 'Please send to url of intended parent'}, 422
-        
-        new_item = server.save_in_database(data=data, propagate=propagate)
-        return new_item, 201
+            return jsonify(error='Please send to url of intended parent'), 422
+
+        new_item = current_app.save_in_database(data=data)
+        res = make_response(new_item.pop('data'), 201)
+        self.set_headers(res, new_item)
+        return res
 
     def get(self):
         """
         Get all clips from the db
         """
-        clip = server.get_all_clips()
+        clip = current_app.get_all_clips()
 
         if clip is None:
-            return {'error': 'No clip with specified id'} , 404
+            return jsonify(error='No clips saved yet'), 404
+        else:
+            return clip
 
-        return clip
 
 class ChildClipAdder(BaseClip):
     """
@@ -140,41 +151,42 @@ class ChildClipAdder(BaseClip):
     """
 
     def post(self, clip_id=None):
-        propagate = self._not_from_hook(request.get_json())
-        data = self.parser.get_data_from_request(request)
+        try:
+            decode = self.is_base_64_encoded(request.headers)
+        except ValueError:
+            return jsonify(error='Content-Encoding must only \
+                    be base64 or none'), 422
+        data = self.parser.get_data_from_request(request, decode)
         if not data:
             abort(400)
 
         data['parent'] = clip_id
-
-        new_item = server.save_in_database(data=data, propagate=propagate)
+        new_item = current_app.save_in_database(data=data)
         errors = self.check_for_errors(new_item)
         if errors:
             return errors
         else:
-            return new_item, 201
+            res = make_response(new_item.pop('data'), 201)
+            self.set_headers(res, new_item)
+            return res
 
-class Recipient(Resource):
 
-    def __init__(self, **kwargs):
-        server = kwargs['server']
-        self.pattern = re.compile(r'http://\w+')
-
-    def _is_url(self, url):
-        return self.pattern.match(url)
+class Recipient(MethodView):
 
     def post(self):
-        if request.headers.get('CONTENT_TYPE') not in 'application/json':
-            return ('Please send aplication/json', 415)
+        if request.headers.get('CONTENT-TYPE') not in 'application/json':
+            return jsonify(error='Please send aplication/json'), 415
 
         data = request.get_json()
+        if 'url' not in data:
+            return jsonify(error='No url specified'), 400
         url = data['url']
-        if self._is_url(url):
+        try:
+            parse.urlparse(url)
             is_hook = 'hook' in request.url
-            _id = server.add_recipient(data['url'], is_hook)
-            return ({
-                '_id': _id,
-                'response_url': url_for('clip', _external=True)}, 201)
-        else:
+            _id = current_app.add_recipient(data['url'], is_hook)
+            return jsonify(_id=_id,
+                           response_url=url_for('clip', _external=True)), 201
+        except ValueError:
             return ('Sent value for url was not an acceptable url', 422)
 

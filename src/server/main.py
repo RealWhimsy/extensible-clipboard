@@ -19,36 +19,36 @@ class MainApp():
 
     def add_resources(self):
         # Creates endpoint for REST-Api
-        """
-        self.api.add_resource(ChildClipAdder,
-                              '/clip/<uuid:clip_id>/add_child',
-                              endpoint='adder',
-                              resource_class_kwargs={
-                                    'server': self.server_qt
-                              })
-        self.api.add_resource(Clip,
-                              '/clip/latest/',
-                              '/clip/<uuid:clip_id>/',
-                              '/clip/<uuid:clip_id>/get_alternatives/',
-                              '/clip/<uuid:clip_id>/call_hooks',
-                              resource_class_kwargs={
-                                    'server': self.server_qt
-                              })
-        self.api.add_resource(Clips,
-                              '/clip/',
-                              resource_class_kwargs={
-                                    'server': self.server_qt
-                              })
+        clip_view = Clip.as_view('clip')
+        clip_list_view = Clips.as_view('clip_list')
+        child_add_view = ChildClipAdder.as_view('child_adder')
+        recipient_view = Recipient.as_view('recipient')
 
-        self.api.add_resource(Recipient,
-                              '/clipboard/register',
-                              '/hook/register',
-                              resource_class_kwargs={
-                                    'server': self.server_qt
-                               })
-        """
-        clips_view = Clips.as_view('clip_api')
-        self.flask_server.add_url_rule('/clip/', view_func=clips_view, methods=['GET'])
+        self.flask_server.add_url_rule('/clip/',
+                                       view_func=clip_list_view,
+                                       methods=['GET', 'POST'])
+        self.flask_server.add_url_rule('/clip/latest/',
+                                       view_func=clip_view,
+                                       methods=['GET'])
+        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/',
+                                       view_func=clip_view,
+                                       methods=['GET', 'DELETE',
+                                                'PUT', 'DELETE'])
+        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/get_alternatives',
+                                       view_func=clip_view,
+                                       methods=['GET'])
+        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/call_hooks',
+                                       view_func=clip_view,
+                                       methods=['GET'])
+        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/add_child',
+                                       view_func=child_add_view,
+                                       methods=['POST'])
+        self.flask_server.add_url_rule('/clipboard/register',
+                                       view_func=recipient_view,
+                                       methods=['POST'])
+        self.flask_server.add_url_rule('/hook/register',
+                                       view_func=recipient_view,
+                                       methods=['POST'])
 
     def main(self):
         self.add_resources()

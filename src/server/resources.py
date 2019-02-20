@@ -2,16 +2,19 @@ from mimetypes import guess_type
 import re
 
 from flask import request, url_for
+from flask import current_app as server
+from flask.views import MethodView
 
 from flask_restful import abort, Resource
 
-from exceptions import *
+from exceptions import (GrandchildException, ParentNotFoundException,
+                        SameMimetypeException)
 from parser import RequestParser
 
-class BaseClip(Resource):
 
-    def __init__(self, **kwargs):
-        self.server = kwargs['server']
+class BaseClip(MethodView):
+
+    def __init__(self):
         self.parser = RequestParser()
 
     def _not_from_hook(self, request):
@@ -50,16 +53,16 @@ class Clip(BaseClip):
     def get(self, clip_id=None):
         clip = None
         if request.url.endswith('/get_alternatives/'):
-            clip = self.server.get_alternatives(clip_id)
+            clip = server.get_alternatives(clip_id)
         elif request.url.endswith('/latest/'):
-            clip = self.server.get_latest_clip()
+            clip = server.get_latest_clip()
         else:
             preferred_type = None
             if request.accept_mimetypes.best != '*/*':  # Default value
                 # Already sorted by Werkzeug
                 preferred_type = request.accept_mimetypes
 
-            clip = self.server.get_clip_by_id(clip_id, preferred_type)
+            clip = server.get_clip_by_id(clip_id, preferred_type)
 
         if clip is None:
             return {'error': 'No clip with specified id'} , 404
@@ -74,7 +77,7 @@ class Clip(BaseClip):
         data = self.parser.get_data_from_request(request)
         if not data:
             abort(400)
-        clip = self.server.save_in_database(_id=clip_id, data=data, propagate=False)
+        clip = server.save_in_database(_id=clip_id, data=data, propagate=False)
 
         if clip is not None:
             return clip
@@ -85,7 +88,7 @@ class Clip(BaseClip):
         if clip_id is None:
             return ({'error': 'Please specifiy an existing object to delete'},
                     405)
-        item = self.server.delete_entry_by_id(clip_id=clip_id)
+        item = server.delete_entry_by_id(clip_id=clip_id)
 
         if item is not 0:
             return str(clip_id), 200
@@ -94,7 +97,7 @@ class Clip(BaseClip):
 
     def post(self, clip_id=None):
         if request.url.endswith('/call_hooks'):
-            self.server.call_hooks(clip_id)
+            server.call_hooks(clip_id)
             return '', 204
         else:
             return {'error': 'Please use put to update a clip'}, 400
@@ -117,14 +120,14 @@ class Clips(BaseClip):
         elif 'parent' in data:
             return {'error': 'Please send to url of intended parent'}, 422
         
-        new_item = self.server.save_in_database(data=data, propagate=propagate)
+        new_item = server.save_in_database(data=data, propagate=propagate)
         return new_item, 201
 
     def get(self):
         """
         Get all clips from the db
         """
-        clip = self.server.get_all_clips()
+        clip = server.get_all_clips()
 
         if clip is None:
             return {'error': 'No clip with specified id'} , 404
@@ -144,7 +147,7 @@ class ChildClipAdder(BaseClip):
 
         data['parent'] = clip_id
 
-        new_item = self.server.save_in_database(data=data, propagate=propagate)
+        new_item = server.save_in_database(data=data, propagate=propagate)
         errors = self.check_for_errors(new_item)
         if errors:
             return errors
@@ -154,7 +157,7 @@ class ChildClipAdder(BaseClip):
 class Recipient(Resource):
 
     def __init__(self, **kwargs):
-        self.server = kwargs['server']
+        server = kwargs['server']
         self.pattern = re.compile(r'http://\w+')
 
     def _is_url(self, url):
@@ -168,7 +171,7 @@ class Recipient(Resource):
         url = data['url']
         if self._is_url(url):
             is_hook = 'hook' in request.url
-            _id = self.server.add_recipient(data['url'], is_hook)
+            _id = server.add_recipient(data['url'], is_hook)
             return ({
                 '_id': _id,
                 'response_url': url_for('clip', _external=True)}, 201)

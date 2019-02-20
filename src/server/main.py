@@ -19,6 +19,7 @@ class MainApp():
 
     def add_resources(self):
         # Creates endpoint for REST-Api
+        """
         self.api.add_resource(ChildClipAdder,
                               '/clip/<uuid:clip_id>/add_child',
                               endpoint='adder',
@@ -45,21 +46,19 @@ class MainApp():
                               resource_class_kwargs={
                                     'server': self.server_qt
                                })
+        """
+        clips_view = Clips.as_view('clip_api')
+        self.flask_server.add_url_rule('/clip/', view_func=clips_view, methods=['GET'])
 
     def main(self):
         self.add_resources()
-        self.server_qt.start_server()
+        self.flask_server.start_server()
 
     def __init__(self, argv):
-        # The flask-server itself
-        self.flask_server = Flask(__name__)
-        # Restful-Flask server
-        self.api = Api(self.flask_server)
         # Database for saving clips, currently mongo
         self.database = ClipDatabase()
-
-        # The Flask-Server itself
-        self.server_qt = FlaskServer(self.flask_server, self.database)
+        # The flask-server itself
+        self.flask_server = FlaskServer(__name__, self.database)
 
 
 if __name__ == "__main__":

@@ -1,14 +1,9 @@
-import os
-
-from base64 import b64encode, b64decode
 from datetime import datetime
 from configparser import ConfigParser
 from uuid import UUID, uuid4
 
 from bson.binary import Binary, UUID_SUBTYPE
-from bson.json_util import default, dumps
-from bson.objectid import ObjectId
-from pymongo import ASCENDING, DESCENDING, MongoClient
+from pymongo import ASCENDING, MongoClient
 from pymongo.collection import ReturnDocument
 
 from exceptions import *
@@ -136,7 +131,7 @@ class ClipDatabase:
         for key, value in data.items():
             new_clip[key] = value
 
-        insert_result = self.clip_collection.insert_one(new_clip)
+        self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
         return self._build_json_response_clip(new_clip)
 
@@ -167,7 +162,9 @@ class ClipDatabase:
         """
         :return: Json-like string containing all clips
         """
-        results = list(self.clip_collection.find({}).sort('creation_date', ASCENDING))
+        results = list(self.clip_collection.find({}).sort(
+            'creation_date', ASCENDING)
+        )
         json_result = [self._build_json_response_clip(i) for i in results]
         return json_result
 
@@ -255,7 +252,7 @@ class ClipDatabase:
         new_clipboard['is_hook'] = is_hook
         print(new_clipboard['is_hook'])
 
-        insert_result = self.clipboard_collection.insert_one(new_clipboard)
+        self.clipboard_collection.insert_one(new_clipboard)
         new_clipboard = self.clipboard_collection.find_one({'_id': _id})
 
         return self._build_json_response_clip(new_clipboard)
@@ -263,5 +260,4 @@ class ClipDatabase:
     def get_recipients(self):
         if self.clipboard_collection.count_documents({}) is 0:
             return None
-        results = self.clipboard_collection.find({})
         return list(self.clipboard_collection.find({}))

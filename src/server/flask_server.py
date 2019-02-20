@@ -1,21 +1,22 @@
 import requests
 from uuid import UUID
 
-from flask import url_for
+from flask import Flask, url_for
 
 from hooks.hook_manager import HookManager
-from exceptions import *
+from exceptions import (GrandchildException, ParentNotFoundException,
+                        SameMimetypeException)
 
 
-class FlaskServer():
+class FlaskServer(Flask):
     """
     Wrapper around the Flask-server to be able to run it in a QThread.
     Also responsible for passing data to the database and the clipboard
     """
     MAX_CONTENT_LENGTH = 15 * 1024 * 1024
 
-    def __init__(self, flask_app, database):
-        self.app = flask_app
+    def __init__(self, app_name, database):
+        super(FlaskServer, self).__init__(app_name)
         self.db = database
         self.native_hooks = HookManager()
         self.clipboards = []
@@ -24,18 +25,18 @@ class FlaskServer():
         self.last_sender = ''
 
         self._build_recipients()
-        self.app.config['MAX_CONTENT_LENGTH'] = self.MAX_CONTENT_LENGTH
+        self.config['MAX_CONTENT_LENGTH'] = self.MAX_CONTENT_LENGTH
 
     def start_server(self):
         """
         Starts the Flask development-server. Cannot use autoreload
         because it runs in a seperate thread
         """
-        self.app.run(debug=False, use_reloader=False, host='0.0.0.0')
+        self.run(debug=False, use_reloader=False, host='0.0.0.0')
 
     def _build_recipients(self):
         result = self.db.get_recipients() or []
-        self.post_hooks = [] 
+        self.post_hooks = []
         self.clipboards = []
         for r in result:
             if r['is_hook']:
@@ -47,7 +48,10 @@ class FlaskServer():
     def _send_failed(self, recipient):
         recipient['error_count'] += 1
         print('Could not send data to {}'.format(recipient['url']))
-        print('Errors for {}: {}'.format(recipient['url'], recipient['error_count']))
+        print('Errors for {}: {}'.format(
+            recipient['url'],
+            recipient['error_count']
+        ))
 
     def send_to_clipboards(self, data):
         """
@@ -80,7 +84,10 @@ class FlaskServer():
         for c in self.post_hooks:
             if c['is_hook']:
                 try:
-                    data['response_url'] = url_for('adder', clip_id=_id, _external=True)
+                    data['response_url'] = url_for(
+                            'adder',
+                            clip_id=_id, _external=True
+                    )
                     requests.post(c['url'], json=data, timeout=5)
                 except:
                     self._send_failed(c)
@@ -104,7 +111,9 @@ class FlaskServer():
         :return: the newly created entry
         """
         new_clip = {}
-        self.last_sender = self._get_last_sender_or_None(data.pop('sender_id', ''))
+        self.last_sender = self._get_last_sender_or_None(
+                data.pop('sender_id', '')
+        )
         self.propagate = propagate
         try:
             if _id is None:
@@ -115,7 +124,11 @@ class FlaskServer():
             if new_clip:
                 if 'parent' not in new_clip:
                     self.current_clip = new_clip['_id']
-                response_url = url_for('adder', clip_id=new_clip['_id'], _external=True)
+                response_url = url_for(
+                        'adder',
+                        clip_id=new_clip['_id'],
+                        _external=True
+                )
                 new_clip['response_url'] = response_url.format(new_clip['_id'])
                 self.send_to_clipboards(new_clip)
 

@@ -1,9 +1,7 @@
 from json import dumps
-from mimetypes import guess_type
-from sys import getsizeof
 import re
 
-from PyQt5.QtCore import pyqtSignal, QMimeData, QByteArray, QObject
+from PyQt5.QtCore import pyqtSignal, QMimeData, QObject
 
 
 class Clipboard(QObject):
@@ -81,7 +79,9 @@ class Clipboard(QObject):
                             mime_data.data(dt))
                 except UnicodeDecodeError:
                     clip_data = mime_data.data(dt).data()
-                if clip_data:  # Image data is often empty does QT do image conversion internally on-demand?
+                if clip_data:
+                    # Different images formats are often empty, maybe some
+                    # implicit conversion on OS-level is supposed to provide
                     data.append({
                         'mimetype': dt,
                         'data': clip_data

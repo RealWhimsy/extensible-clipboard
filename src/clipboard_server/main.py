@@ -30,6 +30,8 @@ class MainApp(QtWidgets.QApplication):
             f = open(path, mode='rb')
             new_file['data'] = f
             new_file['mimetype'] = mimetypes.guess_type(path)[0]
+            if new_file['mimetype'] is None:
+                new_file['mimetype'] = 'application/octet-stream'
             to_return.append(new_file)
         return to_return
 

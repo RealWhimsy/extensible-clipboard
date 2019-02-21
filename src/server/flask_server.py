@@ -82,12 +82,13 @@ class FlaskServer(Flask):
         """
         _id = data.get('parent', data['_id'])
         for c in self.post_hooks:
-            if c['is_hook']:
+            types = c['subscribed_types']
+            if data['mimetype'] in types or types == ['*/*']:
+                print(data['mimetype'])
                 try:
-                    data['response_url'] = url_for(
-                            'child_adder',
-                            clip_id=_id, _external=True
-                    )
+                    data['response_url'] = url_for('child_adder',
+                                                   clip_id=_id,
+                                                   _external=True)
                     requests.post(c['url'], json=data, timeout=5)
                 except:
                     self._send_failed(c)
@@ -171,7 +172,7 @@ class FlaskServer(Flask):
         """
         return self.db.get_alternatives(clip_id)
 
-    def add_recipient(self, url, is_hook):
-        r = self.db.add_recipient(url, is_hook)
+    def add_recipient(self, url, is_hook, subscribed_types):
+        r = self.db.add_recipient(url, is_hook, subscribed_types)
         self._build_recipients()
         return r['_id']

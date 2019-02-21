@@ -167,7 +167,10 @@ class Recipient(MethodView):
         url = data['url']
         if self.is_url(url):
             is_hook = 'hook' in request.url
-            _id = current_app.add_recipient(data['url'], is_hook)
+            _id = current_app.add_recipient(
+                    data['url'],
+                    is_hook,
+                    data.get('subscribed_types', None))
             return jsonify(_id=_id,
                            response_url=url_for('clip', _external=True)), 201
         else:

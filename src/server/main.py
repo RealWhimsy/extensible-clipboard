@@ -36,7 +36,7 @@ class MainApp():
                                        methods=['GET'])
         self.flask_server.add_url_rule('/clip/<uuid:clip_id>/call_hooks',
                                        view_func=clip_view,
-                                       methods=['GET'])
+                                       methods=['POST'])
         self.flask_server.add_url_rule('/clip/<uuid:clip_id>/add_child',
                                        view_func=child_add_view,
                                        methods=['POST'])

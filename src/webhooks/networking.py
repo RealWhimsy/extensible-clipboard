@@ -69,9 +69,10 @@ class ConnectionHandler():
         if result:
             result['from_hook'] = True
             result['sender_id'] = self._id
-            r = requests.post(data['response_url'], json=result)
+            requests.post(data['response_url'], json=result)
 
     def handle_new_data(self, request):
+        print(request.headers['Content-Type'])
         if not request.is_json:
             return 'Supplied content not application/json', 415
         data = request.get_json()
@@ -82,10 +83,13 @@ class ConnectionHandler():
             return 'Malformed request', 400
 
     def register_to_server(self):
+        types = ['text/html', 'text/plain'] 
         try:
             response = requests.post(
                     self.clipserver,
-                    json={'url': self.domain},
+                    json={
+                        'url': self.domain,
+                        'subscribed_types': types},
                     timeout=5
             )
             response.raise_for_status()

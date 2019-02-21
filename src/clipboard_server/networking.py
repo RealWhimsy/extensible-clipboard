@@ -1,5 +1,3 @@
-from base64 import b64encode
-from json import dumps, dump
 import sys
 
 from flask import request
@@ -89,6 +87,7 @@ class ClipSender:
     def _post_clip(self, clip, parent_id=None):
         headers = {'Content-Type': clip['mimetype'],
                    'X-C2-sender_id': self._id, }
+        print(headers)
         if parent_id:
             url = self.add_child_url.format(parent_id)
         else:
@@ -102,6 +101,7 @@ class ClipSender:
                 timeout=5
             )
             r.raise_for_status()
+            requests.post(self.call_hook_url.format(r.headers['X-C2-_id']))
         except req_exceptions.ConnectionError as e:
             print('Connection refused by server')
             r = None

@@ -99,7 +99,7 @@ class ClipDatabase:
                         return child
 
         # No exact or wildcard match, default to parent
-        return parent
+        return None
 
     def save_clip(self, data):
         """
@@ -153,7 +153,9 @@ class ClipDatabase:
         if clip is not None:
             if preferred_types:  # Request specified mimetype
                 if not clip['mimetype'] == preferred_types[0]:
-                    clip = self._find_best_match(clip, preferred_types)
+                    best_match = self._find_best_match(clip, preferred_types)
+                    if best_match:
+                        clip = best_match
 
             clip = self._build_json_response_clip(clip)
         return clip

@@ -27,10 +27,10 @@ class MainApp(QtWidgets.QApplication):
         for s in splits:
             new_file = {}
             path = unquote(s)[7:]
-            with open(path, mode='rb') as f:
-                new_file['data'] = f
-                new_file['mimetype'] = mimetypes.guess_type(path)[0]
-                to_return.append(new_file)
+            f = open(path, mode='rb')
+            new_file['data'] = f
+            new_file['mimetype'] = mimetypes.guess_type(path)[0]
+            to_return.append(new_file)
         return to_return
 
     def on_data_get(self, data):

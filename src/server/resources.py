@@ -50,7 +50,6 @@ class Clip(BaseClip):
             if request.accept_mimetypes.best != '*/*':  # Default value
                 # Already sorted by Werkzeug
                 preferred_type = request.accept_mimetypes
-
             clip = current_app.get_clip_by_id(clip_id, preferred_type)
 
         if clip is None:

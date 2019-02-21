@@ -27,6 +27,7 @@ class MainApp():
                                        view_func=clip_view,
                                        methods=['GET'])
         self.flask_server.add_url_rule('/clip/<uuid:clip_id>/',
+                                       endpoint='clip',
                                        view_func=clip_view,
                                        methods=['GET', 'DELETE',
                                                 'PUT', 'DELETE'])

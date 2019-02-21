@@ -6,7 +6,7 @@ from bson.binary import Binary, UUID_SUBTYPE
 from pymongo import ASCENDING, MongoClient
 from pymongo.collection import ReturnDocument
 
-from exceptions import *
+from exceptions import (GrandchildException, ParentNotFoundException)
 
 
 class ClipDatabase:
@@ -121,8 +121,10 @@ class ClipDatabase:
                 raise ParentNotFoundException
             if 'parent' in parent:
                 raise GrandchildException
+            """
             if parent['mimetype'] == data['mimetype']:
                 raise SameMimetypeException
+            """
             new_clip['parent'] = parent_id
 
         new_clip['_id'] = _id
@@ -164,9 +166,9 @@ class ClipDatabase:
         """
         :return: Json-like string containing all clips
         """
-        results = list(self.clip_collection.find({}).sort(
-            'creation_date', ASCENDING)
-        )
+        projection = {'data': False}
+        results = list(self.clip_collection.find({}, projection=projection)
+                       .sort('creation_date', ASCENDING))
         json_result = [self._build_json_response_clip(i) for i in results]
         return json_result
 

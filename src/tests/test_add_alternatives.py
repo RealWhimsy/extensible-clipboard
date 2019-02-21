@@ -51,8 +51,7 @@ class SimpleTextServerTest(unittest.TestCase):
                 self.CLIP_URL + str(fake_id) + '/add_child',
                 json={'mimetype': 'text/plain',
                       'data': 'ClipChild',
-                      'parent': str(fake_id)
-                     })
+                      'parent': str(fake_id)})
 
         self.assertEqual(r.status_code, 412)
 
@@ -67,25 +66,26 @@ class SimpleTextServerTest(unittest.TestCase):
         try:
             UUID(r.headers['X-C2-parent'])
         except ValueError:
-            self.fail('Cannot create UUID from {}'.format(r.headers['X-C2-parent']))
+            self.fail('Cannot create UUID from {}'.format(
+                r.headers['X-C2-parent']))
 
     @unittest.skip
     def test_child_must_have_different_mimetype(self):
         parent_id = self.create_parent()
 
-
         r = requests.post(
                 self.CLIP_URL + parent_id + '/add_child',
                 json={'mimetype': 'text/plain',
                       'data': 'ClipChild',
-                      'parent': parent_id
-                     })
+                      'parent': parent_id})
         self.assertEqual(r.status_code, 422)
 
     def test_server_honors_ACCEPT_header(self):
         parent_id = self.create_parent()
         self.add_child(parent_id)
-        header = {'accept': 'text/html, application/json;q=0.5 ,text/plain;q=0.8'}
+        header = {'accept': 'text/html, '
+                            + 'application/json;q=0.5, '
+                            + 'text/plain;q=0.8'}
 
         r = requests.get(
             self.CLIP_URL + parent_id,
@@ -103,7 +103,7 @@ class SimpleTextServerTest(unittest.TestCase):
                 json={'mimetype': 'application/json',
                       'data': '{"key": "json-child"}',
                       'parent': parent_id
-                     })
+                      })
 
         header = {'accept': 'application/*'}
         r = requests.get(
@@ -135,7 +135,7 @@ class SimpleTextServerTest(unittest.TestCase):
         header = {'accept': 'text/plain;q=0.8, text/html;q=0.3'}
 
         r = requests.get(
-                self.CLIP_URL + child_id, 
+                self.CLIP_URL + child_id,
                 headers=header
         )
 
@@ -159,7 +159,7 @@ class SimpleTextServerTest(unittest.TestCase):
         child = self.add_child(parent_id)
         child_id = child.headers['X-C2-_id']
         r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 300)
 
         self.assertIn(parent_id, r.text)
         self.assertIn(child_id, r.text)
@@ -169,15 +169,16 @@ class SimpleTextServerTest(unittest.TestCase):
         child = self.add_child(parent_id)
         child_id = child.headers['X-C2-_id']
         r = requests.post(self.CLIP_URL,
-                      json={'mimetype': 'text/plain',
-                            'data': 'WrongTurn'
-                           })
+                          json={'mimetype': 'text/plain',
+                                'data': 'WrongTurn'})
+
         wrong_id = r.headers['X-C2-_id']
         r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')
 
         self.assertIn(parent_id, r.text)
         self.assertIn(child_id, r.text)
         self.assertNotIn(wrong_id, r.text)
+
 
 if __name__ == '__main__':
     unittest.main()

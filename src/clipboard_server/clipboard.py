@@ -77,13 +77,15 @@ class Clipboard(QObject):
         for dt in mime_data.formats():
             if self._is_mime_type(dt) and ';charset=' not in dt:
                 try:
-                    clip_data = self._string_from_qByteArray(mime_data.data(dt))
+                    clip_data = self._string_from_qByteArray(
+                            mime_data.data(dt))
                 except UnicodeDecodeError:
                     clip_data = mime_data.data(dt).data()
-                data.append({
-                    'mimetype': dt,
-                    'data': clip_data
-                })
+                if clip_data:  # Image data is often empty does QT do image conversion internally on-demand?
+                    data.append({
+                        'mimetype': dt,
+                        'data': clip_data
+                    })
         self.clipboard_changed_signal.emit(data)
 
     def __init__(self, clip, sync_clipboard):
@@ -94,7 +96,10 @@ class Clipboard(QObject):
         self.clipboard = clip
         self.current_id = ''
         self.mime_data = QMimeData()
-        #https://tools.ietf.org/html/rfc6838#section-4.2
-        self.mime_pattern = re.compile("^([a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]{0,126})/([a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]{0,126})$")
+        # https://tools.ietf.org/html/rfc6838#section-4.2
+        self.mime_pattern = re.compile(
+                '^([a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]{0,126})'
+                + '/'
+                + '([a-zA-Z1-9][a-zA-Z1-9!#$&-^.+]{0,126})$')
         if sync_clipboard:
             self.clipboard.dataChanged.connect(self.onDataChanged)

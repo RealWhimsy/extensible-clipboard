@@ -41,8 +41,10 @@ class Clip(BaseClip):
     def get(self, clip_id=None):
         clip = None
         if request.url.endswith('/get_alternatives/'):
-            clip = current_app.get_alternatives(clip_id)
-            return jsonify(clip), 200
+            clips = current_app.get_alternatives(clip_id)
+            for c in clips:
+                c['url'] = url_for('clip', clip_id=c['_id'], _external=True)
+            return jsonify(clips), 300
         elif request.url.endswith('/latest/'):
             clip = current_app.get_latest_clip()
         else:
@@ -95,7 +97,6 @@ class Clip(BaseClip):
             return jsonify(error='Please use put to update a clip'), 400
 
 
-
 class Clips(BaseClip):
     """
     Class responsible for handling a set of Clips
@@ -127,7 +128,7 @@ class Clips(BaseClip):
         if clips is None:
             return jsonify(error='No clips saved yet'), 404
         else:
-            return clips
+            return jsonify(clips), 200
 
 
 class ChildClipAdder(BaseClip):
@@ -171,4 +172,3 @@ class Recipient(MethodView):
                            response_url=url_for('clip', _external=True)), 201
         else:
             return ('Sent value for url was not an acceptable url', 422)
-

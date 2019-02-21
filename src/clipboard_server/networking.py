@@ -46,14 +46,13 @@ class ConnectionHandler(QObject):
         )
 
     def handle_request(self, request):
-        if not request.is_json:
-            return 'Supplied content not application/json', 415
-        data = request.get_json()
-        if self._check_data(data):
-            self.new_item_signal.emit(data)
-            return '', 204
-        else:
-            return 'Malformed request', 400
+        data = {}
+        data['data'] = request.get_data()
+        data['mimetype'] = request.headers['Content-Type']
+        data['_id'] = request.headers['X-C2-_id']
+        data['parent'] = request.headers['X-C2-parent']
+        self.new_item_signal.emit(data)
+        return '', 204
 
     def register_to_server(self):
         try:
@@ -87,7 +86,6 @@ class ClipSender:
     def _post_clip(self, clip, parent_id=None):
         headers = {'Content-Type': clip['mimetype'],
                    'X-C2-sender_id': self._id, }
-        print(headers)
         if parent_id:
             url = self.add_child_url.format(parent_id)
         else:

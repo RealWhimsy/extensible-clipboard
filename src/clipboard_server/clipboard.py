@@ -35,7 +35,6 @@ class Clipboard(QObject):
     def _is_mime_type(self, mime_string):
         return self.mime_pattern.match(mime_string)
 
-
     def save(self, data):
         """
         Parses the data to a String (only for the current implementation)
@@ -59,12 +58,14 @@ class Clipboard(QObject):
 
     def update(self, data):
         # Refresh object b/c it gets deleted sometimes
+        print(data['mimetype'])
+        """
         self.mime_data = self.clipboard.mimeData()
         mime_type = data['mimetype']
-
         prepared_data = self._prepare_data(data['data'])
         self.mime_data.setData(mime_type, prepared_data)
         self.clipboard.setMimeData(self.mime_data)
+        """
 
     def onDataChanged(self):
         # if change was triggerd by inserting data received from server

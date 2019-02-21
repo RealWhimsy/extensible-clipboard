@@ -23,13 +23,15 @@ class HookWorker():
             return result
         elif mimetype == 'text/plain':
             result['mimetype'] = 'application/json'
-            result['data'] = {'senttext': str(data)}
+            result['data'] = {'senttext': data.decode()}
             return result
         else:
             return None
 
 
 class ConnectionHandler():
+
+    TYPES = ['text/html', 'text/plain']
 
     def __init__(self, flask_app, port, clipserver, domain):
         self.flask_app = flask_app
@@ -49,13 +51,6 @@ class ConnectionHandler():
         print(message)
         sys.exit(1)
 
-    def _check_data(self, data):
-        keys = data.keys()
-        if 'mimetype' in keys and 'data' in keys and '_id' in keys:
-            return True
-        else:
-            return False
-
     def start_server(self):
         self.register_to_server()
         self.flask_app.run(
@@ -64,32 +59,29 @@ class ConnectionHandler():
                 port=self.port
         )
 
-    def delegate_work(self, data):
-        result = self.hook.do_work(data['data'], data['mimetype'])
+    def delegate_work(self, clip):
+        result = self.hook.do_work(clip['data'], clip['mimetype'])
         if result:
-            result['from_hook'] = True
-            result['sender_id'] = self._id
-            requests.post(data['response_url'], json=result)
+            headers = {'Content-Type': result['mimetype'],
+                       'X-C2-from_hook': "True"}
+            requests.post(clip['response_url'], data=result['data'], headers=headers)
 
     def handle_new_data(self, request):
-        print(request.headers['Content-Type'])
-        if not request.is_json:
-            return 'Supplied content not application/json', 415
-        data = request.get_json()
-        if self._check_data(data):
-            _thread.start_new_thread(self.delegate_work, (data,))
-            return '', 204
-        else:
-            return 'Malformed request', 400
+        clip = {'data': request.get_data(),
+                'mimetype': request.headers['Content-Type'],
+                'response_url': request.headers['X-C2-response_url']}
+        if clip['mimetype'] not in self.TYPES:
+            return 'Supplied content not subscribed', 415
+        _thread.start_new_thread(self.delegate_work, (clip,))
+        return '', 204
 
     def register_to_server(self):
-        types = ['text/html', 'text/plain'] 
         try:
             response = requests.post(
                     self.clipserver,
                     json={
                         'url': self.domain,
-                        'subscribed_types': types},
+                        'subscribed_types': self.TYPES},
                     timeout=5
             )
             response.raise_for_status()

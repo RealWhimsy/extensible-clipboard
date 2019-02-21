@@ -67,10 +67,17 @@ class FlaskServer(Flask):
             return
 
         for c in self.clipboards:
-            try:
-                requests.post(c['url'], json=data, timeout=5)
-            except:
-                self._send_failed(c)
+            if self.last_sender != c['_id']:
+                try:
+                    send_data = data.get('data')
+                    headers = {'X-C2-response_url': url_for('child_adder', clip_id=data.get('parent', data['_id']), _external=True)}
+                    headers['Content-Type'] = data.get('mimetype')
+                    for key, value in data.items():
+                        if key != 'data' and key != 'mimetype':
+                            headers['X-C2-{}'.format(key)] = value
+                    requests.post(c['url'], data=send_data, headers=headers, timeout=5)
+                except Exception as e:
+                    self._send_failed(c)
 
     def send_to_hooks(self, data):
         """
@@ -84,12 +91,13 @@ class FlaskServer(Flask):
         for c in self.post_hooks:
             types = c['subscribed_types']
             if data['mimetype'] in types or types == ['*/*']:
-                print(data['mimetype'])
                 try:
-                    data['response_url'] = url_for('child_adder',
-                                                   clip_id=_id,
-                                                   _external=True)
-                    requests.post(c['url'], json=data, timeout=5)
+                    send_data = data.pop('data')
+                    headers = {'X-C2-response_url': url_for('child_adder', clip_id=_id, _external=True)}
+                    headers['Content-Type'] = data.pop('mimetype')
+                    for key, value in data.items():
+                        headers['X-C2-{}'.format(key)] = value
+                    requests.post(c['url'], data=send_data, headers=headers, timeout=5)
                 except:
                     self._send_failed(c)
 

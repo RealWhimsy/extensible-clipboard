@@ -1,6 +1,5 @@
 import requests
 import unittest
-from uuid import uuid4
 
 from pymongo import MongoClient
 
@@ -31,9 +30,10 @@ class SimpleTextServerTest(unittest.TestCase):
         self.clipboard_collection.delete_many({})
 
     def test_get_returns_json(self):
-        r = requests.post(self.CLIP_URL, json={'mimetype': 'text/plain', 'data': 'Clip 1'})
+        r = requests.post(self.CLIP_URL, json={
+            'mimetype': 'text/plain', 'data': 'Clip 1'})
 
-        _id = r.json()['_id']
+        _id = r.headers['X-C2-_id']
 
         r = requests.get(self.CLIP_URL + _id)
         header = r.headers.get('content-type')
@@ -41,17 +41,22 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def test_register_returns_201_when_url(self):
         headers = {'content-type': 'application/json'}
-        r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'http://localhost:5555/'})
+        r = requests.post(self.CLIPBOARD_URL + 'register',
+                          headers=headers,
+                          json={'url': 'http://localhost:5555/'})
         self.assertEqual(r.status_code, 201)
 
     def test_server_only_accepts_json(self):
-        r = requests.post(self.CLIPBOARD_URL + 'register', data={'url': 'http://localhost:5555/'})
+        r = requests.post(self.CLIPBOARD_URL + 'register',
+                          data={'url': 'http://localhost:5555/'})
         self.assertEqual(r.status_code, 415)
 
     def test_server_refuses_non_url(self):
         headers = {'content-type': 'application/json'}
-        r = requests.post(self.CLIPBOARD_URL + 'register', headers=headers, json={'url': 'notAnURL'})
+        r = requests.post(self.CLIPBOARD_URL + 'register',
+                          headers=headers, json={'url': 'notAnURL'})
         self.assertEqual(r.status_code, 422)
+
 
 if __name__ == '__main__':
     unittest.main()

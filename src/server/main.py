@@ -1,9 +1,5 @@
-import signal
 import os
 import sys
-
-from flask import Flask
-from flask_restful import Api
 
 from database import ClipDatabase
 from flask_server import FlaskServer
@@ -34,7 +30,7 @@ class MainApp():
                                        view_func=clip_view,
                                        methods=['GET', 'DELETE',
                                                 'PUT', 'DELETE'])
-        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/get_alternatives',
+        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/get_alternatives/',
                                        view_func=clip_view,
                                        methods=['GET'])
         self.flask_server.add_url_rule('/clip/<uuid:clip_id>/call_hooks',

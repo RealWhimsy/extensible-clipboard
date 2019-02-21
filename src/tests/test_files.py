@@ -40,54 +40,45 @@ class FileUploadTest(unittest.TestCase):
             try:
                 r = requests.post(self.CLIP_URL, files=files)
                 self.assertEqual(r.status_code, 413)
-            except :
+            except:
                 pass
-
-    def test_wrong_mime_type_results_in_error(self):
-        with open('tests/res/example.txt', 'rb') as f:
-            files = {'file': ('example.txt', f,  'text/xml')}
-            r = requests.post(self.CLIP_URL, files=files)
-
-            self.assertEqual(r.status_code, requests.codes.bad_request)
 
     def test_upload_returns_file(self):
         with open('tests/res/example.txt', 'rb') as f:
             files = {'file': ('example.txt', f, 'text/plain')}
             r = requests.post(self.CLIP_URL, files=files)
 
-            filename = r.json()['filename']
-            received_data = r.json()['data']
-
-            received_data = b64decode(received_data)
+            filename = r.headers['X-C2-filename']
+            received_data = r.content
 
             f.seek(0)
             self.assertEqual(received_data, f.read())
             self.assertEqual(filename, 'example.txt')
 
     def test_image_upload_returns_file(self):
-        with open('tests/res/example.txt', 'rb') as f:
+        with open('tests/res/example.jpg', 'rb') as f:
             files = {'file': ('example.jpg', f, 'image/jpeg')}
             r = requests.post(self.CLIP_URL, files=files)
-
-            filename = r.json()['filename']
-            received_data = r.json()['data']
-
-            received_data = b64decode(received_data)
+            received_data = r.content
 
             f.seek(0)
             self.assertEqual(received_data, f.read())
 
     def test_url_upload_returns_correct_file(self):
         image_url = 'http://www.google.com/favicon.ico'
-        data = {'mimetype': 'text/plain', 'data': image_url, 'download_request': True}
-        r = requests.post(self.CLIP_URL, json=data)
+        headers = {'Content-Type': 'text/plain',
+                   'X-C2-download_request': 'True'}
+        r = requests.post(self.CLIP_URL, data=image_url, headers=headers)
         r1 = requests.get(image_url, allow_redirects=True)
-        server_data = b64decode(r.json()['data'])
+        server_data = r.content
+        """
         # shows you, it's working :p
         f = open('tests/res/favicon.ico', 'wb')
         f.write(server_data)
         f.close()
+        """
         self.assertEqual(server_data, r1.content)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -28,8 +28,7 @@ class MainApp(QtWidgets.QApplication):
             new_file = {}
             path = unquote(s)[7:]
             with open(path, mode='rb') as f:
-                new_file['data'] = f.read()
-                new_file['filename'] = os.path.split(path)[1]
+                new_file['data'] = f
                 new_file['mimetype'] = mimetypes.guess_type(path)[0]
                 to_return.append(new_file)
         return to_return

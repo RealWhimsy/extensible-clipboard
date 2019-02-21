@@ -87,22 +87,17 @@ class ClipSender:
         self.id_updater = id_updater
 
     def _post_clip(self, clip, parent_id=None):
-        headers = {}
+        headers = {'Content-Type': clip['mimetype'],
+                   'X-C2-sender_id': self._id, }
         if parent_id:
             url = self.add_child_url.format(parent_id)
         else:
             url = self.post_url
-        if type(clip['data']) is bytes:
-            clip['data'] = b64encode(clip['data'])
-            headers['Content-Encoding': 'base64']
         try:
             r = requests.post(
                 url,
                 headers=headers,
-                json={
-                    'mimetype': clip['mimetype'],
-                    'data': clip['data'],
-                    'sender_id': self._id},
+                data=clip['data'],
                 timeout=5
             )
             r.raise_for_status()

@@ -1,12 +1,12 @@
-from base64 import b64decode
 import re
 import requests
 
-from mimetypes import guess_type
-
 from flask_server import FlaskServer as server
 
+
 class RequestParser():
+
+    ACCEPTED_HEADERS = ['X-C2-src_url', 'X-C2-src_app', 'X-C2-sender_id']
 
     def file_too_large(self, url):
         r = requests.head(url)
@@ -23,7 +23,6 @@ class RequestParser():
         else:
             return None
 
-
     def get_filename_from_cd(self, cd):
         """
         Get filename from content-disposition
@@ -36,7 +35,7 @@ class RequestParser():
         return fname[0]
 
     def download_file(self, url):
-        # https://www.codementor.io/aviaryan/downloading-files-from-urls-in-python-77q3bs0un 
+        # https://www.codementor.io/aviaryan/downloading-files-from-urls-in-python-77q3bs0un
         if self.file_too_large(url):
             return None
 
@@ -51,56 +50,42 @@ class RequestParser():
         file_content = r.content
         filename = self.get_filename_from_url(url)
         if not filename:
-            filename = self.get_filename_from_cd(r.headers.get('content-disposition'))
+            filename = self.get_filename_from_cd(
+                    r.headers.get('content-disposition'))
         mimetype = r.headers.get('content-type')
 
         return (file_content, filename, mimetype)
 
-    def get_data_from_request(self, request, decode):
+    def get_data_from_request(self, request):
         data = {}
-        """
-        Server received a file
-        This path might get deleted and user be forced
-        To send files as base64 inside json-request
-        """
+
+        # Server received a file
+        data['mimetype'] = request.headers['Content-Type']
         if 'file' in request.files:
             f = request.files['file']
-            received_mt = f.mimetype
-            guessed_mt = guess_type(f.filename)[0]
-
-            if received_mt != guessed_mt:
-                return None
-
             data['filename'] = f.filename
             data['data'] = f.stream.read()
-            data['mimetype'] = guessed_mt
 
         # Server received an object (text)
         else:
-            if request.headers.get('CONTENT_TYPE') in 'application/json':
-                json = request.get_json()
-                if json.get('data') and json.get('mimetype'):
-                    if json.pop('download_request', None):
-                        _file = self.download_file(str(json['data']))
-                        if _file:
-                            data['filename'] = _file[1]
-                            json['mimetype'] = _file[2]
-                            json['data'] = _file[0]
-                        else:
-                            return {'error': 'Error during download. Check if file is accessible and smaller than 15MB'}
-                    if decode:
-                        decoded_data = b64decode(json['data'])
-                        data['data'] = decoded_data
-                    else:
-                        data['data'] = json['data']
-                    data['mimetype'] = json['mimetype']
-                    data['src_url'] = json.get('src_url', 'n/a')
-                    data['src_app'] = json.get('src_app', 'n/a')
-                    #if 'sender_id' in json and 'from_hook' not in json:
-                    if 'sender_id' in json:
-                        data['sender_id'] = json['sender_id']
-                    if 'filename' in json:
-                        data['filename'] = json['filename']
+            data['data'] = request.get_data()
+            if 'X-C2-download_request' in request.headers:
+                _file = self.download_file(data['data'].decode())
+                if _file:
+                    data['filename'] = _file[1]
+                    data['data'] = _file[0]
+                    data['mimetype'] = _file[2]
+                else:
+                    return {'error': 'Error during download. \
+                            Check if file is accessible and smaller than 15MB'}
+
+            for h in self.ACCEPTED_HEADERS:
+                if h in request.headers:
+                    data[h[5:]] = request.headers[h]
+        try:
+            data['data'] = data['data'].decode()
+        except:
+            pass
         return data
 
     def __init__(self):

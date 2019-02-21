@@ -93,6 +93,7 @@ class ClipSender:
             url = self.add_child_url.format(parent_id)
         else:
             url = self.post_url
+
         try:
             r = requests.post(
                 url,

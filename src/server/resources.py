@@ -95,6 +95,7 @@ class Clip(BaseClip):
             return jsonify(error='Please use put to update a clip'), 400
 
 
+
 class Clips(BaseClip):
     """
     Class responsible for handling a set of Clips
@@ -154,7 +155,6 @@ class Recipient(MethodView):
 
     def is_url(self, url):
         return re.match(r'^http://', url)
-
 
     def post(self):
         if request.headers.get('CONTENT-TYPE') not in 'application/json':

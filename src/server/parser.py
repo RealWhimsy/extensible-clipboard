@@ -6,7 +6,8 @@ from flask_server import FlaskServer as server
 
 class RequestParser():
 
-    ACCEPTED_HEADERS = ['X-C2-src_url', 'X-C2-src_app', 'X-C2-sender_id']
+    ACCEPTED_HEADERS = ['X-C2-src_url', 'X-C2-src_app',
+                        'X-C2-sender_id', 'X-C2-from_hook']
 
     def file_too_large(self, url):
         r = requests.head(url)
@@ -41,7 +42,7 @@ class RequestParser():
 
         try:
             r = requests.get(url, allow_redirects=True)
-        except:
+        except Exception as e:
             print('Error during download')
             return None
         if int(r.headers.get('content-length')) >= server.MAX_CONTENT_LENGTH:
@@ -84,7 +85,7 @@ class RequestParser():
                     data[h[5:]] = request.headers[h]
         try:
             data['data'] = data['data'].decode()
-        except:
+        except Exception as e:
             pass
         return data
 

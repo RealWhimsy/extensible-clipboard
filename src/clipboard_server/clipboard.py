@@ -1,3 +1,4 @@
+import copy
 from json import dumps
 import re
 
@@ -35,6 +36,20 @@ class Clipboard(QObject):
     def _is_mime_type(self, mime_string):
         return self.mime_pattern.match(mime_string)
 
+    def _get_data_in_clipboard(self):
+        """
+        Creates a deep copy of the current clipboard contents and then
+        clears it. This enables this program to take ownership of the cb
+        without data being lost. After that, it can insert data on its whim.
+        Otherwise, no additional data can be inserted into the clipboard!
+        """
+        mime_data = QMimeData()
+        src = self.clipboard.mimeData()
+        for mt in src.formats():
+            mime_data.setData(mt, copy.deepcopy(src.data(mt)))
+        self.clipboard.clear()
+        return mime_data
+
     def save(self, data):
         """
         Parses the data to a String (only for the current implementation)
@@ -58,7 +73,6 @@ class Clipboard(QObject):
 
     def update(self, data):
         # Refresh object b/c it gets deleted sometimes
-        print(data['mimetype'])
         """
         self.mime_data = self.clipboard.mimeData()
         mime_type = data['mimetype']
@@ -66,6 +80,14 @@ class Clipboard(QObject):
         self.mime_data.setData(mime_type, prepared_data)
         self.clipboard.setMimeData(self.mime_data)
         """
+        if not self.clipboard.ownsClipboard():
+            mime_data = self._get_data_in_clipboard()
+        else:
+            mime_data = self.clipboard.mimeData()
+        mime_type = data['mimetype']
+        prepared_data = self._prepare_data(data['data'])
+        mime_data.setData(mime_type, prepared_data)
+        self.clipboard.setMimeData(mime_data)
 
     def onDataChanged(self):
         # if change was triggerd by inserting data received from server

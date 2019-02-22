@@ -53,7 +53,7 @@ class FlaskServer(Flask):
             recipient['error_count']
         ))
 
-    def send_to_clipboards(self, data):
+    def send_to_clipboards(self, data, force_propagation=False):
         """
         Passes data to the Q-Application so it can put them into the clipboard
         :param data: The data (text, binary) received by the Resource
@@ -67,7 +67,8 @@ class FlaskServer(Flask):
             return
 
         for c in self.clipboards:
-            if self.last_sender != c['_id']:
+            #TODO stuff is not correctly forwarded if owner was clipboard and stuff from hook
+            if force_propagation or self.last_sender != c['_id']:
                 try:
                     send_data = data.get('data')
                     headers = {'X-C2-response_url': url_for('child_adder', clip_id=data.get('parent', data['_id']), _external=True)}
@@ -123,6 +124,7 @@ class FlaskServer(Flask):
         self.last_sender = self._get_last_sender_or_None(
                 data.pop('sender_id', '')
         )  # Prevents clipboard from uselessly receiving it's own data again
+        force_propagation = data.pop('from_hook', False)
         try:
             if _id is None:
                 new_clip = self.db.save_clip(data)
@@ -138,7 +140,7 @@ class FlaskServer(Flask):
                         _external=True
                 )
                 new_clip['response_url'] = response_url.format(new_clip['_id'])
-                self.send_to_clipboards(new_clip)
+                self.send_to_clipboards(new_clip, force_propagation)
 
         except (GrandchildException,
                 ParentNotFoundException,

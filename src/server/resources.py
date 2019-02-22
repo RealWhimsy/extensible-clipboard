@@ -3,8 +3,10 @@ import re
 from flask import abort, current_app, jsonify, make_response, request, url_for
 from flask.views import MethodView
 
+import decorators
 from exceptions import (GrandchildException, ParentNotFoundException,
                         SameMimetypeException)
+from hooks.hook_manager import HookManager
 from parser import RequestParser
 
 
@@ -12,6 +14,10 @@ class BaseClip(MethodView):
 
     def __init__(self):
         self.parser = RequestParser()
+        self.pre_hooks = HookManager()
+
+    def _load_pre_hooks(self):
+        return []
 
     def check_for_errors(self, new_item):
         # Checks if any errors occured during adding of child
@@ -38,6 +44,7 @@ class BaseClip(MethodView):
 
 class Clip(BaseClip):
 
+    @decorators.pre_hooks
     def get(self, clip_id=None):
         clip = None
         if request.url.endswith('/get_alternatives/'):
@@ -119,6 +126,7 @@ class Clips(BaseClip):
         self.set_headers(res, new_item)
         return res
 
+    @decorators.pre_hooks
     def get(self):
         """
         Get all clips from the db

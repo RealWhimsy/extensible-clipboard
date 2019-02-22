@@ -1,13 +1,12 @@
 from .basehook import BaseHook
 
 
-class ExampleHook(BaseHook):
+class UserIsLocalHook(BaseHook):
+    """
+    Small example hook that returns True if the request
+    came from a local IP, one starting with '127.'
+    """
 
-    def do_work(self, obj, handle):
-        if obj['mimetype'] in 'text/plain' and 'filename' not in obj:
-            print(obj)
-            new_object = {}
-            new_object['parent'] = obj['_id']
-            new_object['mimetype'] = 'text/xml'
-            new_object['data'] = '<h1>' + obj['data'] + '</h1>'
-            handle(new_object)
+    def do_work(self, request):
+        remote = request.remote_addr
+        return remote.startswith('127.')

@@ -25,8 +25,11 @@ class HookManager:
                     if isinstance(hook, BaseHook):  # is child of BaseHook
                         self.hooks.append(hook)
 
-    def call_hooks(self, obj, handle):
-        [h.do_work(obj, handle) for h in self.hooks]
+    def call_hooks(self, request):
+        for h in self.hooks:
+            if not h.do_work(request):
+                return False
+        return True
 
     def __init__(self):
         self.hooks = []

@@ -3,7 +3,6 @@ from uuid import UUID
 
 from flask import Flask, url_for
 
-from hooks.hook_manager import HookManager
 from exceptions import (GrandchildException, ParentNotFoundException,
                         SameMimetypeException)
 
@@ -18,7 +17,6 @@ class FlaskServer(Flask):
     def __init__(self, app_name, database):
         super(FlaskServer, self).__init__(app_name)
         self.db = database
-        self.native_hooks = HookManager()
         self.clipboards = []
         self.post_hooks = []
         self.current_clip = ''
@@ -67,16 +65,23 @@ class FlaskServer(Flask):
             return
 
         for c in self.clipboards:
-            #TODO stuff is not correctly forwarded if owner was clipboard and stuff from hook
             if force_propagation or self.last_sender != c['_id']:
                 try:
                     send_data = data.get('data')
-                    headers = {'X-C2-response_url': url_for('child_adder', clip_id=data.get('parent', data['_id']), _external=True)}
+                    response_url = url_for('child_adder',
+                                           clip_id=data.get('parent',
+                                                            data['_id']),
+                                           _external=True)
+                    headers = {'X-C2-response_url': response_url}
                     headers['Content-Type'] = data.get('mimetype')
                     for key, value in data.items():
                         if key != 'data' and key != 'mimetype':
                             headers['X-C2-{}'.format(key)] = value
-                    requests.post(c['url'], data=send_data, headers=headers, timeout=5)
+
+                    requests.post(c['url'],
+                                  data=send_data,
+                                  headers=headers,
+                                  timeout=5)
                 except Exception as e:
                     self._send_failed(c)
 
@@ -94,12 +99,19 @@ class FlaskServer(Flask):
             if data['mimetype'] in types or types == ['*/*']:
                 try:
                     send_data = data.pop('data')
-                    headers = {'X-C2-response_url': url_for('child_adder', clip_id=_id, _external=True)}
+                    response_url = url_for('child_adder',
+                                           clip_id=_id,
+                                           _external=True)
+                    headers = {'X-C2-response_url': response_url}
                     headers['Content-Type'] = data.pop('mimetype')
                     for key, value in data.items():
                         headers['X-C2-{}'.format(key)] = value
-                    requests.post(c['url'], data=send_data, headers=headers, timeout=5)
-                except:
+                    requests.post(c['url'],
+                                  data=send_data,
+                                  headers=headers,
+                                  timeout=5)
+                except Exception as e:
+                    print(e)
                     self._send_failed(c)
 
     def call_hooks(self, clip_id):
@@ -110,7 +122,7 @@ class FlaskServer(Flask):
     def _get_last_sender_or_None(self, sender_id):
         try:
             return UUID(sender_id)
-        except:
+        except Exception as e:
             return None
 
     def save_in_database(self, data, _id=None):

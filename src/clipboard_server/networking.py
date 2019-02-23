@@ -40,8 +40,7 @@ class ConnectionHandler(QObject):
     def start_server(self):
         self.register_to_server()
         self.flask_app.run(
-                debug=True,
-                use_reloader=False,
+                host='0.0.0.0',
                 port=self.port
         )
 

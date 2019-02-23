@@ -1,3 +1,4 @@
+from json import dumps
 import re
 import sys
 import _thread
@@ -6,6 +7,7 @@ from flask import request
 
 import requests
 from requests import exceptions as req_exceptions
+
 
 class HookWorker():
 
@@ -40,7 +42,7 @@ class ConnectionHandler():
         if domain == 'http://localhost':
             domain = domain + ':' + str(self.port) + '/'
         self.domain = domain
-        self.respons_url = ''
+        self.response_url = ''
         self.hook = HookWorker()
 
         @self.flask_app.route('/', methods=['POST'])
@@ -54,8 +56,7 @@ class ConnectionHandler():
     def start_server(self):
         self.register_to_server()
         self.flask_app.run(
-                debug=True,
-                use_reloader=False,
+                host='0.0.0.0',
                 port=self.port
         )
 
@@ -64,7 +65,11 @@ class ConnectionHandler():
         if result:
             headers = {'Content-Type': result['mimetype'],
                        'X-C2-from_hook': "True"}
-            requests.post(clip['response_url'], data=result['data'], headers=headers)
+            if result['mimetype'] == 'application/json':
+                result['data'] = dumps(result['data'])
+            requests.post(clip['response_url'],
+                          data=result['data'],
+                          headers=headers)
 
     def handle_new_data(self, request):
         clip = {'data': request.get_data(),

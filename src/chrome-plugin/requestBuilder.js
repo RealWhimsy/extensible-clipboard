@@ -11,9 +11,11 @@ var requestBuilder = (function(){
     }
 
     function sendRequest(xhr, data=null){
+        /*
         if (data !== null) {
             data = JSON.stringify(data)
         }
+        */
         console.log(xhr)
         xhr.send(data)        
     }

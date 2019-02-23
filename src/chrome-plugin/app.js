@@ -26,8 +26,15 @@ function initContextMenu(){
     });
 }
 
+function onStorageChanged(changes, areaName){
+    if ( 'serverUrl' in changes ) {
+        clipboardApi.onUrlChanged(changes.serverUrl.newValue)
+    }
+}
+
 function initListeners(){
     chrome.contextMenus.onClicked.addListener(onContextClick)
+    chrome.storage.onChanged.addListener(onStorageChanged)
 }
 
 chrome.runtime.onInstalled.addListener(function() {

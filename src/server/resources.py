@@ -40,6 +40,8 @@ class BaseClip(MethodView):
         res.headers['Content-Type'] = clip.pop('mimetype')
         for key, value in clip.items():
             res.headers['X-C2-{}'.format(key)] = value
+        if 'filename' in clip:
+            res.headers['Content-Disposition'] = 'inline; filename={}'.format(clip['filename'])
 
 
 class Clip(BaseClip):

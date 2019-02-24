@@ -7,7 +7,8 @@ from flask_server import FlaskServer as server
 class RequestParser():
 
     ACCEPTED_HEADERS = ['X-C2-src_url', 'X-C2-src_app',
-                        'X-C2-sender_id', 'X-C2-from_hook']
+                        'X-C2-sender_id', 'X-C2-from_hook',
+                        'X-C2-filename',]
 
     def file_too_large(self, url):
         r = requests.head(url)
@@ -59,7 +60,6 @@ class RequestParser():
 
     def get_data_from_request(self, request):
         data = {}
-
         # Server received a file
         data['mimetype'] = request.headers['Content-Type']
         if 'file' in request.files:

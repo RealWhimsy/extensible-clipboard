@@ -30,6 +30,7 @@ class MainApp(QtWidgets.QApplication):
             f = open(path, mode='rb')
             new_file['data'] = f
             new_file['mimetype'] = mimetypes.guess_type(path)[0]
+            new_file['filename'] = os.path.split(f.name)[1]
             if new_file['mimetype'] is None:
                 new_file['mimetype'] = 'application/octet-stream'
             to_return.append(new_file)
@@ -46,7 +47,7 @@ class MainApp(QtWidgets.QApplication):
         for clip in clip_list:
             if 'text/uri-list' in clip['mimetype']:
                 clip_list += self.get_files(clip['data'])
-                break;
+                break
         self.clip_sender.add_clips_to_server(clip_list)
 
     def on_id_get(self, _id):

@@ -49,7 +49,7 @@ class ConnectionHandler(QObject):
         data['data'] = request.get_data()
         data['mimetype'] = request.headers['Content-Type']
         data['_id'] = request.headers['X-C2-_id']
-        data['parent'] = request.headers['X-C2-parent']
+        data['parent'] = request.headers.get('X-C2-parent', None)
         self.new_item_signal.emit(data)
         return '', 204
 
@@ -85,6 +85,8 @@ class ClipSender:
     def _post_clip(self, clip, parent_id=None):
         headers = {'Content-Type': clip['mimetype'],
                    'X-C2-sender_id': self._id, }
+        if 'filename' in clip:
+            headers['X-C2-filename'] = clip['filename']
         if parent_id:
             url = self.add_child_url.format(parent_id)
         else:

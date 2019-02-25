@@ -5,8 +5,8 @@ let app = (function(){
     let $table = null;
 
     function onSyncButtonClick(){
-        $("#clipTable tbody").empty()
-        clipboardApi.getAllClips(app, onClipsGet)
+        $('#clipList').empty();
+        clipboardApi.getAllClips(app, onClipsGet);
     }
 
     function isBinary(data){
@@ -25,33 +25,56 @@ let app = (function(){
         i[data._id] = data;
         chrome.storage.local.set(i) 
     }
+    
+    function createClip(dataItem) {
+        clip = {};
+        clip._id = dataItem._id
+        clip.clipType = dataItem.mimetype
+        clip.children = []
+        /*
+        if (isBinary(data[i].data) === true){
+            console.log(data[i])
+            clip.clipText = data[i].filename.toString()
+        }
+        else {
+            clip.clipText = data[i].data.toString()
+        }
+        if (data[i].mimetype === 'text/html'){
+            a = $(clip.clipText).attr('href')
+            clip.clipText = clip.clipText.replace('<a ', '<a target="_blank" ')
+            clip.clipText = clip.clipText.replace('</a>', a + '</a>')
+        }
+        */
+        return clip
+    
+    }
 
     function onClipsGet(data, textStatus, jqXHR){
         if (jqXHR.status === 200 ){
             let clips = [];
             let clipList = document.getElementById('clipList');
             for (let i = 0; i < data.length; i++){
-                clip = {};
-                clip._id = data[i]._id
-                if (isBinary(data[i].data) === true){
-                    console.log(data[i])
-                    clip.clipText = data[i].filename.toString()
+                if (!( 'parent' in data[i] )) {
+                    clips.push(createClip(data[i]));
+                    saveToStorage(data[i])
                 }
-                else {
-                    clip.clipText = data[i].data.toString()
-                }
-                clip.clipType = data[i].mimetype
-                if (data[i].mimetype === 'text/html'){
-                    a = $(clip.clipText).attr('href')
-                    clip.clipText = clip.clipText.replace('<a ', '<a target="_blank" ')
-                    clip.clipText = clip.clipText.replace('</a>', a + '</a>')
-                }
-                clips.push(clip);
-                saveToStorage(data[i])
             }
-            let _new = this.clipTemplate({clips: clips})
-            this.$table.append(_new)
+            for (let i = 0; i < data.length; i++) {
+                if ( 'parent' in data[i] ) {
+                    for (let j = 0; j < clips.length; j++) {
+                        if ( data[i].parent === clips[j]._id ) {
+                            clips[j].children.push(createClip(data[i]))
+                            saveToStorage(data[i])
+                            break;
+                        }
+                    }
+                }
+            }
+            let context = {"parents": clips}
+            console.log(context)
+            $('#clipList').append(this.clipTemplate(context))
             $('.clipDelete').click(onDeleteClick)
+            $('.clipPaste').click(onPasteClick)
         }
         else {
             console.log(data)
@@ -68,12 +91,22 @@ let app = (function(){
         clipboardApi.deleteClip(_id, onClipDeleted)
     }
 
-    function init(){
-        this.clipTemplate = Handlebars.compile(
-            $("#clipTemplate").html()
-        )
-        this.$table = $('#clipTable tbody')
+    function onClipGet(data, textStatus, jqXHR){
+        if ( jqXHR.status === 200 ) {
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {data: data},);
+            });
+        }
+    }
 
+    function onPasteClick(e){
+        _id = $(e.currentTarget).parent().data('id');
+        clipboardApi.getClip(_id, onClipGet)
+    }
+
+    function init(){
+        let source = document.getElementById("clipTemplate2").innerHTML;
+        this.clipTemplate = Handlebars.compile(source)
         this.syncButton = $('#syncButton')
         this.syncButton.click(onSyncButtonClick)
 

@@ -3,7 +3,7 @@
   "version": "1.0",
   "description": "Interacts with the server to clipboard data",
   "permissions": ["contextMenus", "storage",
-                  "http://localhost/"  
+                  "http://localhost/", "activeTab"
                  ],
   "background": {
       "scripts": ["app.js", 
@@ -32,5 +32,15 @@
     "page": "options.html",
     "open_in_tab": false
   },
+  "content_scripts": [
+        {
+        "matches": [
+            "http://*/*",
+            "https://*/*"
+        ],
+        "js": ["content.js"],
+        "run_at": "document_start"
+        }
+    ], 
   "manifest_version": 2
 }

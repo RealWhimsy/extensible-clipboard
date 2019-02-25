@@ -94,7 +94,7 @@ class Clip(BaseClip):
         item = current_app.delete_entry_by_id(clip_id=clip_id)
 
         if item is not 0:
-            return jsonify(_id=item), 200
+            return jsonify(_id=clip_id), 200
         else:
             return jsonify(error='No clip with specified id'), 404
 

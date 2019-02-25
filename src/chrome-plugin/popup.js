@@ -57,7 +57,7 @@ let app = (function(){
             for (let i = 0; i < data.length; i++){
                 if (!( 'parent' in data[i] )) {
                     clips.push(createClip(data[i]));
-                    saveToStorage(data[i])
+                    //saveToStorage(data[i])
                 }
             }
             for (let i = 0; i < data.length; i++) {
@@ -65,7 +65,7 @@ let app = (function(){
                     for (let j = 0; j < clips.length; j++) {
                         if ( data[i].parent === clips[j]._id ) {
                             clips[j].children.push(createClip(data[i]))
-                            saveToStorage(data[i])
+                            //saveToStorage(data[i])
                             break;
                         }
                     }
@@ -91,8 +91,7 @@ let app = (function(){
     }
 
     function onClipDeleted(data, textStatus, jqXHR) {
-        chrome.storage.local.remove(data)
-        $("[data-id=" + data + "]").remove()
+        $("[data-id=" + data._id + "]").remove()
     }
 
     function onDeleteClick(e){

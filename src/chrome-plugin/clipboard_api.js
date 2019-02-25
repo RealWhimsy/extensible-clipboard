@@ -57,11 +57,16 @@ var clipboardApi = (function(){
         }).done(callback)
     }
 
+    function openLink(_id) {
+        window.open(base_clip_url + _id + '/', '_blank')
+    }
+
     that.saveClip = saveClip;
     that.getAllClips = getAllClips;
     that.getClip = getClip;
     that.deleteClip = deleteClip;
     that.onUrlChanged = onUrlChanged;
+    that.openLink = openLink;
     url = chrome.storage.sync.get('serverUrl', onUrlChanged)
     return that;
 

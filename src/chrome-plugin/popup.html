@@ -13,6 +13,7 @@
     <div id="clipTable">
       <div class="clipType">Mimetype</div>
       <div class="clipPaste"></div>
+      <div class="clipOpen"></div>
       <div class="clipDelete"></div>
     </div>
     <div id="clipList">
@@ -20,26 +21,20 @@
 
 
     <script id="clipTemplate2" type="text/x-handlebars-template">
-      {{#each parents}}
-        <div class="clipRow" data-id={{this._id}}>
+      {{#each clips}}
+        {{#if parent}}
+          <div class="clipRow childRow" data-id={{this._id}}>
+        {{else}}
+          <div class="clipRow" data-id={{this._id}}>
+        {{/if}}
           <div class="clipType">{{this.clipType}}</div>
           <div class="clipPaste"></div>
+          <div class="clipOpen"></div>
           <div class="clipDelete"></div>
         </div>
       {{/each}}
     </script>
-<!--
 
-          <div class="childList>
-            {{#each children}}
-              <div class="clipRow childRow" data-id={{this._id}}>
-                <div class="clipType">{{this.clipType}}</div>
-                <div class="clipPaste"></div>
-                <div class="clipDelete"></div>
-              </div>
-            {{/each}}
-          </div>
--->
     <script src="libs/handlebars-v4.0.12.js"></script>
     <script src="libs/jquery-3.3.1.min.js"></script>
     <script src="requestBuilder.js"></script>

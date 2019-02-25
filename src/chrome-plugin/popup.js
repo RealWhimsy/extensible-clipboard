@@ -28,9 +28,10 @@ let app = (function(){
     
     function createClip(dataItem) {
         clip = {};
-        clip._id = dataItem._id
-        clip.clipType = dataItem.mimetype
-        clip.children = []
+        clip._id = dataItem._id;
+        clip.clipType = dataItem.mimetype;
+        clip.parent = dataItem.parent;
+        clip.children = [];
         /*
         if (isBinary(data[i].data) === true){
             console.log(data[i])
@@ -70,11 +71,19 @@ let app = (function(){
                     }
                 }
             }
-            let context = {"parents": clips}
-            console.log(context)
+            let flattened = [];
+            for (let i = clips.length-1; i >= 0; i--) {
+                flattened.push(clips[i]) 
+                for ( let j = 0; j < clips[i].children.length; j++ ) {
+                    flattened.push(clips[i].children[j])
+                }
+            }
+            let context = {"clips": flattened}
             $('#clipList').append(this.clipTemplate(context))
             $('.clipDelete').click(onDeleteClick)
             $('.clipPaste').click(onPasteClick)
+            $('.clipOpen').click(onOpenClick)
+            $('.clipType').click(onOpenClick)
         }
         else {
             console.log(data)
@@ -89,6 +98,13 @@ let app = (function(){
     function onDeleteClick(e){
         _id = $(e.currentTarget).parent().data('id');
         clipboardApi.deleteClip(_id, onClipDeleted)
+    }
+
+    function onOpenClick(e) {
+        _id = $(e.currentTarget).parent().data('id');
+        if ( _id !== undefined ) {
+            clipboardApi.openLink(_id)
+        }
     }
 
     function onClipGet(data, textStatus, jqXHR){

@@ -32,6 +32,10 @@ let app = (function(){
         clip.clipType = dataItem.mimetype;
         clip.parent = dataItem.parent;
         clip.children = [];
+        date = new Date(dataItem.creation_date)
+        options = {year: '2-digit', month: '2-digit', day: 'numeric',
+                   timezone: 'UTC+1', hour: 'numeric', minute: 'numeric'};
+        clip.date = date.toLocaleString('de-DE', options);
         /*
         if (isBinary(data[i].data) === true){
             console.log(data[i])

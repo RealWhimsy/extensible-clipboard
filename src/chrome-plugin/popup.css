@@ -1,6 +1,6 @@
 body {
-    min-height: 50em;
-    min-width: 32em;
+    min-height: 5em;
+    min-width: 60em;
     margin: unset;
 }
 
@@ -39,6 +39,7 @@ body {
 #clipTable div {
     float:left;
     height: 100%;
+    background-image: None;
 }
 
 #clipList {
@@ -51,27 +52,33 @@ body {
     float: left;
     width: 100%;
     height: 1.5em;
-    margin-top: 0.5em;
+    margin-top: 0.7em;
 }
 
 .clipRow div {
     float:left;
     height: 100%;
+    margin-left: 0.5%;
 }
 
 .childRow {
-    margin-top: 0em;
+    margin-top: 0.1em;
 }
 
 .clipContent {
-    background: #aaa; 
+    background: #eee; 
     overflow: hidden;
     width: 30%;
 }
 
+.clipDate {
+    width: 20%;
+    background: #ccc;
+}
+
 .clipType {
-    width: 70%;
-    background: #ddd;
+    width: 45%;
+    background: #eee;
     overflow:hidden;
     cursor: pointer;
 }
@@ -84,13 +91,16 @@ body {
 }
 
 .clipDelete {
-    background-image: url(images/times.svg)
+    background-image: url(images/times.svg);
+    background-color: #ccc;
 }
 
 .clipPaste{
-    background-image: url(images/paste.svg)
+    background-image: url(images/paste.svg);
+    background-color: #ccc;
 }
 
 .clipOpen {
-    background-image: url(images/external-link-alt.svg)
+    background-image: url(images/external-link-alt.svg);
+    background-color: #eee;
 }

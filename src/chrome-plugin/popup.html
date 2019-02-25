@@ -11,10 +11,13 @@
       </div>
     </div>
     <div id="clipTable">
-      <div class="clipType">Mimetype</div>
-      <div class="clipPaste"></div>
-      <div class="clipOpen"></div>
-      <div class="clipDelete"></div>
+      <div class="clipRow">
+        <div class="clipDate">Date</div>
+        <div class="clipType">Mimetype</div>
+        <div class="clipPaste">Paste</div>
+        <div class="clipOpen">Open</div>
+        <div class="clipDelete">Delete</div>
+      </div>
     </div>
     <div id="clipList">
     </div>
@@ -27,11 +30,12 @@
         {{else}}
           <div class="clipRow" data-id={{this._id}}>
         {{/if}}
-          <div class="clipType">{{this.clipType}}</div>
-          <div class="clipPaste"></div>
-          <div class="clipOpen"></div>
-          <div class="clipDelete"></div>
-        </div>
+        <div class="clipDate">{{this.date}}</div>
+        <div class="clipType">{{this.clipType}}</div>
+        <div class="clipPaste"></div>
+        <div class="clipOpen"></div>
+        <div class="clipDelete"></div>
+      </div>
       {{/each}}
     </script>
 

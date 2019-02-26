@@ -91,14 +91,13 @@ public class ClipTreeDialog implements XDialogEventHandler {
 		Type type = new Type(java.lang.String.class);
 		Any any = new Any(type, "Root");
 		XMutableTreeNode root = mxTreeDataModel.createNode(any, true);
-
 		for (ClipEntry c : currentItems) {
-			any = new Any(type, c.getData());
+			any = new Any(type, c.getCreationDate() + " | " + c.getMimetype());
 			XMutableTreeNode parent = mxTreeDataModel.createNode(any, true);
 			root.appendChild(parent);
 			List<ClipEntry> children = c.getChildren();
 			for (ClipEntry child : children) {
-				any = new Any(type, child.getMimetype() + " | " +child.getData());
+				any = new Any(type, child.getCreationDate() + " | " + child.getMimetype());
 				XMutableTreeNode childNode = mxTreeDataModel.createNode(any, true);
 				parent.appendChild(childNode);
 			}
@@ -129,11 +128,11 @@ public class ClipTreeDialog implements XDialogEventHandler {
 	
 	private ClipEntry findEntry(String value) {
 		for (ClipEntry curr : currentItems) {
-			if (value.contains(curr.getData().toString())) {
+			if (value.contains(curr.getCreationDate()) && value.contains(curr.getMimetype())) {
 				return curr;
 			}
 			for (ClipEntry child : curr.getChildren()) {
-				if (value.contains(child.getData().toString())) {
+				if (value.contains(child.getCreationDate()) && value.contains(child.getMimetype())) {
 					return child;
 				}
 			}

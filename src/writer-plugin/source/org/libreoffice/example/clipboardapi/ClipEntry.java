@@ -1,8 +1,5 @@
 package org.libreoffice.example.clipboardapi;
 
-import java.util.Base64;
-import java.util.Base64.Decoder;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -12,29 +9,30 @@ import org.json.simple.JSONObject;
 public class ClipEntry {
 
 	private UUID _id;
-	private Date creationDate;
+	private String creationDate;
 	private String mimetype;
 	private String data;
 	private byte[] bin_data;
 	private String filename;
-	private List<ClipEntry> children = new LinkedList<ClipEntry>();
-	private Decoder b64decoder; 
+	private List<ClipEntry> children = new LinkedList<ClipEntry>();; 
 	
 	public ClipEntry(String uuid) {
 		_id = UUID.fromString(uuid);
-		b64decoder = Base64.getDecoder();
 	}
 	
 	public ClipEntry(JSONObject json) {
 		_id = UUID.fromString( ((String) json.get("_id")) );
-		b64decoder = Base64.getDecoder();
 	}
 	
-	public Date getCreationDate() {
+	public String getStringId() {
+		return _id.toString();
+	}
+	
+	public String getCreationDate() {
 		return creationDate;
 	}
 
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(String creationDate) {
 		this.creationDate = creationDate;
 	}
 
@@ -66,18 +64,15 @@ public class ClipEntry {
 		return bin_data;
 	}
 	
-	/**
-	 * Sets the data of the object.
-	 * This method will automatically deterimine if the content of data are
-	 * a base64-encoded binary object or just a String and set it to either
-	 * data or binData as needed
-	 * @param data Data for this object
-	 */
-	public void setData(String data) {
-		try {
-			bin_data = b64decoder.decode(data);
-		} catch (IllegalArgumentException e) {
-			this.data = data;
+	public void setBinData(byte[] bin_data) {
+		this.bin_data = bin_data;
+	}
+	
+	public void setData(Object data) {
+		if (data instanceof String) {
+			this.data = (String) data;
+		} else {
+			this.bin_data = (byte[]) data;
 		}
 	}
 	

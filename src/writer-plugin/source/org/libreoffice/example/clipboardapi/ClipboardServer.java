@@ -1,8 +1,11 @@
 package org.libreoffice.example.clipboardapi;
 
 import java.net.MalformedURLException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -32,8 +35,8 @@ public class ClipboardServer {
 	private ClipEntry fillEntry(JSONObject c) {
 		ClipEntry toReturn = new ClipEntry(c);
 		toReturn.setMimetype((String) c.get("mimetype"));
-		toReturn.setData((String) c.get("data"));
-		
+		toReturn.setData(c.get("data"));
+		toReturn.setCreationDate((String)c.get("creation_date"));
 		return toReturn;
 	}
 	

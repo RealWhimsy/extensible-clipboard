@@ -130,13 +130,14 @@ public class DataHelper {
 
 	public static void insertIntoGUICursor(XComponentContext xContext, ClipEntry entry) {
 		String mt = entry.getMimetype();
-		
+		System.out.println(mt);
 		if (mt.contains("text/")) {
 			XTextViewCursor xViewCursor = DocumentHelper.getCurrentCursor(xContext);
 			XText xCrsrText = xViewCursor.getText();
 			XTextCursor xDocumentCursor = xCrsrText.createTextCursorByRange(xViewCursor.getStart());
 			xDocumentCursor.gotoRange(xViewCursor.getEnd(), true);
 			//TODO Problem when trying to set HTML-String
+			System.out.println(entry.getData());
 			xDocumentCursor.setString(entry.getData().toString());
 		}
 		else if (mt.contains("image/")) {

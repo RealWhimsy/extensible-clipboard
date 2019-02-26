@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
+import java.lang.String;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -57,6 +58,16 @@ public class RequestHandler {
 			String result = buildStringFromConnection(conn);
 			json = (JSONArray) parser.parse(result);
 			
+			for (int i = 0; i < json.size(); i++) {
+				JSONObject curr = (JSONObject) json.get(i);
+				byte[] data = getClipData(curr.get("_id").toString());
+				if (curr.get("mimetype").toString().contains("text/")) {
+					curr.put("data", new String(data));
+				}
+				else {
+					curr.put("data", data);
+				}
+			}
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -66,11 +77,35 @@ public class RequestHandler {
 		return json;
 	}
 	
+	private byte[] getDataFromConnection(HttpURLConnection conn) {
+		byte[] result = null;
+		InputStream in;
+		try {
+			in = conn.getInputStream();
+			return in.readAllBytes();
+		} catch (IOException e) {
+			return null;
+		}
+
+	}
+	
+	public byte[] getClipData(String id) {
+		try {
+			URL objectUrl = new URL(clipUrl + id + "/");
+			HttpURLConnection conn = (HttpURLConnection) objectUrl.openConnection();
+			conn.setInstanceFollowRedirects(true);
+			conn.setConnectTimeout(3000);
+			return getDataFromConnection(conn);			
+		} catch (IOException e) {
+			return null;
+		}
+	}
+	
 	public boolean sendStringToServer(JSONObject toSend) {
 		try {
 			HttpURLConnection conn = (HttpURLConnection) clipUrl.openConnection();
 			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Contenty-Type", "application/json");
+			conn.setRequestProperty("Contenty-Type", "text/plain");
 			conn.setInstanceFollowRedirects(true);
 			conn.setConnectTimeout(3000);
 			

@@ -16,18 +16,15 @@ var clipboardApi = (function(){
         if ( url instanceof Object ){
             url = url.serverUrl;
         }
-        console.log(url)
         base_url = url;
         base_clip_url = base_url.concat('clip/');
     }
 
     function saveClip(data, mimetype, src_url=null, src_app=null, download_request=false){
-        console.log('saving')
         let headers = {};
         if (src_url) { headers['X-C2-src_url'] = src_url };
         if (src_app) { headers['X-C2-src_app'] = src_app };
         if (download_request) { headers['X-C2-download_request'] = download_request };
-        console.log(headers)
         $.ajax(base_clip_url, {
             contentType: mimetype,
             data:data,

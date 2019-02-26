@@ -41,7 +41,11 @@ class BaseClip(MethodView):
         for key, value in clip.items():
             res.headers['X-C2-{}'.format(key)] = value
         if 'filename' in clip:
-            res.headers['Content-Disposition'] = 'inline; filename={}'.format(clip['filename'])
+            res.headers['Content-Disposition'] = \
+                'inline; filename={}'.format(clip['filename'])
+        res.headers['Location'] = url_for('clip_details',
+                                          clip_id=clip['_id'],
+                                          _external=True)
 
 
 class Clip(BaseClip):

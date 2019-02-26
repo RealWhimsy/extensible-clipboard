@@ -16,6 +16,7 @@ class MainApp():
     def add_resources(self):
         # Creates endpoint for REST-Api
         clip_view = Clip.as_view('clip')
+        clip_details = Clip.as_view('clip_details')
         clip_list_view = Clips.as_view('clip_list')
         child_add_view = ChildClipAdder.as_view('child_adder')
         recipient_view = Recipient.as_view('recipient')
@@ -27,10 +28,9 @@ class MainApp():
                                        view_func=clip_view,
                                        methods=['GET'])
         self.flask_server.add_url_rule('/clip/<uuid:clip_id>/',
-                                       endpoint='clip',
-                                       view_func=clip_view,
+                                       view_func=clip_details,
                                        methods=['GET', 'DELETE',
-                                                'PUT', 'DELETE'])
+                                                'PUT', ])
         self.flask_server.add_url_rule('/clip/<uuid:clip_id>/'
                                        + 'get_alternatives/',
                                        view_func=clip_view,

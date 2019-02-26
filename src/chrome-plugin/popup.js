@@ -61,7 +61,6 @@ let app = (function(){
             for (let i = 0; i < data.length; i++){
                 if (!( 'parent' in data[i] )) {
                     clips.push(createClip(data[i]));
-                    //saveToStorage(data[i])
                 }
             }
             for (let i = 0; i < data.length; i++) {
@@ -69,7 +68,6 @@ let app = (function(){
                     for (let j = 0; j < clips.length; j++) {
                         if ( data[i].parent === clips[j]._id ) {
                             clips[j].children.push(createClip(data[i]))
-                            //saveToStorage(data[i])
                             break;
                         }
                     }

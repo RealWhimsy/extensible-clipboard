@@ -15,22 +15,46 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+/**
+ * This class is responsible for the communication to the server on a lower
+ * level. Retrieved data will be passed into JSON-objects
+ */
 public class RequestHandler {
 	
+	/** Used to parse received clips into JSON */
 	private JSONParser parser;
+	/** Root Url of the server */
 	private URL serverUrl;
+	/** Url under which clips can be saved or retrieved. serverUrl/clip/ by default */
 	private URL clipUrl;
 	
+	/**
+	 * Construcs a new instance
+	 * @param baseUrl Base url of the Clipboard server
+	 * @throws MalformedURLException If baseUrl is not correct according to java.net.URL
+	 */
 	public RequestHandler(String baseUrl) throws MalformedURLException {
 		updateServerUrl(baseUrl);
 		parser = new JSONParser();
 	}
 	
+	/**
+	 * Sets the currently used serverUrl
+	 * @param baseUrl String representing the Url to be used
+	 * @throws MalformedURLException If baseUrl is not correct according to java.net.URL
+	 */
 	public void updateServerUrl(String baseUrl) throws MalformedURLException {
 		serverUrl = new URL(baseUrl);
 		clipUrl = new URL(baseUrl.concat("clip/"));
 	}
 	
+	/**
+	 * Makes an HTTP-Request and parses the response to a String
+	 * @param conn Preconfigured HttpURLConnection that will be executed.
+	 *   No further actions will be made so be sure that everything is set correctly
+	 * @return A String containing the data from the response
+	 * @throws IOException If the connection failed
+	 */
 	private String buildStringFromConnection(HttpURLConnection conn) throws IOException{
 		InputStream in = conn.getInputStream();
 		BufferedReader br = new BufferedReader( new InputStreamReader(in) );
@@ -47,6 +71,13 @@ public class RequestHandler {
 
 	}
 
+	/**
+	 * This method will make a connection to the server specified in serverUrl and
+	 * request all available clips. It then proceeds to retrieve the data for all clips.
+	 * @return All received clips parsed to JSON, sorted ascending by creation_date.
+	 *   The keys correspond to the ones used on the server, important ones:
+	 *   _id, data, creation_date
+	 */
 	public JSONArray getAllClips() {
 		JSONArray json = new JSONArray();
 		try {
@@ -77,6 +108,13 @@ public class RequestHandler {
 		return json;
 	}
 	
+	/**
+	 Makes an HTTP-Request and parses the response to a byte[].
+	 This will be used if the clip is not a string but binary data, eg. an image
+	 * @param conn Preconfigured HttpURLConnection that will be executed.
+	 *   No further actions will be made so be sure that everything is set correctly
+	 * @return A byte[] containing the data from the response or null if the connection failed.
+	 */
 	private byte[] getDataFromConnection(HttpURLConnection conn) {
 		byte[] result = null;
 		InputStream in;
@@ -89,6 +127,13 @@ public class RequestHandler {
 
 	}
 	
+	/**
+	 * Requests the server to get a specific cilp
+	 * @param id _id of the clip to be requested, needs to be a UUID4- compatible string
+	 * @return A byte[] containg the binary data gotten from the server.
+	 *  According to the mimetype, this may either be a UTF-8-encoded String or
+	 *  simply binary data
+	 */
 	public byte[] getClipData(String id) {
 		try {
 			URL objectUrl = new URL(clipUrl + id + "/");
@@ -101,6 +146,12 @@ public class RequestHandler {
 		}
 	}
 	
+	/**
+	 * POSTs data the server.
+	 * @param toSend JSONObject containing a String as data
+	 * @return true, if server created a new object and responded with 201
+	 *  	   false, otherwise
+	 */
 	public boolean sendStringToServer(JSONObject toSend) {
 		try {
 			HttpURLConnection conn = (HttpURLConnection) clipUrl.openConnection();

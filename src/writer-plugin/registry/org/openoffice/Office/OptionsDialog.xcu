@@ -14,7 +14,7 @@
 						<value>org.libreoffice.example.starterproject</value>
 					</prop>
 					<prop oor:name="Label">
-						<value xml:lang="en-US">Demo Options</value>
+						<value xml:lang="en-US">C^2 Options</value>
 					</prop>
 					<prop oor:name="OptionsPage">
 						<value>%origin%/../../../../dialog/FooOptionsPage.xdl</value>

@@ -24,6 +24,9 @@ import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 import com.sun.star.view.XSelectionSupplier;
 
+/**
+ * This class represents the tree of clips visible on the ClipSelectDialog
+ */
 public class ClipTreeDialog implements XDialogEventHandler {
 
 	private XComponentContext xContext;
@@ -42,40 +45,17 @@ public class ClipTreeDialog implements XDialogEventHandler {
 		initCachedTree();
 	}
 	
+	/**
+	 * Tries to fill the tree with previously cached items from ClipboardServer
+	 */
 	private void initCachedTree() throws Exception{
 		currentItems = cbServer.getCachedClips();
 		fillTree();
 	}
 
-	public void testTree() throws Exception{
-		// https://forum.openoffice.org/en/forum/viewtopic.php?f=20&t=7348
-		XControl tree = DialogHelper.getTree(this.dialog, "ClipTree");
-		XControlModel model = tree.getModel();
-
-		Object xTreeData = this.xContext.getServiceManager()
-				.createInstanceWithContext("com.sun.star.awt.tree.MutableTreeDataModel", this.xContext);
-		XMutableTreeDataModel mxTreeDataModel = (XMutableTreeDataModel) UnoRuntime
-				.queryInterface(XMutableTreeDataModel.class, xTreeData);
-
-		Type type = new Type(java.lang.String.class);
-		Any any = new Any(type, "Clips");
-		XMutableTreeNode root = mxTreeDataModel.createNode(any, true);
-		any = new Any(type, "p1");
-		XMutableTreeNode p1 = mxTreeDataModel.createNode(any, true);
-		any = new Any(type, "p2");
-		XMutableTreeNode p2 = mxTreeDataModel.createNode(any, true);
-		any = new Any(type, "c1");
-		XMutableTreeNode c1 = mxTreeDataModel.createNode(any, true);
-		root.appendChild(p1);
-		root.appendChild(p2);
-		p2.appendChild(c1);
-		
-		mxTreeDataModel.setRoot(root);
-		XPropertySet xTreeModelProperty = (XPropertySet) UnoRuntime.queryInterface(XPropertySet.class, model);
-		xTreeModelProperty.setPropertyValue("DataModel", mxTreeDataModel);
-	}
-
-
+	/**
+	 * Builds the visible representation of the Tree itself
+	 */
 	public void fillTree() throws Exception {
 		if ( currentItems == null ) {
 			return;
@@ -112,11 +92,18 @@ public class ClipTreeDialog implements XDialogEventHandler {
 		dialog.execute();
 	}
 
+	/**
+	 * Closes the Dialog. 
+	 * The button itself is not present anymore
+	 */
 	private void onOkButtonPressed() {
-		System.out.println("The girls are alright");
 		dialog.endExecute();
 	}
 
+	/**
+	 * This will trigger cbServer to get all visible clips from the remote
+	 * Clipboard-server
+	 */
 	private void onSyncButtonPressed() {
 		currentItems = cbServer.getClipsFromServer();
 		try {
@@ -126,6 +113,13 @@ public class ClipTreeDialog implements XDialogEventHandler {
 		}
 	}
 	
+	/**
+	 * Finds the ClipEntry corresponding to the currently selected
+	 * node of the tree
+	 * @param value Visible value selcted
+	 * @return The ClipEntry the user has selected right now.
+	 * 	null, if none could be found, should only ever happen when root is selected
+	 */
 	private ClipEntry findEntry(String value) {
 		for (ClipEntry curr : currentItems) {
 			if (value.contains(curr.getCreationDate()) && value.contains(curr.getMimetype())) {
@@ -140,6 +134,10 @@ public class ClipTreeDialog implements XDialogEventHandler {
 		return null;
 	}
 	
+	/**
+	 * User clicked on insert. Gets the data of the currently selected tree-node 
+	 * and inserts it into the current cursor-position
+	 */
 	private void onInsertPressed() {
 		XTreeControl xtreeControl = DialogHelper.getTreeControl(dialog, "ClipTree");
 		XSelectionSupplier ss = (XSelectionSupplier) xtreeControl;
@@ -151,6 +149,9 @@ public class ClipTreeDialog implements XDialogEventHandler {
 		onOkButtonPressed();
 	}
 
+	/**
+	 * New buttons need to be registered here
+	 */
 	@Override
 	public boolean callHandlerMethod(XDialog dialog, Object eventObject, String methodName)
 			throws WrappedTargetException {
@@ -159,12 +160,10 @@ public class ClipTreeDialog implements XDialogEventHandler {
 			return true; // Event was handled
 		}
 		if (methodName.equals(actionInsert)) {
-			System.out.println("Inserting");
 			onInsertPressed();
 			return true;
 		}
 		if (methodName.equals(actionSync)) {
-			System.out.println("Syncing");
 			onSyncButtonPressed();
 			return true;
 		}

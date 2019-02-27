@@ -6,6 +6,13 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
+/**
+ * This class represents a clip as it is saved on the server.
+ * It should be able to save all metadata possible and may 
+ * need to be updated periodically.
+ * It can save instances of the same type in children,
+ * so the parent-child-relationship between clips can be accounted for.
+ */
 public class ClipEntry {
 
 	private UUID _id;
@@ -68,6 +75,11 @@ public class ClipEntry {
 		this.bin_data = bin_data;
 	}
 	
+	/**
+	 * Sets either data or binData depending on the class of data.
+	 * If data is a String, it will be saved to this.data,
+	 * if it is a byte[], it will be saved to binData
+	 */
 	public void setData(Object data) {
 		if (data instanceof String) {
 			this.data = (String) data;

@@ -85,8 +85,6 @@ public final class StarterProjectImpl extends WeakBase implements com.sun.star.a
 	
 	private void onCopyClicked() {
 		XText xSelectedText = DataHelper.getCurrentGUISelection(m_xContext);
-		System.out.println(xSelectedText);
-		System.out.println(xSelectedText.getString());
 	}
 
 	// com.sun.star.task.XJobExecutor:

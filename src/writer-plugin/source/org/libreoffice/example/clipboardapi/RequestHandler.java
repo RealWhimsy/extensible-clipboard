@@ -3,6 +3,7 @@ package org.libreoffice.example.clipboardapi;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.lang.String;
@@ -116,7 +117,6 @@ public class RequestHandler {
 	 * @return A byte[] containing the data from the response or null if the connection failed.
 	 */
 	private byte[] getDataFromConnection(HttpURLConnection conn) {
-		byte[] result = null;
 		InputStream in;
 		try {
 			in = conn.getInputStream();
@@ -156,14 +156,16 @@ public class RequestHandler {
 		try {
 			HttpURLConnection conn = (HttpURLConnection) clipUrl.openConnection();
 			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Contenty-Type", "text/plain");
+			conn.setRequestProperty("Content-Type", toSend.get("mimetype").toString());
+			conn.setRequestProperty("X-C2-src_app", "Libre Office");
 			conn.setInstanceFollowRedirects(true);
 			conn.setConnectTimeout(3000);
+			conn.setDoOutput(true);
 			
-			OutputStreamWriter wr= new OutputStreamWriter(conn.getOutputStream());
-			wr.write(toSend.toString());
-			wr.close();
-			
+			OutputStream os = conn.getOutputStream();
+			os.write(toSend.get("data").toString().getBytes("UTF-8"));
+			os.close();
+
 			if (conn.getResponseCode() == 201) {
 				return true;
 			}

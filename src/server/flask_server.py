@@ -9,9 +9,13 @@ from exceptions import (GrandchildException, ParentNotFoundException,
 
 class FlaskServer(Flask):
     """
-    Wrapper around the Flask-server to be able to run it in a QThread.
-    Also responsible for passing data to the database and the clipboard
+    Wrapper around the Flask-server adding custom logic.
+    Also responsible for passing data to the database and to send
+    newly added data to the webhooks or remote clipboards registered to
+    the server.
     """
+
+    # Bigger requests will be discarded. Currently 15MB
     MAX_CONTENT_LENGTH = 15 * 1024 * 1024
 
     def __init__(self, app_name, database):
@@ -33,6 +37,10 @@ class FlaskServer(Flask):
         self.run(debug=False, use_reloader=False, host='0.0.0.0')
 
     def _build_recipients(self):
+        """
+        Refreshes the lists of all recipients for data on the server,
+        webhooks and clipboards
+        """
         result = self.db.get_recipients() or []
         self.post_hooks = []
         self.clipboards = []
@@ -44,6 +52,11 @@ class FlaskServer(Flask):
             r['error_count'] = 0
 
     def _send_failed(self, recipient):
+        """
+        Called when sending data to a recipient failed. Currently ony counts
+        errors and prints them. Could be used to remove the recipient after
+        a certain number of consecutive failures.
+        """
         recipient['error_count'] += 1
         print('Could not send data to {}'.format(recipient['url']))
         print('Errors for {}: {}'.format(
@@ -53,11 +66,8 @@ class FlaskServer(Flask):
 
     def send_to_clipboards(self, data, force_propagation=False):
         """
-        Passes data to the Q-Application so it can put them into the clipboard
+        Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
-        """
-        """
-        self.native_hooks.call_hooks(data, self.db.save_clip)
         """
         parent = data.get('parent')
         if parent and self.current_clip != parent:

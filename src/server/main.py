@@ -6,16 +6,21 @@ from flask_server import FlaskServer
 from resources import Clip, Clips, ChildClipAdder, Recipient
 
 """
-Built after https://codereview.stackexchange.com/questions/114221/python-gui-by-qtwebkit-and-flask
-https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-works-better-method
-"""  # noqa
+This class is responsible for starting the whole application.
+It initializes the database first and then builds the configuration
+for the Flask server
+"""
 
 
 class MainApp():
 
     def add_resources(self):
-        # Creates endpoint for REST-Api
-        clip_view = Clip.as_view('clip')
+        """
+        Since we use class-based routing for the server, we cannot utilize
+        the decorators provided by Flask and instead have to plug in the
+        routes manually
+        """
+        clip_view = Clip.as_view('clip')  # 'clip' can be used in url_for
         clip_details = Clip.as_view('clip_details')
         clip_list_view = Clips.as_view('clip_list')
         child_add_view = ChildClipAdder.as_view('child_adder')
@@ -60,6 +65,7 @@ class MainApp():
 
 
 if __name__ == "__main__":
+    # Changes into dir for imports to work as expected
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
     q_app = MainApp(sys.argv)
     q_app.main()

@@ -1,40 +1,45 @@
 package org.libreoffice.example.clipboardapi;
 
-import java.util.Base64;
-import java.util.Base64.Decoder;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
+/**
+ * This class represents a clip as it is saved on the server.
+ * It should be able to save all metadata possible and may 
+ * need to be updated periodically.
+ * It can save instances of the same type in children,
+ * so the parent-child-relationship between clips can be accounted for.
+ */
 public class ClipEntry {
 
 	private UUID _id;
-	private Date creationDate;
+	private String creationDate;
 	private String mimetype;
 	private String data;
 	private byte[] bin_data;
 	private String filename;
-	private List<ClipEntry> children = new LinkedList<ClipEntry>();
-	private Decoder b64decoder; 
+	private List<ClipEntry> children = new LinkedList<ClipEntry>();; 
 	
 	public ClipEntry(String uuid) {
 		_id = UUID.fromString(uuid);
-		b64decoder = Base64.getDecoder();
 	}
 	
 	public ClipEntry(JSONObject json) {
 		_id = UUID.fromString( ((String) json.get("_id")) );
-		b64decoder = Base64.getDecoder();
 	}
 	
-	public Date getCreationDate() {
+	public String getStringId() {
+		return _id.toString();
+	}
+	
+	public String getCreationDate() {
 		return creationDate;
 	}
 
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(String creationDate) {
 		this.creationDate = creationDate;
 	}
 
@@ -66,18 +71,20 @@ public class ClipEntry {
 		return bin_data;
 	}
 	
+	public void setBinData(byte[] bin_data) {
+		this.bin_data = bin_data;
+	}
+	
 	/**
-	 * Sets the data of the object.
-	 * This method will automatically deterimine if the content of data are
-	 * a base64-encoded binary object or just a String and set it to either
-	 * data or binData as needed
-	 * @param data Data for this object
+	 * Sets either data or binData depending on the class of data.
+	 * If data is a String, it will be saved to this.data,
+	 * if it is a byte[], it will be saved to binData
 	 */
-	public void setData(String data) {
-		try {
-			bin_data = b64decoder.decode(data);
-		} catch (IllegalArgumentException e) {
-			this.data = data;
+	public void setData(Object data) {
+		if (data instanceof String) {
+			this.data = (String) data;
+		} else {
+			this.bin_data = (byte[]) data;
 		}
 	}
 	

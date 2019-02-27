@@ -9,6 +9,8 @@ import org.libreoffice.example.clipboardapi.ClipEntry;
 import org.libreoffice.example.helper.DocumentHelper;
 
 import com.sun.star.beans.XPropertySet;
+import com.sun.star.graphic.XGraphic;
+import com.sun.star.graphic.XGraphicProvider;
 import com.sun.star.text.XText;
 import com.sun.star.text.XTextContent;
 import com.sun.star.text.XTextCursor;
@@ -19,6 +21,11 @@ import com.sun.star.uno.XComponentContext;
 
 public class DataHelper {
 	
+	/**
+	 * Used when inserting binary data into the document.
+	 * Creates a temporary file so Libre Office can import it
+	 * via its Url
+	 */
 	private static File createTemporaryFileFromEntry(ClipEntry entry) {
 		try {
 			File tmpFile = File.createTempFile("LOC2", "");
@@ -38,6 +45,9 @@ public class DataHelper {
 		}
 	}
 	
+	/**
+	 * Adapted from https://api.libreoffice.org/examples/java/Text/GraphicsInserter.java
+	 */
 	private static void insertGraphicFromFile(XComponentContext xContext, File tmpFile) {
 		 com.sun.star.lang.XMultiComponentFactory xMCF = xContext.getServiceManager();
 			// Querying for the interface XTextDocument on the xcomponent
@@ -84,23 +94,20 @@ public class DataHelper {
              XPropertySet.class, oGraphic);
          try {
              // Creating a string for the graphic url
-             StringBuffer sUrl = new StringBuffer("file:///");
+             StringBuffer sUrl = new StringBuffer("file://");
              sUrl.append(tmpFile.getCanonicalPath().replace('\\', '/'));
              System.out.println( "insert graphic \"" + sUrl + "\"");
 
-             com.sun.star.graphic.XGraphicProvider xGraphicProvider =
-                 UnoRuntime.queryInterface(com.sun.star.graphic.XGraphicProvider.class,
-                     xMCF.createInstanceWithContext("com.sun.star.graphic.GraphicProvider",
-                     xContext));
+             Object oGraphicProvider = xMCF.createInstanceWithContext("com.sun.star.graphic.GraphicProvider", xContext);
+             XGraphicProvider xGraphicProvider = (XGraphicProvider) UnoRuntime.queryInterface(XGraphicProvider.class, oGraphicProvider);
 
+             com.sun.star.beans.PropertyValue[] aMediaProps = new com.sun.star.beans.PropertyValue[1];
+             com.sun.star.beans.PropertyValue aPropertyValue = new com.sun.star.beans.PropertyValue();
+             aPropertyValue.Name = "URL";
+             aPropertyValue.Value = sUrl.toString();
+             aMediaProps[0] = aPropertyValue;
 
-             com.sun.star.beans.PropertyValue[] aMediaProps = new com.sun.star.beans.PropertyValue[] { new com.sun.star.beans.PropertyValue() };
-             aMediaProps[0].Name = "URL";
-             aMediaProps[0].Value = sUrl;
-
-             com.sun.star.graphic.XGraphic xGraphic =
-                 UnoRuntime.queryInterface(com.sun.star.graphic.XGraphic.class,
-                             xGraphicProvider.queryGraphic(aMediaProps));
+             XGraphic xGraphic = xGraphicProvider.queryGraphic(aMediaProps);
 
              // Setting the anchor type
              xPropSet.setPropertyValue("AnchorType",
@@ -130,18 +137,18 @@ public class DataHelper {
 
 	public static void insertIntoGUICursor(XComponentContext xContext, ClipEntry entry) {
 		String mt = entry.getMimetype();
-		
+		System.out.println(mt);
 		if (mt.contains("text/")) {
 			XTextViewCursor xViewCursor = DocumentHelper.getCurrentCursor(xContext);
 			XText xCrsrText = xViewCursor.getText();
 			XTextCursor xDocumentCursor = xCrsrText.createTextCursorByRange(xViewCursor.getStart());
 			xDocumentCursor.gotoRange(xViewCursor.getEnd(), true);
 			//TODO Problem when trying to set HTML-String
+			System.out.println(entry.getData());
 			xDocumentCursor.setString(entry.getData().toString());
 		}
 		else if (mt.contains("image/")) {
 			// https://api.libreoffice.org/examples/java/Text/GraphicsInserter.java
-			System.out.println("Inserting graphic");
 			File tmpFile = createTemporaryFileFromEntry(entry);
 			insertGraphicFromFile(xContext, tmpFile);
             tmpFile.delete();

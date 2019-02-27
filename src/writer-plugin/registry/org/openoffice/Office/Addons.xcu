@@ -15,11 +15,11 @@
 				</prop>
 				<node oor:name="UserDefinedImages">
 					<prop oor:name="ImageSmallURL">
-						<value>vnd.sun.star.extension://org.libreoffice.example.starterproject/images/actionOne_16.png
+						<value>vnd.sun.star.extension://org.libreoffice.example.starterproject/images/logo16.png
 						</value>
 					</prop>
 					<prop oor:name="ImageBigURL">
-						<value>vnd.sun.star.extension://org.libreoffice.example.starterproject/images/actionOne_26.png
+						<value>vnd.sun.star.extension://org.libreoffice.example.starterproject/images/logo26.png
 						</value>
 					</prop>
 				</node>

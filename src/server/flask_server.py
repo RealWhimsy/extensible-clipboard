@@ -109,6 +109,7 @@ class FlaskServer(Flask):
             if data['mimetype'] in types or types == ['*/*']:
                 try:
                     send_data = data.pop('data')
+                    # URL used for adding a child to the entry
                     response_url = url_for('child_adder',
                                            clip_id=_id,
                                            _external=True)
@@ -125,11 +126,18 @@ class FlaskServer(Flask):
                     self._send_failed(c)
 
     def call_hooks(self, clip_id):
+        """
+        Gets a clip and sends it to the post hooks
+        """
         clip = self.db.get_clip_by_id(clip_id)
         if clip:
             self.send_to_hooks(clip)
 
     def _get_last_sender_or_None(self, sender_id):
+        """
+        Creates a UUID to identify the client which sent the last clip.
+        Returns None if sender_id is not a parsable UUID-string
+        """
         try:
             return UUID(sender_id)
         except Exception as e:
@@ -153,6 +161,7 @@ class FlaskServer(Flask):
             else:
                 new_clip = self.db.update_clip(_id, data)
 
+            # Creation successful
             if new_clip:
                 if 'parent' not in new_clip:
                     self.current_clip = new_clip['_id']
@@ -187,6 +196,9 @@ class FlaskServer(Flask):
         return self.db.get_all_clips()
 
     def get_latest_clip(self):
+        """
+        Returns the last added parent clip
+        """
         return self.db.get_latest()
 
     def delete_entry_by_id(self, clip_id):
@@ -205,6 +217,11 @@ class FlaskServer(Flask):
         return self.db.get_alternatives(clip_id)
 
     def add_recipient(self, url, is_hook, subscribed_types):
+        """
+        Adds a recipient (webhook or clipboard to the database)
+        with the specified options
+        :return: The UUID of the created recipient as a UUID-string
+        """
         r = self.db.add_recipient(url, is_hook, subscribed_types)
         self._build_recipients()
         return r['_id']

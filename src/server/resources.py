@@ -8,9 +8,29 @@ from exceptions import (GrandchildException, ParentNotFoundException,
                         SameMimetypeException)
 from hooks.hook_manager import HookManager
 from parser import RequestParser
+"""
+The classes in this file act as the views for Flask and expose the application
+to the network. Extension of the API should happen here and new classes
+introduced should inherit from BaseClip.
+Here, the concept of Clip is introduced used throughout the whole project.
+A clip is the representation of an object in the clipboard. Apart from its
+data it must contain a mimetype. Several other pieces of data can be sent
+with custom HTTP-headers. Please refert to parser.py for a specification
+of those.
+Apart from Recipient, the classes were added to split the logic of processing
+the incoming data into different methods as to make the code more readable.
+"""
 
 
 class BaseClip(MethodView):
+    """
+    This Method view acts a parent-class for all following classes
+    and provides several utility-methods for them like checking
+    the objects received from  the database for errors and returning
+    the correct error-code.
+    It is not intended to act as a view like its subclasses and has no methods
+    implemented for processing requests, this should be done by subclasses.
+    """
 
     def __init__(self):
         self.parser = RequestParser()
@@ -20,8 +40,11 @@ class BaseClip(MethodView):
         return []
 
     def check_for_errors(self, new_item):
-        # Checks if any errors occured during adding of child
-        # Works similar to passing of errors in Django
+        """
+        Checks if any errors occured during adding of child and
+        returns directly aborts the request with an error code
+        Works similar to passing of errors in Django
+        """
         if 'error' in new_item:
             error = new_item['error']
             if isinstance(error, ParentNotFoundException):
@@ -37,6 +60,11 @@ class BaseClip(MethodView):
                 return None
 
     def set_headers(self, res, clip):
+        """
+        Iterates over all items of a clip and puts them into custom
+        HTTP-headers prefixed with X-C2-
+        Also sets the Content-Disposition- and Location-header as needed.
+        """
         res.headers['Content-Type'] = clip.pop('mimetype')
         for key, value in clip.items():
             res.headers['X-C2-{}'.format(key)] = value
@@ -49,17 +77,24 @@ class BaseClip(MethodView):
 
 
 class Clip(BaseClip):
+    """
+    This class deals with operations on a single clip such as changing
+    its contents or getting alternative representations of the same data.
+    """
 
     @decorators.pre_hooks
     def get(self, clip_id=None):
         clip = None
+        # gets the siblings and parent or children of a clip
         if request.url.endswith('/get_alternatives/'):
             clips = current_app.get_alternatives(clip_id)
             for c in clips:
                 c['url'] = url_for('clip', clip_id=c['_id'], _external=True)
             return jsonify(clips), 300
+        # returns the last added parent-clip
         elif request.url.endswith('/latest/'):
             clip = current_app.get_latest_clip()
+        # returns the spcified clip or a sibling according to the CN
         else:
             preferred_type = None
             if request.accept_mimetypes.best != '*/*':  # Default value
@@ -75,6 +110,9 @@ class Clip(BaseClip):
         return res
 
     def put(self, clip_id=None):
+        """
+        Updates the clip specified by clip_id
+        """
         if clip_id is None:
             return jsonify(
                     error='Please specify an existing object to update'), 405
@@ -92,6 +130,10 @@ class Clip(BaseClip):
             return jsonify(error='No clip with specified id'), 404
 
     def delete(self, clip_id=None):
+        """
+        Deletes the clip specified by clip_id. When a parent is deleted,
+        all its children will be removed also.
+        """
         if clip_id is None:
             return jsonify(
                     error='Please specify an existing object to delete'), 404
@@ -135,7 +177,9 @@ class Clips(BaseClip):
     @decorators.pre_hooks
     def get(self):
         """
-        Get all clips from the db
+        Get all clips from the db. This will not get their data to reduce
+        the amount of data sent to the clients. To get the data, one has
+        to request the clip directly by its url ( /clip/{CLIP_ID}/
         """
         clips = current_app.get_all_clips()
 
@@ -147,7 +191,8 @@ class Clips(BaseClip):
 
 class ChildClipAdder(BaseClip):
     """
-    Responsible for adding a child to an existing clip
+    Responsible for adding a child to an existing clip.
+    Introduced to simplify the flow of the application.
     """
 
     def post(self, clip_id=None):
@@ -167,11 +212,26 @@ class ChildClipAdder(BaseClip):
 
 
 class Recipient(MethodView):
+    """
+    Adds a recipient to the database. A recipient represents another webserver
+    that is interested in the data saved on THIS server. There are two kinds
+    of recipeints: remote clipboards and webhook. A clipboard will get
+    virtually and data saved on the server while a webhook may subscribe to
+    specific mimetypes it is interested in.
+    """
 
     def is_url(self, url):
+        """
+        Sanity-check to see if the data sent by the recipient seems to be
+        an URL, might be imporoved
+        """
         return re.match(r'^http://', url)
 
     def post(self):
+        """
+        Adds another recipient. Depending on the URL, the request was sent
+        to, it will be treated as a webhook or a clipboard.
+        """
         if request.headers.get('CONTENT-TYPE') not in 'application/json':
             return jsonify(error='Please send aplication/json'), 415
 

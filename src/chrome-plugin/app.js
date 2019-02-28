@@ -10,7 +10,7 @@ function onContextClick(info, tabs){
         dlr = 'true';
     }
     else if ('linkUrl' in info){
-        data = '<a href="' + info.linkUrl + '"></a>';
+        data = '<a href="' + info.linkUrl + '">' + info.linkUrl + '</a>';
         mimetype = 'text/html';
     }
     src_url = info.pageUrl
@@ -37,7 +37,15 @@ function initListeners(){
     chrome.storage.onChanged.addListener(onStorageChanged)
 }
 
-chrome.runtime.onInstalled.addListener(function() {
+function init() {
     initContextMenu();
     initListeners();
+}
+
+chrome.runtime.onInstalled.addListener(function() {
+    init()
+});
+
+chrome.runtime.onStartup.addListener(function() {
+    init()
 });

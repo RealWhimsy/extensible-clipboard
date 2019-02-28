@@ -6,12 +6,19 @@ from flask import Flask
 from networking import ConnectionHandler
 
 """
-Built after https://codereview.stackexchange.com/questions/114221/python-gui-by-qtwebkit-and-flask
-https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-works-better-method
-"""  # noqa
+A webhook is a program that registers itself to teh remote clip-server.
+Its purpose is to further process the data sent to the server. An example
+could be transforming different image-types into each other.
+Since a single webhook is expected to be limited in scope, it can specify
+the mimetypes it is able to process so the server will only send it useful
+data. The mimetyes can be changed in ConnectionHandler.TYPES
+"""
 
 
 class Webhook():
+    """
+    Parses arguments and inits the flask server
+    """
 
     def main(self):
         self.flask_server.start_server()

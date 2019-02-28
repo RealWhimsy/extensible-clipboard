@@ -120,12 +120,6 @@ class RequestParser():
         for h in self.ACCEPTED_HEADERS:
             if h in request.headers:
                 data[h[5:]] = request.headers[h]
-
-        # Check if the data is a UTF-8-encoded string
-        try:
-            data['data'] = data['data'].decode()
-        except Exception as e:
-            pass
         return data
 
     def __init__(self):

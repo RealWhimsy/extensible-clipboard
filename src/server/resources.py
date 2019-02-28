@@ -65,6 +65,7 @@ class BaseClip(MethodView):
         HTTP-headers prefixed with X-C2-
         Also sets the Content-Disposition- and Location-header as needed.
         """
+        clip['mimetype'] = clip['mimetype'] + "; charset=utf8"
         res.headers['Content-Type'] = clip.pop('mimetype')
         for key, value in clip.items():
             res.headers['X-C2-{}'.format(key)] = value

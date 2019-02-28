@@ -13,6 +13,9 @@ chrome.runtime.onMessage.addListener(
         let selStart = activeElem.selectionStart;
         let front = (activeElem.value).substring(0, selStart);
         let back = (activeElem.value).substring(selStart, activeElem.value.length);
+        if ( request.data instanceof Object ) {
+            request.data = JSON.stringify(request.data)
+        }
         activeElem.value = front + request.data + back;
   }
 );

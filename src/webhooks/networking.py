@@ -39,7 +39,7 @@ class HookWorker():
 class ConnectionHandler():
 
     # Specify the mimetypes the hook is able to process HERE
-    TYPES = ['text/html', 'text/plain']
+    TYPES = ['text/plain']
 
     def __init__(self, flask_app, port, clipserver, domain):
         self.flask_app = flask_app

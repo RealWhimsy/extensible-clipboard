@@ -159,7 +159,6 @@ class ClipDatabase:
         new_clip['last_modified'] = modified_date.isoformat()
         for key, value in data.items():
             new_clip[key] = value
-
         self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
         return self._build_json_response_clip(new_clip)

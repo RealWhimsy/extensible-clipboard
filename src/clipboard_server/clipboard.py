@@ -21,9 +21,12 @@ class Clipboard(QObject):
     clipboard_changed_signal = pyqtSignal(list)
 
     def _prepare_data(self, data):
+        """
+        If the data is a str, it encodes it to bytes.
+        """
         if type(data) is str:
             data = data.encode(encoding='utf8')
-        elif type(data) is dict:
+        elif type(data) is dict:  # JSON received
             data = dumps(data)
             data = data.encode(encoding='utf8')
         else:
@@ -31,9 +34,15 @@ class Clipboard(QObject):
         return data
 
     def _string_from_qByteArray(self, array):
+        """
+        Decodes a string that was saved in the clipboard with UTF-8
+        """
         return bytes.decode(array.data())
 
     def _is_mime_type(self, mime_string):
+        """
+        Checks if mime_string is a valid Mimetype
+        """
         return self.mime_pattern.match(mime_string)
 
     def _get_data_in_clipboard(self):
@@ -72,13 +81,14 @@ class Clipboard(QObject):
             self.current_id = data['_id']
 
     def update(self, data):
-        # Refresh object b/c it gets deleted sometimes
         """
-        self.mime_data = self.clipboard.mimeData()
-        mime_type = data['mimetype']
-        prepared_data = self._prepare_data(data['data'])
-        self.mime_data.setData(mime_type, prepared_data)
-        self.clipboard.setMimeData(self.mime_data)
+        Updates the content of the clipboard. If an update happend to data
+        from this clipboard, the app will take ownership of the clipboard
+        first. This can happen when the data from THIS clipboard was changed
+        by a local application and the data was then sent to the remote server
+        via onDataChanged. If a webhook from the remote server then modified
+        the data, it will be sent back to THIS clipboard and one needs to
+        insert it (which needs ownership of the cb)
         """
         if not self.clipboard.ownsClipboard():
             mime_data = self._get_data_in_clipboard()
@@ -90,6 +100,11 @@ class Clipboard(QObject):
         self.clipboard.setMimeData(mime_data)
 
     def onDataChanged(self):
+        """
+        Called when the data of the clipboard has changed.
+        All data with valid mimetypes will be saved and then given to the
+        local server so it can forward them to the remote clip-server
+        """
         # if change was triggerd by inserting data received from server
         if self.clipboard.ownsClipboard():
             return
@@ -103,7 +118,7 @@ class Clipboard(QObject):
                 except UnicodeDecodeError:
                     clip_data = mime_data.data(dt).data()
                 if clip_data:
-                    # Different images formats are often empty, maybe some
+                    # Various images formats are often empty, maybe some
                     # implicit conversion on OS-level is supposed to provide
                     data.append({
                         'mimetype': dt,

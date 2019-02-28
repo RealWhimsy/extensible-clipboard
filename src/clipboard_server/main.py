@@ -41,7 +41,7 @@ class MainApp(QtWidgets.QApplication):
         splits = uri_list.splitlines()
         for s in splits:
             new_file = {}
-            path = unquote(s)[7:]  # Strings file://
+            path = unquote(s.decode("utf8"))[7:]  # Strings file://
             f = open(path, mode='rb')
             new_file['data'] = f
             new_file['mimetype'] = mimetypes.guess_type(path)[0]

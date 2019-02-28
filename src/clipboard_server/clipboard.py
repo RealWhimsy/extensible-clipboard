@@ -33,12 +33,6 @@ class Clipboard(QObject):
             data = bytes(data)
         return data
 
-    def _string_from_qByteArray(self, array):
-        """
-        Decodes a string that was saved in the clipboard with UTF-8
-        """
-        return bytes.decode(array.data())
-
     def _is_mime_type(self, mime_string):
         """
         Checks if mime_string is a valid Mimetype
@@ -112,11 +106,7 @@ class Clipboard(QObject):
         data = []
         for dt in mime_data.formats():
             if self._is_mime_type(dt) and ';charset=' not in dt:
-                try:
-                    clip_data = self._string_from_qByteArray(
-                            mime_data.data(dt))
-                except UnicodeDecodeError:
-                    clip_data = mime_data.data(dt).data()
+                clip_data = mime_data.data(dt).data()
                 if clip_data:
                     # Various images formats are often empty, maybe some
                     # implicit conversion on OS-level is supposed to provide

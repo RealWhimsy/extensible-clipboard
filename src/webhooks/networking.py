@@ -28,17 +28,7 @@ class HookWorker():
         the new mimetype and the new data. None if any error occurred
         """
         result = {}
-        if mimetype == 'text/html':
-            if data.startswith('<a') and data.endswith('/a>'):
-                # Extracts link from single a-Element
-                pattern = re.compile(r'href=[\'\"](\S*)[\'\"]')
-                result['data'] = pattern.search(data).group(1)
-            else:
-                result['data'] = str(data)
-
-            result['mimetype'] = 'text/plain'
-            return result
-        elif mimetype == 'text/plain':
+        if mimetype == 'text/plain':
             result['mimetype'] = 'application/json'
             result['data'] = {'senttext': data.decode()}
             return result
@@ -55,6 +45,7 @@ class ConnectionHandler():
         self.flask_app = flask_app
         self.port = port
         self.clipserver = clipserver
+        self.register_url = clipserver + "hook/register"
         if domain == 'http://localhost':
             domain = domain + ':' + str(self.port) + '/'
         self.domain = domain
@@ -117,7 +108,7 @@ class ConnectionHandler():
         """
         try:
             response = requests.post(
-                    self.clipserver,
+                    self.register_url,
                     json={
                         'url': self.domain,
                         'subscribed_types': self.TYPES},

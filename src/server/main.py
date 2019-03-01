@@ -61,7 +61,11 @@ class MainApp():
         # Database for saving clips, currently mongo
         self.database = ClipDatabase()
         # The flask-server itself
-        self.flask_server = FlaskServer(__name__, self.database)
+        if len(argv) > 1 and argv[1].isdigit():
+            port = argv[1]
+            self.flask_server = FlaskServer(__name__, self.database, port)
+        else:
+            self.flask_server = FlaskServer(__name__, self.database)
 
 
 if __name__ == "__main__":

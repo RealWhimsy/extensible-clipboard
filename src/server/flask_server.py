@@ -18,9 +18,10 @@ class FlaskServer(Flask):
     # Bigger requests will be discarded. Currently 15MB
     MAX_CONTENT_LENGTH = 15 * 1024 * 1024
 
-    def __init__(self, app_name, database):
+    def __init__(self, app_name, database, port=5000):
         super(FlaskServer, self).__init__(app_name)
         self.db = database
+        self.port = port
         self.clipboards = []
         self.post_hooks = []
         self.current_clip = ''
@@ -34,7 +35,8 @@ class FlaskServer(Flask):
         Starts the Flask development-server. Cannot use autoreload
         because it runs in a seperate thread
         """
-        self.run(debug=False, use_reloader=False, host='0.0.0.0')
+        self.run(debug=False, use_reloader=False,
+                 host='0.0.0.0', port=self.port)
 
     def _build_recipients(self):
         """

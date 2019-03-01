@@ -59,7 +59,7 @@ function init() {
     initContextMenu();
     initListeners();
 }
-
+/*
 chrome.runtime.onInstalled.addListener(function() {
     init()
 });
@@ -67,3 +67,5 @@ chrome.runtime.onInstalled.addListener(function() {
 chrome.runtime.onStartup.addListener(function() {
     init()
 });
+*/
+init()

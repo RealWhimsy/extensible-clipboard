@@ -145,6 +145,7 @@ class MainApp(QtWidgets.QApplication):
 
 
 if __name__ == "__main__":
+    os.chdir(os.path.abspath(os.path.dirname(__file__)))
     q_app = MainApp(sys.argv)
     q_app.main()
     sys.exit(q_app.exec_())

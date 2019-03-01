@@ -156,9 +156,10 @@ class ClipSender:
         if not clip_list:
             return
         r = self._post_clip(clip_list[0])
-        parent_id = r.headers['X-C2-_id']
-        self.id_updater(parent_id)
-        if r and r.status_code == 201 and len(clip_list) > 1:
-            # adds subsequent entries as children of the first
-            for c in clip_list[1:]:
-                self._post_clip(c, parent_id)
+        if r and r.status_code == 201:
+            parent_id = r.headers['X-C2-_id']
+            self.id_updater(parent_id)
+            if len(clip_list) > 1:
+                # adds subsequent entries as children of the first
+                for c in clip_list[1:]:
+                    self._post_clip(c, parent_id)

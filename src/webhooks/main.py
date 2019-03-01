@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import os
 import sys
 
 from flask import Flask
@@ -47,5 +48,6 @@ class Webhook():
 
 
 if __name__ == "__main__":
+    os.chdir(os.path.abspath(os.path.dirname(__file__)))
     hook = Webhook(sys.argv)
     hook.main()

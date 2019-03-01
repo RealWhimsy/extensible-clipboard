@@ -27,3 +27,6 @@ The extension should work for any reasonably new webbrowser based on the Chromiu
 
 #### LibreOffice Writer Plugin
 The extension was written for LibreOffice 6.0.7.3. To install it, open the Extension Manager of LibreOffice, click "Add" and then select the file `PATH/TO/PROJECT/src/writer-plugin/???`
+
+#### Testing
+To ensure the basic functionality of the Clip-Server a bunch of tests are included, located under `PATH/TO/PROJECT/src/tests`. These tests ensure most of the outward-facing API used by the server is correct but currently does not account for every single possible variation. To run those tests enter `python -m unittest discover PATH/TO/PROJECT/tests`.

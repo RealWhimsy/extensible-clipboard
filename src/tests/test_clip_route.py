@@ -35,7 +35,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
         r = requests.get(self.CLIP_URL + _id)
         header = r.headers.get('content-type')
-        self.assertEqual(header, 'text/plain')
+        self.assertIn('text/plain', header)
 
     def test_can_save_and_retrieve_single_item(self):
         headers = {'Content-Type': 'text/plain'}

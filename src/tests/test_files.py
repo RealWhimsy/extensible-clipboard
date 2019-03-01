@@ -1,5 +1,4 @@
-from base64  import b64decode
-
+import os
 import requests
 import unittest
 
@@ -12,6 +11,7 @@ class FileUploadTest(unittest.TestCase):
     client = None
     db = None
     collection = None
+    res_path = os.path.abspath(os.path.dirname(__file__))
 
     @classmethod
     def setUpClass(cls):
@@ -28,14 +28,14 @@ class FileUploadTest(unittest.TestCase):
         self.clip_collection.delete_many({})
 
     def test_can_upload_simple_file(self):
-        with open('tests/res/example.txt', 'rb') as f:
+        with open(os.path.join(self.res_path, 'res/example.txt'), 'rb') as f:
             files = {'file': ('example.txt', f,  'text/plain')}
             r = requests.post(self.CLIP_URL, files=files)
 
             self.assertEqual(r.status_code, requests.codes.created)
 
     def test_cannot_upload_huge_file(self):
-        with open('tests/res/huge_data.clip', 'rb') as f:
+        with open(os.path.join(self.res_path, 'res/huge_data.clip'), 'rb') as f:
             files = {'file': ('example.txt', f,  'text/plain')}
             try:
                 r = requests.post(self.CLIP_URL, files=files)
@@ -44,7 +44,7 @@ class FileUploadTest(unittest.TestCase):
                 pass
 
     def test_upload_returns_file(self):
-        with open('tests/res/example.txt', 'rb') as f:
+        with open(os.path.join(self.res_path, 'res/example.txt'), 'rb') as f:
             files = {'file': ('example.txt', f, 'text/plain')}
             r = requests.post(self.CLIP_URL, files=files)
 
@@ -56,7 +56,7 @@ class FileUploadTest(unittest.TestCase):
             self.assertEqual(filename, 'example.txt')
 
     def test_image_upload_returns_file(self):
-        with open('tests/res/example.jpg', 'rb') as f:
+        with open(os.path.join(self.res_path, 'res/example.jpg'), 'rb') as f:
             files = {'file': ('example.jpg', f, 'image/jpeg')}
             r = requests.post(self.CLIP_URL, files=files)
             received_data = r.content
@@ -73,7 +73,7 @@ class FileUploadTest(unittest.TestCase):
         server_data = r.content
         """
         # shows you, it's working :p
-        f = open('tests/res/favicon.ico', 'wb')
+        f = open('res/favicon.ico', 'wb')
         f.write(server_data)
         f.close()
         """

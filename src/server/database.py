@@ -10,8 +10,28 @@ from exceptions import (GrandchildException, ParentNotFoundException)
 
 
 class ClipDatabase:
+    """
+    This database is mainly for storing single clips. A clip is an object
+    consisting of a mimetype and the associated data as they would be saved
+    in the OS-clipboard. Additionally, metadata can be stored with a clip,
+    the database should simply save those fields, their creation
+    and validation is the responsibility of the parser.
+    A clip may be part of a simple tree-like structure containing one root
+    (called parent) and n leaves (called children). This relation is used
+    to identify clips representing the same data-item and originates
+    from the different representations of an item provided by the OS-clipboard.
+
+    In addition to clips, Recipients can be saved. A recipient represents
+    either a remote clipboard or a webhook and will have an Url pointing
+    to itself. A webhook will also have a list of mimetypes it is subscribed
+    to.
+    """
 
     def __init__(self):
+        """
+        Mainly reads the config from config.ini and establishes
+        a connection to the database
+        """
         config = ConfigParser()
         config.read('config.ini')
         database_conf = config['database']
@@ -29,6 +49,7 @@ class ClipDatabase:
     def _create_binary_uuid(self, _id):
         """
         Creates an Mongo binary uuid from the string-representation of a uuid4
+        This is supposedly faster then using strings as PK's
 
         https://stackoverflow.com/questions/51283260/pymongo-uuid-search-not-returning-documents-that-definitely-exist
         """  # noqc
@@ -53,6 +74,10 @@ class ClipDatabase:
         return clip
 
     def _get_related_entries(self, parent):
+        """
+        Returns a cursor containing the parent itself as well as
+        all it's children.
+        """
         parent_id = self._create_binary_uuid(parent['_id'])
         return self.clip_collection.find(
                 {'$or': [
@@ -61,6 +86,10 @@ class ClipDatabase:
                 ]})
 
     def _get_parent(self, child):
+        """
+        Returns the parent-document of the specified child.
+        Should never return None
+        """
         return self.clip_collection.find_one({
                 '_id': self._create_binary_uuid(child['parent'])
             })
@@ -73,7 +102,7 @@ class ClipDatabase:
         :param preferred_types: List of tuples representing the Accept-header
             of the request. Format: ('text/plain', 1.0).
             The list is to be sorted by the rules of the Accept-header
-        :return: The Mongo-object with the closes match. parent, if no match
+        :return: The Mongo-object with the closes match. None, if no match
         """
         if 'parent' in parent:  # If requested entity is a child itself
             parent = self._get_parent(parent)
@@ -104,9 +133,11 @@ class ClipDatabase:
     def save_clip(self, data):
         """
         Inserts a new clip-object into the database.
+        This method also adds ISO-Timestamps to the new object
+        with the keys creation_date and last_modified
 
-        :param content: The content of the new clip-object
-        :return: A json-like string with the newly created object
+        :param data: The content of the new clip-object
+        :return: A dict representing the new item
         """
         _id = uuid4()
         _id = self._create_binary_uuid(str(_id))
@@ -121,10 +152,6 @@ class ClipDatabase:
                 raise ParentNotFoundException
             if 'parent' in parent:
                 raise GrandchildException
-            """
-            if parent['mimetype'] == data['mimetype']:
-                raise SameMimetypeException
-            """
             new_clip['parent'] = parent_id
 
         new_clip['_id'] = _id
@@ -132,7 +159,6 @@ class ClipDatabase:
         new_clip['last_modified'] = modified_date.isoformat()
         for key, value in data.items():
             new_clip[key] = value
-
         self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
         return self._build_json_response_clip(new_clip)
@@ -146,7 +172,7 @@ class ClipDatabase:
         :param preferred_types: List of tuples representing the Accept-header
             of the request. Format of single entry: ('text/plain', 1.0).
             The list is to be sorted by the rules of the Accept-header
-        :return: Json-like string containing the found object or None
+        :return: A dict containing the found object or None
                  if no object with the id could be found in the database
         """
         clip_id = self._create_binary_uuid(clip_id)
@@ -164,7 +190,8 @@ class ClipDatabase:
 
     def get_all_clips(self):
         """
-        :return: Json-like string containing all clips
+        A list containing all clips in the database. Sorted by creation_date
+        in ascending order (oldest first)
         """
         projection = {'data': False}
         results = list(self.clip_collection.find({}, projection=projection)
@@ -173,6 +200,10 @@ class ClipDatabase:
         return json_result
 
     def get_latest(self):
+        """
+        Returns the parent clip that was added last into the database
+        as a dict
+        """
         results = self.clip_collection.find({
                 "parent": {"$exists": False}
             })
@@ -227,6 +258,10 @@ class ClipDatabase:
             return deleted.deleted_count
 
     def get_alternatives(self, clip_id):
+        """
+        Returns all siblings and the parent for clip_id
+        as a list of dicts
+        """
         bin_id = self._create_binary_uuid(clip_id)
         parent = self.clip_collection.find_one({'_id': bin_id})
         if parent is None:
@@ -242,6 +277,17 @@ class ClipDatabase:
             return results
 
     def add_recipient(self, url, is_hook, subscribed_types):
+        """
+        Adds a recipient to the database. If there is already an recipient
+        with the same URL, this will be returned instead. Subscribed types
+        for a hook will be updated beforehand.
+
+        :param url: The URL the recipient can be reached at
+        :param is_hook: True, if recipient is a hook otherwise it will be
+                        treated as a clipboard
+        :param subscribed_types: List of mimetypes the hook is interested in.
+                                 Will be ignored for clipboards
+        """
         old_instance = self.clipboard_collection.find_one({'url': url})
         if old_instance is not None:
             if subscribed_types:
@@ -267,6 +313,9 @@ class ClipDatabase:
         return self._build_json_response_clip(new_clipboard)
 
     def get_recipients(self):
+        """
+        Returns a list of all saved recipients represented as dicts
+        """
         if self.clipboard_collection.count_documents({}) is 0:
             return None
         return list(self.clipboard_collection.find({}))

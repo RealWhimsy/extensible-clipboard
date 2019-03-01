@@ -9,14 +9,19 @@ from exceptions import (GrandchildException, ParentNotFoundException,
 
 class FlaskServer(Flask):
     """
-    Wrapper around the Flask-server to be able to run it in a QThread.
-    Also responsible for passing data to the database and the clipboard
+    Wrapper around the Flask-server adding custom logic.
+    Also responsible for passing data to the database and to send
+    newly added data to the webhooks or remote clipboards registered to
+    the server.
     """
+
+    # Bigger requests will be discarded. Currently 15MB
     MAX_CONTENT_LENGTH = 15 * 1024 * 1024
 
-    def __init__(self, app_name, database):
+    def __init__(self, app_name, database, port=5000):
         super(FlaskServer, self).__init__(app_name)
         self.db = database
+        self.port = port
         self.clipboards = []
         self.post_hooks = []
         self.current_clip = ''
@@ -30,9 +35,14 @@ class FlaskServer(Flask):
         Starts the Flask development-server. Cannot use autoreload
         because it runs in a seperate thread
         """
-        self.run(debug=False, use_reloader=False, host='0.0.0.0')
+        self.run(debug=False, use_reloader=False,
+                 host='0.0.0.0', port=self.port)
 
     def _build_recipients(self):
+        """
+        Refreshes the lists of all recipients for data on the server,
+        webhooks and clipboards
+        """
         result = self.db.get_recipients() or []
         self.post_hooks = []
         self.clipboards = []
@@ -44,6 +54,11 @@ class FlaskServer(Flask):
             r['error_count'] = 0
 
     def _send_failed(self, recipient):
+        """
+        Called when sending data to a recipient failed. Currently ony counts
+        errors and prints them. Could be used to remove the recipient after
+        a certain number of consecutive failures.
+        """
         recipient['error_count'] += 1
         print('Could not send data to {}'.format(recipient['url']))
         print('Errors for {}: {}'.format(
@@ -53,11 +68,8 @@ class FlaskServer(Flask):
 
     def send_to_clipboards(self, data, force_propagation=False):
         """
-        Passes data to the Q-Application so it can put them into the clipboard
+        Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
-        """
-        """
-        self.native_hooks.call_hooks(data, self.db.save_clip)
         """
         parent = data.get('parent')
         if parent and self.current_clip != parent:
@@ -99,6 +111,7 @@ class FlaskServer(Flask):
             if data['mimetype'] in types or types == ['*/*']:
                 try:
                     send_data = data.pop('data')
+                    # URL used for adding a child to the entry
                     response_url = url_for('child_adder',
                                            clip_id=_id,
                                            _external=True)
@@ -115,11 +128,18 @@ class FlaskServer(Flask):
                     self._send_failed(c)
 
     def call_hooks(self, clip_id):
+        """
+        Gets a clip and sends it to the post hooks
+        """
         clip = self.db.get_clip_by_id(clip_id)
         if clip:
             self.send_to_hooks(clip)
 
     def _get_last_sender_or_None(self, sender_id):
+        """
+        Creates a UUID to identify the client which sent the last clip.
+        Returns None if sender_id is not a parsable UUID-string
+        """
         try:
             return UUID(sender_id)
         except Exception as e:
@@ -143,6 +163,7 @@ class FlaskServer(Flask):
             else:
                 new_clip = self.db.update_clip(_id, data)
 
+            # Creation successful
             if new_clip:
                 if 'parent' not in new_clip:
                     self.current_clip = new_clip['_id']
@@ -177,6 +198,9 @@ class FlaskServer(Flask):
         return self.db.get_all_clips()
 
     def get_latest_clip(self):
+        """
+        Returns the last added parent clip
+        """
         return self.db.get_latest()
 
     def delete_entry_by_id(self, clip_id):
@@ -195,6 +219,11 @@ class FlaskServer(Flask):
         return self.db.get_alternatives(clip_id)
 
     def add_recipient(self, url, is_hook, subscribed_types):
+        """
+        Adds a recipient (webhook or clipboard to the database)
+        with the specified options
+        :return: The UUID of the created recipient as a UUID-string
+        """
         r = self.db.add_recipient(url, is_hook, subscribed_types)
         self._build_recipients()
         return r['_id']

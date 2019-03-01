@@ -1,26 +1,24 @@
-// Saves options to chrome.storage, tken from the Extension Tutorial
-function save_options() {
-  var serverUrl = document.getElementById('serverUrl').value;
-  chrome.storage.sync.set({
-      serverUrl: serverUrl
-  }, function() {
+// Saves options to chrome.storage, taken from the Extension Tutorial
+function save_options() {   
+    var serverUrl = document.getElementById('serverUrl').value;
+    chrome.storage.sync.set({
+        serverUrl: serverUrl
+    }, function() {
     // Update status to let user know options were saved.
     var status = document.getElementById('status');
     status.textContent = 'Options saved.';
     setTimeout(function() {
-      status.textContent = '';
+        status.textContent = '';
     }, 750);
   });
 }
 
-// Restores select box and checkbox state using the preferences
-// stored in chrome.storage.
+// Restores the options
 function restore_options() {
-  chrome.storage.sync.get({
-      serverUrl: 'Enter URL here'
-  }, function(items) {
-    console.log(items)
-    document.getElementById('serverUrl').value = items.serverUrl;
+    chrome.storage.sync.get({
+        serverUrl: 'Enter URL here'
+    }, function(items) {
+        document.getElementById('serverUrl').value = items.serverUrl;
   });
 }
 document.addEventListener('DOMContentLoaded', restore_options);

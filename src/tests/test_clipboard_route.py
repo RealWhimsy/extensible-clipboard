@@ -37,7 +37,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
         r = requests.get(self.CLIP_URL + _id)
         header = r.headers.get('content-type')
-        self.assertEqual(header, 'application/json')
+        self.assertIn('application/json', header)
 
     def test_register_returns_201_when_url(self):
         headers = {'content-type': 'application/json'}

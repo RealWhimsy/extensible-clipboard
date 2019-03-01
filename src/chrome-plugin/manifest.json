@@ -1,14 +1,13 @@
 {
   "name": "Enhanced Clipboard",
   "version": "1.0",
-  "description": "Interacts with the server to clipboard data",
+  "description": "Interacts with the server to clipboard data.\nIcons by FontAwesome https://fontawesome.com/",
   "permissions": ["contextMenus", "storage",
                   "http://localhost/", "activeTab"
                  ],
   "background": {
       "scripts": ["app.js", 
                   "clipboard_api.js",
-                  "requestBuilder.js",
                   "libs/jquery-3.3.1.min.js"],
       "persistent": false
   },

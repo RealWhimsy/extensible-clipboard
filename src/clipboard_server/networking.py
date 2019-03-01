@@ -7,8 +7,22 @@ from requests import exceptions as req_exceptions
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
+"""
+This file contains the two classes needed to provide the communication
+to the remote clip-server.
+ConnectionHandler is a QT-wrapper over a Flask server and will listen to
+incoming requests and handle their data.
+ClipSender on the other hand will send clips that were created locally and
+send them to the remote server.
+This was necessary since flask cannot take action itself withouth receiing
+a request
+"""
+
 
 class ConnectionHandler(QObject):
+    """
+    Wrapper over Flask
+    """
 
     new_item_signal = pyqtSignal(dict)
     recipient_id_got = pyqtSignal(str)
@@ -22,6 +36,7 @@ class ConnectionHandler(QObject):
             domain = domain + ':' + str(self.port) + '/'
         self.domain = domain
 
+        # needed to add the route here, because self.flask_app needs to be set
         @self.flask_app.route('/', methods=['POST'])
         def new_item_incoming():
             return self.handle_request(request)
@@ -31,6 +46,9 @@ class ConnectionHandler(QObject):
         sys.exit(1)
 
     def _check_data(self, data):
+        """
+        Checks if the relevant data could be parsed
+        """
         keys = data.keys()
         if 'mimetype' in keys and 'data' in keys and '_id' in keys:
             return True
@@ -38,6 +56,9 @@ class ConnectionHandler(QObject):
             return False
 
     def start_server(self):
+        """
+        Run flask on specified port
+        """
         self.register_to_server()
         self.flask_app.run(
                 host='0.0.0.0',
@@ -45,6 +66,9 @@ class ConnectionHandler(QObject):
         )
 
     def handle_request(self, request):
+        """
+        Parses incoming data from the server for the relevant parts
+        """
         data = {}
         data['data'] = request.get_data()
         data['mimetype'] = request.headers['Content-Type']
@@ -54,6 +78,10 @@ class ConnectionHandler(QObject):
         return '', 204
 
     def register_to_server(self):
+        """
+        Registers itself to the remote server. Kills the whole
+        application if this fails
+        """
         try:
             response = requests.post(
                     self.clip_server_url,
@@ -75,6 +103,9 @@ class ConnectionHandler(QObject):
 
 
 class ClipSender:
+    """
+    Posting data to remote clip-server
+    """
 
     def __init__(self, clip_server_url, id_updater):
         self.post_url = clip_server_url + "clip/"
@@ -83,6 +114,9 @@ class ClipSender:
         self.id_updater = id_updater
 
     def _post_clip(self, clip, parent_id=None):
+        """
+        Sends a clip received from the local clipboard to the server
+        """
         headers = {'Content-Type': clip['mimetype'],
                    'X-C2-sender_id': self._id, }
         if 'filename' in clip:
@@ -100,6 +134,7 @@ class ClipSender:
                 timeout=5
             )
             r.raise_for_status()
+            # Calls hooks on remote server
             requests.post(self.call_hook_url.format(r.headers['X-C2-_id']))
         except req_exceptions.ConnectionError as e:
             print('Connection refused by server')
@@ -115,12 +150,16 @@ class ClipSender:
         return r
 
     def add_clips_to_server(self, clip_list):
+        """
+        Receives the current clipboard-data and pushes them onto the server
+        """
         if not clip_list:
             return
         r = self._post_clip(clip_list[0])
-        if r and r.status_code == 201 and len(clip_list) > 1:
+        if r and r.status_code == 201:
             parent_id = r.headers['X-C2-_id']
             self.id_updater(parent_id)
-            requests.post(self.call_hook_url.format(parent_id))
-            for c in clip_list[1:]:
-                self._post_clip(c, parent_id)
+            if len(clip_list) > 1:
+                # adds subsequent entries as children of the first
+                for c in clip_list[1:]:
+                    self._post_clip(c, parent_id)

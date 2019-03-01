@@ -7,7 +7,7 @@ from clipboard import Clipboard
 
 class ClipboardHandler(QObject):
     """
-    This class is responsible to take data from other programs,
+    This class is responsible for taking data from other programs,
     plugins etc and save them to the clipboard
     and also forwards the data to the server
     It also retrieves data from the server and can return it
@@ -39,6 +39,7 @@ class ClipboardHandler(QObject):
         """
         :param q_app: The current QApplication this package is part
         of running in
+        :param sync_clipboard: Instructs the clipboard whether or not
+        it should monitor its contents and notify on change
         """
-        # start QCoreApp ...
         self.clipboard = Clipboard(q_app.clipboard(), sync_clipboard)

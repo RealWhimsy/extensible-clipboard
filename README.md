@@ -26,7 +26,7 @@ Webhooks are designed to register themselves to the Clip-Server and be notified 
 The extension should work for any reasonably new webbrowser based on the Chromium enging. It was developed and tested with Vivaldi 2.3. To install it, simply go to the extensions-page `chrome://extensions/`, activate "Developer mode" and click on "Load unpacked". In the pop-up, select the directory `PATH/TO/PROJECT/src/chrome-plugin`. Use the options-page of the extension (right-click on the icon for example) to specify the URL of your running Clip-Server
 
 #### LibreOffice Writer Plugin
-The extension was written for LibreOffice 6.0.7.3. To install it, open the Extension Manager of LibreOffice, click "Add" and then select the file `PATH/TO/PROJECT/src/writer-plugin/???`
+The extension was written for LibreOffice 6.0.7.3. To install it, open the Extension Manager of LibreOffice, click "Add" and then select the file `PATH/TO/PROJECT/src/writer-plugin/dist/WriterPlugin.oxt`. It is recommended to edit this plugin by importing it into Eclipse with [https://marketplace.eclipse.org/content/loeclipse] installed since it takes care of correctly compiling and assembling the .otx-file for you.
 
 #### Testing
 To ensure the basic functionality of the Clip-Server a bunch of tests are included, located under `PATH/TO/PROJECT/src/tests`. These tests ensure most of the outward-facing API used by the server is correct but currently does not account for every single possible variation. To run those tests enter `python -m unittest discover PATH/TO/PROJECT/tests`.

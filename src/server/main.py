@@ -64,6 +64,10 @@ class MainApp():
         if len(argv) > 1 and argv[1].isdigit():
             port = argv[1]
             self.flask_server = FlaskServer(__name__, self.database, port)
+        elif len(argv) > 1 and argv[1] == '-h':
+            print('A port can be specified as the first argument')
+            print('5000 will be used otherwise')
+            sys.exit()
         else:
             self.flask_server = FlaskServer(__name__, self.database)
 

@@ -9,5 +9,7 @@ class UserIsLocalHook(BaseHook):
 
     def do_work(self, request):
         remote = request.remote_addr
-        return True
-        return remote.startswith('192.')
+        if remote.startswith('192.') or remote.startswith('127.'):
+            return True
+        else:
+            return False

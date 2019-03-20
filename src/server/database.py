@@ -42,6 +42,7 @@ class ClipDatabase:
         self.clip_collection = self.db[
                 database_conf['collection']
         ]
+        self.clip_collection.create_index([("creation_date", ASCENDING)])
         self.clipboard_collection = self.db[
                 database_conf['clipboard_collection']
         ]

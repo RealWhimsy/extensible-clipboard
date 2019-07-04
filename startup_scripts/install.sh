@@ -17,6 +17,6 @@ git clone https://github.com/PDA-UR/extensible-clipboard.git
 
 # Install dependencies of services
 cd ./extensible-clipboard
-pip install -r requirements.txt
 pip install flask
 pip install requests
+pip install -r requirements.txt

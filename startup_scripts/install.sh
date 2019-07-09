@@ -13,7 +13,7 @@ sudo mongod &
 echo "MongoDB served"
 
 # Clone Project from git
-git clone https://github.com/PDA-UR/extensible-clipboard.git
+git clone https://github.com/FelixRDL/extensible-clipboard.git
 
 # Install dependencies of services
 cd ./extensible-clipboard

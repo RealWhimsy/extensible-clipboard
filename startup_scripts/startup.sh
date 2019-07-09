@@ -1,5 +1,5 @@
 echo "Attention, this action will kill all active python3 processes!"
-pgrep python3 | xargs kill
+pgrep Python | xargs kill
 
 cd ./extensible-clipboard
 echo "Start Servers"

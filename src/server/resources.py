@@ -83,7 +83,7 @@ class Clip(BaseClip):
     its contents or getting alternative representations of the same data.
     """
 
-    @decorators.pre_hooks
+    # @decorators.pre_hooks
     def get(self, clip_id=None):
         clip = None
         # gets the siblings and parent or children of a clip

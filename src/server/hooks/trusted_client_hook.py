@@ -12,7 +12,7 @@ class ClientIsTrustedHook(BaseHook):
     def do_work(self, request):
         remote = request.remote_addr
         print(remote)
-        if remote in self.trusted_addresses or remote.startswith('192.') or remote.startswith('127.'):
+        if (remote in self.trusted_addresses) or remote.startswith('192.') or remote.startswith('127.'):
             return True
         else:
             return False

@@ -4,7 +4,9 @@ from .basehook import BaseHook
 class ClientIsTrustedHook(BaseHook):
     trusted_addresses = [
         '132.199.132.37',
-        '132.199.182.211'
+        '132.199.182.211',
+        '132.199.196.108',
+        '132.199.128.253'
     ]
     """
     Demo hook for allowing connections from two demo devices (my phone and a raspberry Pi) 

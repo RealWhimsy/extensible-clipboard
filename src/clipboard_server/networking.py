@@ -6,6 +6,7 @@ import requests
 from requests import exceptions as req_exceptions
 
 from PyQt5.QtCore import QObject, pyqtSignal
+from utils import NetworkUtil
 
 """
 This file contains the two classes needed to provide the communication
@@ -34,7 +35,13 @@ class ConnectionHandler(QObject):
         self.clip_server_url = clip_server_url + "clipboard/register"
         if domain == 'http://localhost':
             domain = domain + ':' + str(self.port) + '/'
-        self.domain = domain
+        # Request own ip through external service for more convenience
+        elif domain == 'public':
+            self.domain = NetworkUtil.get_public_ipv4(self.port)
+            print("Domain", self.domain)
+        else:
+            self.domain = domain
+        print(self.domain)
 
         # needed to add the route here, because self.flask_app needs to be set
         @self.flask_app.route('/', methods=['POST'])

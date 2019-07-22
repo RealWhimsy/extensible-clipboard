@@ -113,11 +113,12 @@ class MainApp(QtWidgets.QApplication):
         parser = ArgumentParser()
         parser.add_argument('-p', '--port', type=int, dest='port',
                             help='Port THIS server shall listen on, \
-                                  defaults to 12345', default=12345)
+                                  defaults to 5555', default=5555)
         parser.add_argument('-d', '--domain', type=str, dest='domain',
                             help='URL THIS server can be reached under, \
                                   must contain specified port, \
-                                  defaults to localhost',
+                                  defaults to localhost, set to "public" for exposing clipboard ' \
+                                 'to a remote clipserver',
                                   default='http://localhost')
         parser.add_argument('-s', '--sync-clipboard', type=bool,
                             dest='sync_clipboard', default=False,

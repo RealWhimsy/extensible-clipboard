@@ -131,7 +131,7 @@ class ClipSender:
                 url,
                 headers=headers,
                 data=clip['data'],
-                timeout=5
+                timeout=100
             )
             r.raise_for_status()
         except req_exceptions.ConnectionError as e:

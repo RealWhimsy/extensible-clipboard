@@ -138,6 +138,7 @@ class ClipSender:
             print('Connection refused by server')
             r = None
         except req_exceptions.Timeout as e:
+            print(e)
             print('Server failed to respond in time')
             r = None
         except req_exceptions.HTTPError as e:

@@ -67,6 +67,7 @@ class FlaskServer(Flask):
         ))
 
     def send_to_clipboards(self, data, force_propagation=False):
+        print(self.clipboards)
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
@@ -77,6 +78,7 @@ class FlaskServer(Flask):
             return
 
         for c in self.clipboards:
+            print('\n', c['url'])
             if force_propagation or self.last_sender != c['_id']:
                 try:
                     send_data = data.get('data')
@@ -95,6 +97,7 @@ class FlaskServer(Flask):
                                   headers=headers,
                                   timeout=5)
                 except Exception as e:
+                    print(e)
                     self._send_failed(c)
 
     def send_to_hooks(self, data):
@@ -224,6 +227,7 @@ class FlaskServer(Flask):
         with the specified options
         :return: The UUID of the created recipient as a UUID-string
         """
+        print("Add Rec", url)
         r = self.db.add_recipient(url, is_hook, subscribed_types)
         self._build_recipients()
         return r['_id']

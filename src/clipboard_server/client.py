@@ -37,6 +37,7 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         self.own_port = self.ui.edit_port.text()
         self.is_syncing = self.ui.check_sync.isChecked()
         self.clipboard_process = None
+        self.domain = "<UNKNOWN>"
 
         self.set_connected(False)
 
@@ -75,7 +76,8 @@ class ClipboardClientController(QtWidgets.QMainWindow):
             self.clipboard_server = MainApp(self.own_port, address, "public", self.is_syncing, sys.argv)
             self.clipboard_server.main()
             self.set_connected(True)
-            domain = self.clipboard_server.flask_qt.domain
+            self.domain = self.clipboard_server.flask_qt.domain
+            self.update_display()
         except:
             print("Error connecting!")
             # TODO: error handling and feedback!
@@ -97,7 +99,9 @@ class ClipboardClientController(QtWidgets.QMainWindow):
 
     # Set the display content to the value of str_display and repaint
     def update_display(self):
+        self.lbl_port_3.setText(self.domain)
         self.update()
+        self.repaint()
 
 
     #

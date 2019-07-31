@@ -47,9 +47,6 @@ class ClipboardClientController(QtWidgets.QMainWindow):
 
     def closeEvent(self, QCloseEvent):
         if self.app is not None:
-            # Since process reference cannot kill or terminate the subprocess
-            # https://stackoverflow.com/questions/4789837/how-to-terminate-a-python-subprocess-launched-with-shell-true
-            # os.killpg(os.getpgid(self.clipboard_process.pid), signal.SIGTERM)
             self.app.quit()
 
     # Actions
@@ -67,11 +64,6 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         command = "python3 ./clipboard_server/main.py "+params
         command = command.format(address)
         list = command.split()
-
-        # self.clipboard_process = subprocess.run(command, shell=True)
-        # self.clipboard_process = subprocess.Popen(command, shell=True)
-        # print("Started server, PID: ", self.clipboard_process.pid)
-        print(['main.py']+params.split())
         self.app = MainApp(5555, address, "public", True, sys.argv)
         self.app.main()
 

@@ -108,46 +108,50 @@ class MainApp(QtWidgets.QApplication):
         self.flask_qt.recipient_id_got.connect(self.on_id_get)
         self.server_thread.start()
 
-    def __init__(self, argv):
+    def __init__(self, port, clipserver_address, domain, is_syncing, argv=sys.argv):
         super(MainApp, self).__init__(argv)
-        parser = ArgumentParser()
-        parser.add_argument('-p', '--port', type=int, dest='port',
-                            help='Port THIS server shall listen on, \
-                                  defaults to 5555', default=5555)
-        parser.add_argument('-d', '--domain', type=str, dest='domain',
-                            help='URL THIS server can be reached under, \
-                                  must contain specified port, \
-                                  defaults to localhost, set to "public" for exposing clipboard ' \
-                                 'to a remote clipserver',
-                                  default='http://localhost')
-        parser.add_argument('-s', '--sync-clipboard', type=bool,
-                            dest='sync_clipboard', default=False,
-                            help='If True, content of clipboard will be \
-                            monitored and changes will be sent to server. \
-                            Defaults to False')
-        parser.add_argument('-c', '--clipserver', type=str, dest='clipserver',
-                            help='URL this server can register itself \
-                                  to the clipboard-server', required=True)
-        self.args = parser.parse_args()
 
         self.flask_server = Flask(__name__)
         self.flask_qt = ConnectionHandler(
                 self.flask_server,
-                self.args.port,
-                self.args.clipserver,
-                self.args.domain)
+                port,
+                clipserver_address,
+                domain)
         self.server_thread = QtCore.QThread()
 
         # Connection to system clipboard
-        self.clh = ClipboardHandler(self, self.args.sync_clipboard)
+        self.clh = ClipboardHandler(self, is_syncing)
         self.clip_sender = ClipSender(
-                self.args.clipserver,
+                clipserver_address,
                 self.on_current_clip_id_get)
+
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument('-p', '--port', type=int, dest='port',
+                        help='Port THIS server shall listen on, \
+                              defaults to 5555', default=5555)
+    parser.add_argument('-d', '--domain', type=str, dest='domain',
+                        help='URL THIS server can be reached under, \
+                              must contain specified port, \
+                              defaults to localhost, set to "public" for exposing clipboard ' \
+                             'to a remote clipserver',
+                        default='http://localhost')
+    parser.add_argument('-s', '--sync-clipboard', type=bool,
+                        dest='sync_clipboard', default=False,
+                        help='If True, content of clipboard will be \
+                        monitored and changes will be sent to server. \
+                        Defaults to False')
+    parser.add_argument('-c', '--clipserver', type=str, dest='clipserver',
+                        help='URL this server can register itself \
+                              to the clipboard-server', required=True)
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    print(sys.argv)
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
-    q_app = MainApp(sys.argv)
+    args = parse_args()
+    q_app = MainApp(args.port, args.clipserver, args.domain, args.sync_clipboard, sys.argv)
     q_app.main()
     sys.exit(q_app.exec_())
+
+

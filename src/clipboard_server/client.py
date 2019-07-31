@@ -12,6 +12,8 @@ import subprocess
 #
 #
 # CONSTANTS
+from main import MainApp
+
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 300
 STR_APP_NAME = 'Extensible Clipboard Client'
@@ -44,31 +46,34 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         self.server_address = content
 
     def closeEvent(self, QCloseEvent):
-        if self.clipboard_process is not None:
+        if self.app is not None:
             # Since process reference cannot kill or terminate the subprocess
             # https://stackoverflow.com/questions/4789837/how-to-terminate-a-python-subprocess-launched-with-shell-true
-            os.killpg(os.getpgid(self.clipboard_process.pid), signal.SIGTERM)
+            # os.killpg(os.getpgid(self.clipboard_process.pid), signal.SIGTERM)
+            self.app.quit()
 
     # Actions
 
     def start_server(self, address):
         args = [
-           'python3',
-            os.path.abspath(os.path.dirname(__file__))+'/clipboard_server/main.py',
+           # 'python3',
+           os.path.abspath(os.path.dirname(__file__))+'/clipboard_server/main.py',
             '--port', '5555',
             '--domain', 'public',
             '--clipserver={}'.format(address),
             '--sync-clipboard', 'True'
         ]
-
-        command = "python3 ./clipboard_server/main.py --port 5555 --domain=public --clipserver={} --sync-clipboard True"
+        params = "--port 5555 --domain=public --clipserver={} --sync-clipboard True".format(address)
+        command = "python3 ./clipboard_server/main.py "+params
         command = command.format(address)
         list = command.split()
 
         # self.clipboard_process = subprocess.run(command, shell=True)
-        self.clipboard_process = subprocess.Popen(command, shell=True)
-        print("Started server, PID: ", self.clipboard_process.pid)
-        # self.clipboard_process.
+        # self.clipboard_process = subprocess.Popen(command, shell=True)
+        # print("Started server, PID: ", self.clipboard_process.pid)
+        print(['main.py']+params.split())
+        self.app = MainApp(5555, address, "public", True, sys.argv)
+        self.app.main()
 
     def set_connected(self, is_connected):
         if is_connected == True:
@@ -78,7 +83,6 @@ class ClipboardClientController(QtWidgets.QMainWindow):
 
     # Set the display content to the value of str_display and repaint
     def update_display(self):
-        #self.ui.display_num.setText(str(val))
         self.update()
 
 
@@ -117,4 +121,5 @@ def main():
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     main()
-    sys.exit(app.exec_())
+    #sys.exit(app.exec_())
+    app.exec()

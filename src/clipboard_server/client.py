@@ -29,8 +29,13 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         self.ui.show()
         self.ui.btn_connect.pressed.connect(self.on_connect_pressed)
         self.ui.btn_disconnect.pressed.connect(self.on_disconnect_pressed)
-        self.ui.edit_server_address.textChanged.connect(self.on_text_entered)
+        self.ui.edit_server_address.textChanged.connect(self.update_model)
+        self.ui.edit_port.textChanged.connect(self.update_model)
+        self.ui.check_sync.stateChanged.connect(self.update_model)
+
         self.server_address = self.ui.edit_server_address.text()
+        self.own_port = self.ui.edit_port.text()
+        self.is_syncing = self.ui.check_sync.isChecked()
         self.clipboard_process = None
 
         self.set_connected(False)
@@ -46,10 +51,17 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         self.clipboard_server.quit()
         self.clipboard_server = None
 
+
+    def update_model(self, data):
+        self.server_address = self.ui.edit_server_address.text()
+        self.own_port = self.ui.edit_port.text()
+        self.is_syncing = self.ui.check_sync.isChecked()
+
+    # legacy
     def on_text_entered(self, content):
         # TODO: evaluate, whether the input is correct
         # TODO: add http:// and / to address
-        self.server_address = content
+        pass
 
     def closeEvent(self, QCloseEvent):
         if self.clipboard_server  is not None:

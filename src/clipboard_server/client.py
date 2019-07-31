@@ -72,7 +72,7 @@ class ClipboardClientController(QtWidgets.QMainWindow):
 
     def start_server(self, address):
         try:
-            self.clipboard_server = MainApp(5556, address, "public", True, sys.argv)
+            self.clipboard_server = MainApp(self.own_port, address, "public", self.is_syncing, sys.argv)
             self.clipboard_server .main()
             self.set_connected(True)
         except:

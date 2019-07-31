@@ -52,18 +52,6 @@ class ClipboardClientController(QtWidgets.QMainWindow):
     # Actions
 
     def start_server(self, address):
-        args = [
-           # 'python3',
-           os.path.abspath(os.path.dirname(__file__))+'/clipboard_server/main.py',
-            '--port', '5555',
-            '--domain', 'public',
-            '--clipserver={}'.format(address),
-            '--sync-clipboard', 'True'
-        ]
-        params = "--port 5555 --domain=public --clipserver={} --sync-clipboard True".format(address)
-        command = "python3 ./clipboard_server/main.py "+params
-        command = command.format(address)
-        list = command.split()
         self.app = MainApp(5555, address, "public", True, sys.argv)
         self.app.main()
 

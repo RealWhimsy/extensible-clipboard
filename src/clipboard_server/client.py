@@ -75,6 +75,7 @@ class ClipboardClientController(QtWidgets.QMainWindow):
             self.clipboard_server = MainApp(self.own_port, address, "public", self.is_syncing, sys.argv)
             self.clipboard_server.main()
             self.set_connected(True)
+            domain = self.clipboard_server.flask_qt.domain
         except:
             print("Error connecting!")
             # TODO: error handling and feedback!

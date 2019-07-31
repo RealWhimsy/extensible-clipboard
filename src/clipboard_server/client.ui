@@ -44,11 +44,11 @@
      <height>21</height>
     </rect>
    </property>
-   <property name="placeholderText">
-    <string>e.g. 42.42.42.42:4200</string>
-   </property>
    <property name="text">
     <string>http://185.16.61.29:5000/</string>
+   </property>
+   <property name="placeholderText">
+    <string>e.g. 42.42.42.42:4200</string>
    </property>
   </widget>
   <widget class="QLabel" name="lbl_heading_2">
@@ -89,14 +89,27 @@
   <widget class="QPushButton" name="btn_connect">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>80</y>
-     <width>441</width>
+     <width>231</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>Connect Clipboard to Server</string>
+    <string>Connect</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_disconnect">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>80</y>
+     <width>231</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Disconnect</string>
    </property>
   </widget>
  </widget>

@@ -48,8 +48,8 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         )
 
     def on_disconnect_pressed(self):
-        self.clipboard_server.quit()
-        self.clipboard_server = None
+        self.clipboard_server.exit()
+        self.set_connected(False)
 
 
     def update_model(self, data):
@@ -73,7 +73,7 @@ class ClipboardClientController(QtWidgets.QMainWindow):
     def start_server(self, address):
         try:
             self.clipboard_server = MainApp(self.own_port, address, "public", self.is_syncing, sys.argv)
-            self.clipboard_server .main()
+            self.clipboard_server.main()
             self.set_connected(True)
         except:
             print("Error connecting!")
@@ -82,6 +82,11 @@ class ClipboardClientController(QtWidgets.QMainWindow):
     def set_connected(self, is_connected):
         self.ui.btn_connect.setDisabled(is_connected)
         self.ui.btn_disconnect.setDisabled(not is_connected)
+
+        self.ui.edit_port.setDisabled(is_connected)
+        self.ui.edit_server_address.setDisabled(is_connected)
+        self.ui.check_sync.setDisabled(is_connected)
+
         if is_connected == True:
             self.ui.btn_connect.setText("Connected!")
         else:

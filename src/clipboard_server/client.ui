@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>457</width>
-    <height>129</height>
+    <width>471</width>
+    <height>167</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,7 +57,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>20</x>
      <y>50</y>
      <width>101</width>
      <height>16</height>
@@ -89,8 +89,8 @@
   <widget class="QPushButton" name="btn_connect">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>80</y>
+     <x>10</x>
+     <y>120</y>
      <width>231</width>
      <height>41</height>
     </rect>
@@ -102,14 +102,74 @@
   <widget class="QPushButton" name="btn_disconnect">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>80</y>
+     <x>230</x>
+     <y>120</y>
      <width>231</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>Disconnect</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="edit_port">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>90</y>
+     <width>41</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>5556</string>
+   </property>
+   <property name="placeholderText">
+    <string>e.g. 42.42.42.42:4200</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_port">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>90</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Clipboard Port:</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="check_sync">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>90</y>
+     <width>211</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Sync Clipboard to Server</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="tristate">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>

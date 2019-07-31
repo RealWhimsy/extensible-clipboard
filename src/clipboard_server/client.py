@@ -27,18 +27,24 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
         self.ui = uic.loadUi(STR_UI_PATH, self)
         self.ui.show()
-        self.ui.btn_connect.pressed.connect(self.on_start_pressed)
+        self.ui.btn_connect.pressed.connect(self.on_connect_pressed)
+        self.ui.btn_disconnect.pressed.connect(self.on_disconnect_pressed)
         self.ui.edit_server_address.textChanged.connect(self.on_text_entered)
-
         self.server_address = self.ui.edit_server_address.text()
-
         self.clipboard_process = None
+
+        self.set_connected(False)
+
     # UI Event Handlers
 
-    def on_start_pressed(self):
+    def on_connect_pressed(self):
         self.start_server(
             self.server_address
         )
+
+    def on_disconnect_pressed(self):
+        self.clipboard_server.quit()
+        self.clipboard_server = None
 
     def on_text_entered(self, content):
         # TODO: evaluate, whether the input is correct
@@ -46,25 +52,29 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         self.server_address = content
 
     def closeEvent(self, QCloseEvent):
-        if self.app is not None:
-            self.app.quit()
+        if self.clipboard_server  is not None:
+            self.clipboard_server.quit()
+
 
     # Actions
 
     def start_server(self, address):
         try:
-            self.app = MainApp(5555, address, "public", True, sys.argv)
-            self.app.main()
+            self.clipboard_server = MainApp(5556, address, "public", True, sys.argv)
+            self.clipboard_server .main()
             self.set_connected(True)
         except:
             print("Error connecting!")
             # TODO: error handling and feedback!
 
     def set_connected(self, is_connected):
+        self.ui.btn_connect.setDisabled(is_connected)
+        self.ui.btn_disconnect.setDisabled(not is_connected)
         if is_connected == True:
-            self.ui.btn_connect.setDisabled(True)
-            self.ui.btn_connect.setText("Clipserver Connected!")
-            self.repaint()
+            self.ui.btn_connect.setText("Connected!")
+        else:
+            self.ui.btn_connect.setText("Connect")
+        self.repaint()
 
 
     # Set the display content to the value of str_display and repaint

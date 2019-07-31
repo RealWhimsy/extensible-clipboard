@@ -52,12 +52,18 @@ class ClipboardClientController(QtWidgets.QMainWindow):
     # Actions
 
     def start_server(self, address):
-        self.app = MainApp(5555, address, "public", True, sys.argv)
-        self.app.main()
+        try:
+            self.app = MainApp(5555, address, "public", True, sys.argv)
+            self.app.main()
+            self.set_connected(True)
+        except:
+            print("Error connecting!")
+            # TODO: error handling and feedback!
 
     def set_connected(self, is_connected):
         if is_connected == True:
             self.ui.btn_connect.setDisabled(True)
+            self.ui.btn_connect.setText("Clipserver Connected!")
             self.repaint()
 
 

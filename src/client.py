@@ -5,6 +5,7 @@ from PyQt5 import uic, QtWidgets, QtCore
 import time
 
 import os
+import signal
 
 import subprocess
 
@@ -27,8 +28,9 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         self.ui.btn_connect.pressed.connect(self.on_start_pressed)
         self.ui.edit_server_address.textChanged.connect(self.on_text_entered)
 
-        self.server_address = None
+        self.server_address = self.ui.edit_server_address.text()
 
+        self.clipboard_process = None
     # UI Event Handlers
 
     def on_start_pressed(self):
@@ -41,6 +43,12 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         # TODO: add http:// and / to address
         self.server_address = content
 
+    def closeEvent(self, QCloseEvent):
+        if self.clipboard_process is not None:
+            # Since process reference cannot kill or terminate the subprocess
+            # https://stackoverflow.com/questions/4789837/how-to-terminate-a-python-subprocess-launched-with-shell-true
+            os.killpg(os.getpgid(self.clipboard_process.pid), signal.SIGTERM)
+
     # Actions
 
     def start_server(self, address):
@@ -52,34 +60,16 @@ class ClipboardClientController(QtWidgets.QMainWindow):
             '--clipserver={}'.format(address),
             '--sync-clipboard', 'True'
         ]
-        # os.spawnl(os.P_NOWAIT, args)
 
-        command = "python3 ./clipboard_server/main.py --port 5555 --domain=public --clipserver={} --sync-clipboard True &"
+        command = "python3 ./clipboard_server/main.py --port 5555 --domain=public --clipserver={} --sync-clipboard True"
         command = command.format(address)
         list = command.split()
 
-        p = subprocess.call(command, shell=True)
+        # self.clipboard_process = subprocess.run(command, shell=True)
+        self.clipboard_process = subprocess.Popen(command, shell=True)
+        print("Started server, PID: ", self.clipboard_process.pid)
+        # self.clipboard_process.
 
-        # process = subprocess.Popen(args)
-
-        #while process.poll() is None:
-        #    pass
-
-        # process.start()
-
-
-        #    self.set_connected(True)
-             # print(proc.stdout.read())
-        #process
-        #print(os.path.abspath(os.path.dirname(__file__)))
-        #os.chdir(os.path.abspath(os.path.dirname(__file__)+'./clipboard_server'))
-        #q_app = MainApp(args)
-        #q_app.main()
-        #sys.exit(q_app.exec_())
-
-
-        #str_format = "python3 ./clipboard_server/main.py --port 5555 --domain=public --clipserver={} --sync-clipboard True"
-        #os.system(str_format.format(address))
     def set_connected(self, is_connected):
         if is_connected == True:
             self.ui.btn_connect.setDisabled(True)

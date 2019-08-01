@@ -29,7 +29,7 @@ https://stackoverflow.com/questions/41401386/proper-use-of-qthread-subclassing-w
 """  # noqa
 
 
-class MainApp(QtWidgets.QApplication):
+class ClipboardServerApp(QtWidgets.QApplication):
 
     def get_files(self, uri_list):
         """
@@ -109,7 +109,7 @@ class MainApp(QtWidgets.QApplication):
         self.server_thread.start()
 
     def __init__(self, port, clipserver_address, domain, is_syncing, argv=sys.argv):
-        super(MainApp, self).__init__(argv)
+        super(ClipboardServerApp, self).__init__(argv)
 
         self.flask_server = Flask(__name__)
         self.flask_qt = ConnectionHandler(
@@ -150,7 +150,7 @@ def parse_args():
 if __name__ == "__main__":
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
     args = parse_args()
-    q_app = MainApp(args.port, args.clipserver, args.domain, args.sync_clipboard, sys.argv)
+    q_app = ClipboardServerApp(args.port, args.clipserver, args.domain, args.sync_clipboard, sys.argv)
     q_app.main()
     sys.exit(q_app.exec_())
 

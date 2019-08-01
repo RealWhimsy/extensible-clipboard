@@ -12,7 +12,7 @@ import subprocess
 #
 #
 # CONSTANTS
-from main import MainApp
+from main import ClipboardServerApp
 
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 300
@@ -73,7 +73,7 @@ class ClipboardClientController(QtWidgets.QMainWindow):
 
     def start_server(self, address):
         try:
-            self.clipboard_server = MainApp(self.own_port, address, "public", self.is_syncing, sys.argv)
+            self.clipboard_server = ClipboardServerApp(self.own_port, address, "public", self.is_syncing, sys.argv)
             self.clipboard_server.main()
             self.set_connected(True)
             self.domain = self.clipboard_server.flask_qt.domain

@@ -49,7 +49,7 @@ class ClipboardClientController(QtWidgets.QMainWindow):
         )
 
     def on_disconnect_pressed(self):
-        self.clipboard_server.exit()
+        os.killpg(os.getpgid(self.clipboard_server.pid), signal.SIGTERM)
         self.set_connected(False)
 
 
@@ -66,21 +66,31 @@ class ClipboardClientController(QtWidgets.QMainWindow):
 
     def closeEvent(self, QCloseEvent):
         if self.clipboard_server  is not None:
-            self.clipboard_server.quit()
+        os.killpg(os.getpgid(self.clipboard_server.pid), signal.SIGTERM)
 
 
     # Actions
 
     def start_server(self, address):
+        command = "python3 ./main.py --port {} --domain=public --clipserver={} --sync-clipboard True"
+        command = command.format(self.own_port, address)
+
+        self.clipboard_server = subprocess.Popen(command, shell=True)
+        if self.clipboard_server is not None:
+            self.set_connected(True)
+            self.update_display()
+
+        """
         try:
+            pass
             self.clipboard_server = ClipboardServerApp(self.own_port, address, "public", self.is_syncing, sys.argv)
             self.clipboard_server.main()
-            self.set_connected(True)
             self.domain = self.clipboard_server.flask_qt.domain
             self.update_display()
         except:
             print("Error connecting!")
             # TODO: error handling and feedback!
+        """
 
     def set_connected(self, is_connected):
         self.ui.btn_connect.setDisabled(is_connected)

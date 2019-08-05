@@ -66,7 +66,7 @@ class ClipboardClientController(QtWidgets.QMainWindow):
 
     def closeEvent(self, QCloseEvent):
         if self.clipboard_server  is not None:
-        os.killpg(os.getpgid(self.clipboard_server.pid), signal.SIGTERM)
+            os.killpg(os.getpgid(self.clipboard_server.pid), signal.SIGTERM)
 
 
     # Actions

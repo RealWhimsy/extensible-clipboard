@@ -72,8 +72,8 @@ class ClipboardClientController(QtWidgets.QMainWindow):
     # Actions
 
     def start_server(self, address):
-        command = "python3 ./main.py --port {} --domain=public --clipserver={} --sync-clipboard True"
-        command = command.format(self.own_port, address)
+        command = "python3 ./main.py --port={} --domain=public --clipserver={} --sync-clipboard True"
+        command = command.format(self.ui.edit_port.text(), address)
 
         self.clipboard_server = subprocess.Popen(command, shell=True)
         if self.clipboard_server is not None:

@@ -8,6 +8,7 @@ from pymongo.collection import ReturnDocument
 
 from server.exceptions import (GrandchildException, ParentNotFoundException)
 
+from util.context import Context
 
 class ClipDatabase:
     """
@@ -27,13 +28,13 @@ class ClipDatabase:
     to.
     """
 
-    def __init__(self, ctx):
+    def __init__(self):
         """
         Mainly reads the config from dbconfig.ini and establishes
         a connection to the database
         """
         config = ConfigParser()
-        config.read(ctx.get_resource('config/dbconfig.ini'))
+        config.read(Context.ctx.get_resource('config/dbconfig.ini'))
         database_conf = config['database']
         self.client = MongoClient(
                 database_conf['url'],

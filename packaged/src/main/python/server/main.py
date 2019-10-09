@@ -61,9 +61,9 @@ class ClipServer():
         server_thread.daemon = True
         server_thread.start()
 
-    def __init__(self, argv, ctx, port=None):
+    def __init__(self, argv, port=None):
         # Database for saving clips, currently mongo
-        self.database = ClipDatabase(ctx)
+        self.database = ClipDatabase()
         # The flask-server itself
         if port is not None:
             self.flask_server = FlaskServer(__name__, self.database, port)

@@ -1,0 +1,2 @@
+Connection to C^2 server.
+Please don't forget to set the URL to the Clipboard-Server in the options-page of the extension.

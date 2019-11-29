@@ -327,13 +327,48 @@ class ClipDatabase:
 import sqlite3
 # Sql Implementation of the extensible clipboard database module
 class ClipSqlDatabase(ClipDatabase):
+    statement_create_clip_table = \
+    """
+    CREATE TABLE IF NOT EXISTS clips (
+        _id integer PRIMARY KEY,
+        creation_date VARCHAR(40),
+        last_modified VARCHAR(40),
+        mimetype VARCHAR(40),
+        data BLOB        
+    );
+    """
+
+    statement_create_clipboard_table = \
+    """
+    CREATE TABLE IF NOT EXISTS clipboards (
+        _id integer PRIMARY KEY,
+        url VARCHAR(40),
+        is_hook INTEGER
+    );
+    """
+
+
 
     def __init__(self):
         config = ConfigParser()
         config.read(Context.ctx.get_resource('config/dbconfig.ini'))
         self.file_name = config['sqlite']['file_name']
 
+        connection = self._get_connection()
+        connection.execute(self.statement_create_clip_table)
+        connection.execute(self.statement_create_clipboard_table)
+
+
+    def _get_connection(self):
+        # https://stackoverflow.com/questions/16936608/storing-bools-in-sqlite-database?rq=1
+        sqlite3.register_adapter(bool, int)
+        sqlite3.register_converter("BOOLEAN", lambda v: bool(int(v)))
+        connection = sqlite3.connect(self.file_name)
+        return connection
+
+
     def get_recipients(self):
+        conn = self._get_connection()
         pass
 
     def add_recipient(self, url, is_hook, subscribed_types):
@@ -359,3 +394,4 @@ class ClipSqlDatabase(ClipDatabase):
 
     def save_clip(self, data):
         pass
+

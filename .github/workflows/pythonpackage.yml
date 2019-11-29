@@ -18,18 +18,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Create venv
-      run: |
-        cd ./packaged
-        python3 -m venv venv
-        source venv/bin/activate
-        
     - name: Install dependencies
       run: |
-        ls
+        cd ./packaged
+        python 3 -m venv venv
+        source venv/bin/activate
         pip3 install -r requirements.txt
     - name: Build
       run: |
+        cd ./packaged
         fbs freeze
 #    - name: Lint with flake8
 #      run: |

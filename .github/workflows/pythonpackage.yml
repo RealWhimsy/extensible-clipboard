@@ -29,7 +29,7 @@ jobs:
       run: |
         cd ./packaged
         source venv/bin/activate
-        fbs freeze
+        python3 -m fbs freeze
 #    - name: Lint with flake8
 #      run: |
 #        pip install flake8

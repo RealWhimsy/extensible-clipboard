@@ -9,7 +9,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7]
+        python-version: [3.7]
 
     steps:
     - uses: actions/checkout@v1
@@ -18,17 +18,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Create venv
+    - name: Install dependencies
       run: |
         cd ./packaged
         python3 -m venv venv
         source venv/bin/activate
-        
-    - name: Install dependencies
-      run: |
         pip3 install -r requirements.txt
     - name: Build
       run: |
+        cd ./packaged
         fbs freeze
 #    - name: Lint with flake8
 #      run: |

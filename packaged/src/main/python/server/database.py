@@ -35,7 +35,7 @@ class ClipDatabase:
         """
         config = ConfigParser()
         config.read(Context.ctx.get_resource('config/dbconfig.ini'))
-        database_conf = config['database']
+        database_conf = config['mongodb']
         self.client = MongoClient(
                 database_conf['url'],
                 int(database_conf['port']))
@@ -321,3 +321,41 @@ class ClipDatabase:
         if self.clipboard_collection.count_documents({}) is 0:
             return None
         return list(self.clipboard_collection.find({}))
+
+
+
+import sqlite3
+# Sql Implementation of the extensible clipboard database module
+class ClipSqlDatabase(ClipDatabase):
+
+    def __init__(self):
+        config = ConfigParser()
+        config.read(Context.ctx.get_resource('config/dbconfig.ini'))
+        self.file_name = config['sqlite']['file_name']
+
+    def get_recipients(self):
+        pass
+
+    def add_recipient(self, url, is_hook, subscribed_types):
+        pass
+
+    def get_alternatives(self, clip_id):
+        pass
+
+    def delete_entry_by_id(self, clip_id):
+        pass
+
+    def update_clip(self, object_id, data):
+        pass
+
+    def get_latest(self):
+        pass
+
+    def get_all_clips(self):
+        pass
+
+    def get_clip_by_id(self, clip_id, preferred_types=None):
+        pass
+
+    def save_clip(self, data):
+        pass

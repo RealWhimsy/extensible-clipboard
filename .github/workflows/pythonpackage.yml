@@ -25,12 +25,11 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip
         pip3 install -r requirements.txt
+    - name: Build
+      run: |
+        cd ./packaged
+        source venv/bin/activate
         python3 -m fbs freeze
-#    - name: Build
-#      run: |
-#        cd ./packaged
-#        source venv/bin/activate
-#        python3 -m fbs freeze
 #    - name: Lint with flake8
 #      run: |
 #        pip install flake8

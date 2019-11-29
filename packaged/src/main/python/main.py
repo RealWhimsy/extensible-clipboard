@@ -10,12 +10,18 @@ from server.main import  ClipServer
 from clipboard_server.main import ClipboardServerApp
 from util.context import Context
 
-main_server_port = 5000
-clipboard_port = 5010
+from configparser import ConfigParser
+
+
 
 from importlib import machinery
 
 if __name__ == '__main__':
+    config = ConfigParser()
+    config.read(ApplicationContext().get_resource('config/networking.ini'))
+
+    main_server_port = config['main_server']['port']
+    clipboard_port = config['clipboard_server']['port']
 
     Context.ctx = ApplicationContext()       # 1. Instantiate ApplicationContext
 

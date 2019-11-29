@@ -22,6 +22,9 @@ if __name__ == '__main__':
 
     main_server_port = config['main_server']['port']
     clipboard_port = config['clipboard_server']['port']
+    clipboard_main_server_address = config['clipboard_server']['main_server_address']
+    clipboard_domain = config['clipboard_server']['domain']
+    clipboard_is_syncing = config['clipboard_server']['is_syncing']
 
     Context.ctx = ApplicationContext()       # 1. Instantiate ApplicationContext
 
@@ -35,9 +38,9 @@ if __name__ == '__main__':
 
     clipboard = ClipboardServerApp(
         clipboard_port,
-        "http://localhost:{}/".format(str(main_server_port)),
-        "http://localhost",
-        True,
+        clipboard_main_server_address,
+        clipboard_domain,
+        clipboard_is_syncing,
         sys.argv,
         Context.ctx.app
     )

@@ -26,6 +26,7 @@ jobs:
         
     - name: Install dependencies
       run: |
+        ls
         pip3 install -r requirements.txt
     - name: Build
       run: |

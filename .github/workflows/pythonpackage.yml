@@ -28,6 +28,7 @@ jobs:
     - name: Build
       run: |
         cd ./packaged
+        ls
         source venv/bin/activate
         python3 -m fbs freeze
 #    - name: Lint with flake8

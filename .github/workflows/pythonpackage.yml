@@ -27,6 +27,7 @@ jobs:
     - name: Build
       run: |
         cd ./packaged
+        source venv/bin/activate
         fbs freeze
 #    - name: Lint with flake8
 #      run: |

@@ -73,6 +73,7 @@ class ClipServer():
         self.database_2_temp.update_clip(id, "Freude schöne Götterspeise")
         self.database_2_temp.get_clip_by_id(id)
         self.database_2_temp.get_latest()
+        print("Alternatives", self.database_2_temp.get_alternatives(id))
         self.database_2_temp.delete_entry_by_id(id)
 
         # The flask-server itself

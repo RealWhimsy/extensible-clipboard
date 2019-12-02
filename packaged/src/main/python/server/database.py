@@ -356,6 +356,7 @@ class ClipSqlDatabase(ClipDatabase):
     statement_get_clips = """ SELECT * FROM clips; """
     # https://stackoverflow.com/questions/22200587/get-records-for-the-latest-timestamp-in-sqlite
     statement_get_latest_clip = """ SELECT * FROM clips ORDER BY creation_date DESC LIMIT 1; """
+    statement_get_child_clips = """ SELECT * FROM clips WHERE parent = ?; """
     statement_get_clip_by_id = """ SELECT * FROM clips WHERE _id = ? ; """
     statement_delete_clip_by_id = """ DELETE FROM clips WHERE _id = ? ; """
     statement_update_clip_by_id = """ UPDATE clips SET data = ? WHERE _id = ?; """
@@ -479,10 +480,18 @@ class ClipSqlDatabase(ClipDatabase):
         
         """
 
-
+    # Get alternatives to clip item
     def get_alternatives(self, clip_id):
-        pass
-
+        parent = self.get_clip_by_id(clip_id)
+        if parent is None:
+            return None
+        else:
+            conn = self._get_connection()
+            children = []
+            child_cursor = list(conn.execute(self.statement_get_child_clips, (str(parent['_id']), )))
+            for item in child_cursor:
+                children.append(self._get_clip_from_cursor_item(item))
+            return children
 
     # Delete entry by id
     def delete_entry_by_id(self, clip_id):
@@ -509,20 +518,3 @@ class ClipSqlDatabase(ClipDatabase):
             return None
         else:
             return self._get_clip_from_cursor_item(cursor[0])
-
-        """
-
-        Returns the parent clip that was added last into the database
-        as a dict
-
-        results = self.clip_collection.find({
-                "parent": {"$exists": False}
-            })
-        results.sort('creation_date', ASCENDING)
-        if results.count():
-            r = results[0]
-            return self._build_json_response_clip(r)
-        else:
-            return None
-        """
-        pass

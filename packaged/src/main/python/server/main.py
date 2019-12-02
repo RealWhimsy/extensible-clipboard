@@ -66,7 +66,9 @@ class ClipServer():
         self.database = ClipDatabase()
         self.database_2_temp = ClipSqlDatabase()
         # self.database_2_temp.add_recipient("abasdasd", True, [])
-        self.database_2_temp.get_recipients()
+        # self.database_2_temp.get_recipients()
+        self.database_2_temp.get_all_clips()
+        self.database_2_temp.save_clip({'mimetype': 'text/plain', 'data': 'Freude schöner Götterfunken' })
 
         # The flask-server itself
         if port is not None:

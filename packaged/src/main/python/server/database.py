@@ -321,8 +321,6 @@ class ClipDatabase:
         """
         if self.clipboard_collection.count_documents({}) is 0:
             return None
-        print("YAHOOO")
-        print(list(self.clipboard_collection.find({})))
         return list(self.clipboard_collection.find({}))
 
 
@@ -337,7 +335,8 @@ class ClipSqlDatabase(ClipDatabase):
         creation_date VARCHAR(40),
         last_modified VARCHAR(40),
         mimetype VARCHAR(40),
-        data BLOB        
+        data BLOB,
+        parent VARCHAR(40)      
     );
     """
 
@@ -354,7 +353,7 @@ class ClipSqlDatabase(ClipDatabase):
     statement_get_recipients =  """ SELECT * FROM clipboards; """
 
     statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
-    statement_get_clips = """ SELECT * FROM clips;"""
+    statement_get_clips = """ SELECT * FROM clips; """
 
     def __init__(self):
         config = ConfigParser()
@@ -381,11 +380,16 @@ class ClipSqlDatabase(ClipDatabase):
         }
 
     def _get_clip_from_cursor_item(self, item):
-        print(item)
-        return {
-            '_id': None,
-            'creation': None
+        result = {
+            '_id': UUID(item[0]),
+            'creation_date': item[1],
+            'last_modified': item[2],
+            'mimetype': item[3],
+            'data': item[4],
         }
+        if item[5] is not None:
+            result['parent'] = item[5]
+        return result
 
     # RECIPIENT OPERATIONS
 
@@ -436,12 +440,16 @@ class ClipSqlDatabase(ClipDatabase):
 
     # Get all clips
     def get_all_clips(self):
-        conn = self._get_connection()
-        cursor = conn.execute(self.statement_get_clips)
+        print("Get All Clips")
         result = []
+        conn = self._get_connection()
+        # cursor = conn.execute(self.statement_get_clips)
+        cursor = list(conn.execute('SELECT * FROM clips;'))
+        if len(cursor) == 0:
+            return None
         for row in cursor:
             result.append(self._get_clip_from_cursor_item(row))
-        print(result)
+        conn.close()
         return result
 
     def get_alternatives(self, clip_id):

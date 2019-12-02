@@ -320,6 +320,8 @@ class ClipDatabase:
         """
         if self.clipboard_collection.count_documents({}) is 0:
             return None
+        print("YAHOOO")
+        print(list(self.clipboard_collection.find({})))
         return list(self.clipboard_collection.find({}))
 
 
@@ -368,14 +370,23 @@ class ClipSqlDatabase(ClipDatabase):
         connection = sqlite3.connect(self.file_name)
         return connection
 
+    def _get_recipient_from_cursor_item(self, item):
+        return {
+            '_id': UUID(item[0]),
+            'url': item[1],
+            'is_hook': bool(item[2])
+        }
 
+
+    # Return all registered recipients
     def get_recipients(self):
         conn = self._get_connection()
-        results = conn.execute(self.statement_get_recipients)
-        for row in results:
-            print(row)
+        cursor = conn.execute(self.statement_get_recipients)
+        result = []
+        for row in cursor:
+            result.append(self._get_recipient_from_cursor_item(row))
         conn.close()
-        pass
+        return result
 
     # Register another clipboard as recipient
     def add_recipient(self, url, is_hook, subscribed_types):

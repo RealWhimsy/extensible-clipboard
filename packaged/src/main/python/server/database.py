@@ -354,6 +354,7 @@ class ClipSqlDatabase(ClipDatabase):
 
     statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
     statement_get_clips = """ SELECT * FROM clips; """
+    statement_get_clip_by_id = """ SELECT * FROM clips WHERE _id = ? ; """
 
     def __init__(self):
         config = ConfigParser()
@@ -443,14 +444,37 @@ class ClipSqlDatabase(ClipDatabase):
         print("Get All Clips")
         result = []
         conn = self._get_connection()
-        # cursor = conn.execute(self.statement_get_clips)
-        cursor = list(conn.execute('SELECT * FROM clips;'))
+        cursor = conn.execute(self.statement_get_clips)
+        # cursor = list(conn.execute('SELECT * FROM clips;'))
         if len(cursor) == 0:
             return None
         for row in cursor:
             result.append(self._get_clip_from_cursor_item(row))
         conn.close()
         return result
+
+    def get_clip_by_id(self, clip_id, preferred_types=None):
+        conn = self._get_connection()
+        cursor = list(conn.execute(self.statement_get_clip_by_id, (clip_id, )))
+        conn.close()
+        if len(cursor) == 0:
+            return None
+        else:
+            print(self._get_clip_from_cursor_item(cursor[0]))
+            # TODO: find best match!
+            return self._get_clip_from_cursor_item(cursor[0])
+
+
+
+        """
+            if preferred_types:  # Request specified mimetype
+        if not clip['mimetype'] == preferred_types[0]:
+            best_match = self._find_best_match(clip, preferred_types)
+            if best_match:
+                clip = best_match
+        
+        """
+
 
     def get_alternatives(self, clip_id):
         pass
@@ -462,8 +486,4 @@ class ClipSqlDatabase(ClipDatabase):
         pass
 
     def get_latest(self):
-        pass
-
-
-    def get_clip_by_id(self, clip_id, preferred_types=None):
         pass

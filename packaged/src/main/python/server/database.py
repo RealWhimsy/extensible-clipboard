@@ -355,6 +355,7 @@ class ClipSqlDatabase(ClipDatabase):
     statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
     statement_get_clips = """ SELECT * FROM clips; """
     statement_get_clip_by_id = """ SELECT * FROM clips WHERE _id = ? ; """
+    statement_delete_clip_by_id = """ DELETE FROM clips WHERE _id = ? ; """
 
     def __init__(self):
         config = ConfigParser()
@@ -480,6 +481,11 @@ class ClipSqlDatabase(ClipDatabase):
         pass
 
     def delete_entry_by_id(self, clip_id):
+        conn = self._get_connection()
+        cursor = list(conn.execute(self.statement_delete_clip_by_id, (clip_id, )))
+        conn.commit()
+        conn.close()
+        # TODO: get deleted count
         pass
 
     def update_clip(self, object_id, data):

@@ -381,6 +381,7 @@ class ClipSqlDatabase(ClipDatabase):
         }
 
     def _get_clip_from_cursor_item(self, item):
+        print(item)
         return {
             '_id': None,
             'creation': None
@@ -432,6 +433,17 @@ class ClipSqlDatabase(ClipDatabase):
         conn.close()
         return self.get_clip_by_id(_id)
 
+
+    # Get all clips
+    def get_all_clips(self):
+        conn = self._get_connection()
+        cursor = conn.execute(self.statement_get_clips)
+        result = []
+        for row in cursor:
+            result.append(self._get_clip_from_cursor_item(row))
+        print(result)
+        return result
+
     def get_alternatives(self, clip_id):
         pass
 
@@ -444,8 +456,6 @@ class ClipSqlDatabase(ClipDatabase):
     def get_latest(self):
         pass
 
-    def get_all_clips(self):
-        pass
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
         pass

@@ -161,6 +161,7 @@ class ClipDatabase:
         new_clip['last_modified'] = modified_date.isoformat()
         for key, value in data.items():
             new_clip[key] = value
+        print(new_clip)
         self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
         return self._build_json_response_clip(new_clip)
@@ -352,6 +353,8 @@ class ClipSqlDatabase(ClipDatabase):
     statement_add_recipient =   """ INSERT INTO clipboards (_id, url, is_hook) VALUES (?, ?, ?); """
     statement_get_recipients =  """ SELECT * FROM clipboards; """
 
+    statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
+    statement_get_clips = """ SELECT * FROM clips;"""
 
     def __init__(self):
         config = ConfigParser()
@@ -377,11 +380,20 @@ class ClipSqlDatabase(ClipDatabase):
             'is_hook': bool(item[2])
         }
 
+    def _get_clip_from_cursor_item(self, item):
+        return {
+            '_id': None,
+            'creation': None
+        }
+
+    # RECIPIENT OPERATIONS
 
     # Return all registered recipients
     def get_recipients(self):
         conn = self._get_connection()
         cursor = conn.execute(self.statement_get_recipients)
+        if len(list(cursor)) == 0:
+            return None
         result = []
         for row in cursor:
             result.append(self._get_recipient_from_cursor_item(row))
@@ -396,6 +408,29 @@ class ClipSqlDatabase(ClipDatabase):
         connection.commit()
         connection.close()
         pass
+
+    # CLIP OPERATIONS
+
+    # Insert a new clip
+    def save_clip(self, data):
+        _id = str(uuid4())
+        date = datetime.now()
+        new_clip = {}
+
+        if 'parent' in data:
+            parent_id = str(data.pop('parent'))
+            parent = self.get_clip_by_id(parent_id)
+            # Abandon insert, when parent-id not in db
+            if parent is None:
+                raise ParentNotFoundException
+            if 'parent' in parent:
+                raise GrandchildException
+            new_clip['parent'] = parent_id
+        conn = self._get_connection()
+        conn.execute(self.statement_add_clip, (_id, date.isoformat(), date.isoformat(), data['mimetype'], data['data']))
+        conn.commit()
+        conn.close()
+        return self.get_clip_by_id(_id)
 
     def get_alternatives(self, clip_id):
         pass
@@ -414,7 +449,3 @@ class ClipSqlDatabase(ClipDatabase):
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
         pass
-
-    def save_clip(self, data):
-        pass
-

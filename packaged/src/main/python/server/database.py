@@ -356,6 +356,7 @@ class ClipSqlDatabase(ClipDatabase):
     statement_get_clips = """ SELECT * FROM clips; """
     statement_get_clip_by_id = """ SELECT * FROM clips WHERE _id = ? ; """
     statement_delete_clip_by_id = """ DELETE FROM clips WHERE _id = ? ; """
+    statement_update_clip_by_id = """ UPDATE clips SET data = ? WHERE _id = ?; """
 
     def __init__(self):
         config = ConfigParser()
@@ -489,7 +490,11 @@ class ClipSqlDatabase(ClipDatabase):
         pass
 
     def update_clip(self, object_id, data):
-        pass
+        conn = self._get_connection()
+        conn.execute(self.statement_update_clip_by_id, (data, object_id))
+        conn.commit()
+        conn.close()
+        return self.get_clip_by_id(object_id)
 
     def get_latest(self):
         pass

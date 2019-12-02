@@ -1,7 +1,7 @@
 import os
 import sys
 
-from server.database import ClipDatabase
+from server.database import ClipDatabase, ClipSqlDatabase
 from server.flask_server import FlaskServer
 from server.resources import Clip, Clips, ChildClipAdder, Recipient
 
@@ -64,6 +64,10 @@ class ClipServer():
     def __init__(self, argv, port=None):
         # Database for saving clips, currently mongo
         self.database = ClipDatabase()
+        self.database_2_temp = ClipSqlDatabase()
+        # self.database_2_temp.add_recipient("abasdasd", True, [])
+        self.database_2_temp.get_recipients()
+
         # The flask-server itself
         if port is not None:
             self.flask_server = FlaskServer(__name__, self.database, port)

@@ -330,7 +330,7 @@ class ClipSqlDatabase(ClipDatabase):
     statement_create_clip_table = \
     """
     CREATE TABLE IF NOT EXISTS clips (
-        _id integer PRIMARY KEY,
+        _id VARCHAR(40) PRIMARY KEY,
         creation_date VARCHAR(40),
         last_modified VARCHAR(40),
         mimetype VARCHAR(40),
@@ -341,12 +341,14 @@ class ClipSqlDatabase(ClipDatabase):
     statement_create_clipboard_table = \
     """
     CREATE TABLE IF NOT EXISTS clipboards (
-        _id integer PRIMARY KEY,
+        _id VARCHAR(40) PRIMARY KEY,
         url VARCHAR(40),
         is_hook INTEGER
     );
     """
 
+    statement_add_recipient =   """ INSERT INTO clipboards (_id, url, is_hook) VALUES (?, ?, ?); """
+    statement_get_recipients =  """ SELECT * FROM clipboards; """
 
 
     def __init__(self):
@@ -369,9 +371,19 @@ class ClipSqlDatabase(ClipDatabase):
 
     def get_recipients(self):
         conn = self._get_connection()
+        results = conn.execute(self.statement_get_recipients)
+        for row in results:
+            print(row)
+        conn.close()
         pass
 
+    # Register another clipboard as recipient
     def add_recipient(self, url, is_hook, subscribed_types):
+        _id = uuid4().__str__()
+        connection = self._get_connection()
+        connection.execute(self.statement_add_recipient, (_id, url, is_hook))
+        connection.commit()
+        connection.close()
         pass
 
     def get_alternatives(self, clip_id):

@@ -2,6 +2,8 @@ from datetime import datetime
 from configparser import ConfigParser
 from uuid import UUID, uuid4
 
+from copy import deepcopy
+
 from bson.binary import Binary, UUID_SUBTYPE
 from pymongo import ASCENDING, MongoClient
 from pymongo.collection import ReturnDocument
@@ -351,6 +353,7 @@ class ClipSqlDatabase(ClipDatabase):
 
     statement_add_recipient =   """ INSERT INTO clipboards (_id, url, is_hook) VALUES (?, ?, ?); """
     statement_get_recipients =  """ SELECT * FROM clipboards; """
+    statement_get_recipient_by_id =  """ SELECT * FROM clipboards WHERE _id = ?; """
 
     statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
     statement_get_clips = """ SELECT * FROM clips; """
@@ -385,6 +388,15 @@ class ClipSqlDatabase(ClipDatabase):
             'is_hook': bool(item[2])
         }
 
+    # transform
+    def _to_json(self, item):
+        print("ITEM", item)
+        result = deepcopy(item)
+        result['_id'] = str(result['_id'])
+        if 'parent' in result:
+            result['parent'] = result(result['parent'])
+        return result
+
     def _get_clip_from_cursor_item(self, item):
         result = {
             '_id': UUID(item[0]),
@@ -407,18 +419,54 @@ class ClipSqlDatabase(ClipDatabase):
             return None
         result = []
         for row in cursor:
-            result.append(self._get_recipient_from_cursor_item(row))
+            item = self._get_recipient_from_cursor_item(row)
+            item = self._to_json(item)
+            result.append(item)
         conn.close()
         return result
 
     # Register another clipboard as recipient
     def add_recipient(self, url, is_hook, subscribed_types):
+        # TODO: check, if url is already registered and update subscribed types
         _id = uuid4().__str__()
         connection = self._get_connection()
         connection.execute(self.statement_add_recipient, (_id, url, is_hook))
         connection.commit()
+
+        new_recipient = list(connection.execute(self.statement_get_recipient_by_id, (_id, )))
         connection.close()
-        pass
+        if len(new_recipient) > 0:
+            new_recipient = self._get_recipient_from_cursor_item(new_recipient[0])
+            return self._to_json(new_recipient)
+        else:
+            return None
+
+        """
+        old_instance = self.clipboard_collection.find_one({'url': url})
+        if old_instance is not None:
+            if subscribed_types:
+                old_instance = self.clipboard_collection.find_one_and_update(
+                    {'url': url},
+                    {'$set': {'subscribed_types': subscribed_types}},
+                    return_document=ReturnDocument.AFTER)
+            return self._build_json_response_clip(old_instance)
+
+        _id = uuid4()
+        _id = self._create_binary_uuid(str(_id))
+        new_clipboard = {}
+
+        new_clipboard['_id'] = _id
+        new_clipboard['url'] = url
+        new_clipboard['is_hook'] = is_hook
+        if subscribed_types:
+            new_clipboard['subscribed_types'] = subscribed_types
+
+        self.clipboard_collection.insert_one(new_clipboard)
+        new_clipboard = self.clipboard_collection.find_one({'_id': _id})
+
+        return self._build_json_response_clip(new_clipboard)
+
+        """
 
     # CLIP OPERATIONS
 
@@ -460,14 +508,15 @@ class ClipSqlDatabase(ClipDatabase):
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
         conn = self._get_connection()
-        cursor = list(conn.execute(self.statement_get_clip_by_id, (clip_id, )))
+        cursor = list(conn.execute(self.statement_get_clip_by_id, (str(clip_id), )))
         conn.close()
         if len(cursor) == 0:
             return None
         else:
-            print(self._get_clip_from_cursor_item(cursor[0]))
+            item = self._get_clip_from_cursor_item(cursor[0])
+            print(item)
             # TODO: find best match!
-            return self._get_clip_from_cursor_item(cursor[0])
+            return self._to_json(item)
 
 
 

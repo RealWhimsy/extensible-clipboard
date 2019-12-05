@@ -107,6 +107,7 @@ class ConnectionHandler(QObject):
             m += 'Message from server: {}'.format(response.text)
             self._die(m)
 
+        print(response)
         self.recipient_id_got.emit(response.json()['_id'])
 
 

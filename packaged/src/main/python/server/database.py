@@ -163,7 +163,6 @@ class ClipDatabase:
         new_clip['last_modified'] = modified_date.isoformat()
         for key, value in data.items():
             new_clip[key] = value
-        print(new_clip)
         self.clip_collection.insert_one(new_clip)
         new_clip = self.clip_collection.find_one({'_id': _id})
         return self._build_json_response_clip(new_clip)
@@ -390,7 +389,6 @@ class ClipSqlDatabase(ClipDatabase):
 
     # transform
     def _to_json(self, item):
-        print("ITEM", item)
         result = deepcopy(item)
         result['_id'] = str(result['_id'])
         if 'parent' in result:
@@ -494,7 +492,6 @@ class ClipSqlDatabase(ClipDatabase):
 
     # Get all clips
     def get_all_clips(self):
-        print("Get All Clips")
         result = []
         conn = self._get_connection()
         cursor = conn.execute(self.statement_get_clips)
@@ -514,7 +511,6 @@ class ClipSqlDatabase(ClipDatabase):
             return None
         else:
             item = self._get_clip_from_cursor_item(cursor[0])
-            print(item)
             # TODO: find best match!
             return self._to_json(item)
 
@@ -563,7 +559,9 @@ class ClipSqlDatabase(ClipDatabase):
     def get_latest(self):
         conn = self._get_connection()
         cursor = list(conn.execute(self.statement_get_latest_clip))
+        conn.close()
         if len(cursor) < 1:
             return None
         else:
-            return self._get_clip_from_cursor_item(cursor[0])
+            item = self._get_clip_from_cursor_item(cursor[0])
+            return self._to_json(item)

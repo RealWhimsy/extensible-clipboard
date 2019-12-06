@@ -393,6 +393,8 @@ class ClipSqlDatabase(ClipDatabase):
         result['_id'] = str(result['_id'])
         if 'parent' in result:
             result['parent'] = result(result['parent'])
+        if 'data' in result:
+            result['data'] = str(result['data'])
         return result
 
     def _get_clip_from_cursor_item(self, item):
@@ -494,12 +496,14 @@ class ClipSqlDatabase(ClipDatabase):
     def get_all_clips(self):
         result = []
         conn = self._get_connection()
-        cursor = conn.execute(self.statement_get_clips)
+        cursor = list(conn.execute(self.statement_get_clips))
         # cursor = list(conn.execute('SELECT * FROM clips;'))
         if len(cursor) == 0:
             return None
         for row in cursor:
-            result.append(self._get_clip_from_cursor_item(row))
+            item = self._get_clip_from_cursor_item(row)
+            item = self._to_json(item)
+            result.append(item)
         conn.close()
         return result
 

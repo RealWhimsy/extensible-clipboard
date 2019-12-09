@@ -324,7 +324,11 @@ class ClipDatabase:
             return None
         return list(self.clipboard_collection.find({}))
 
-
+################################################################################################
+#
+# SQLite Implementation of database
+#
+################################################################################################
 
 import sqlite3
 # Sql Implementation of the extensible clipboard database module

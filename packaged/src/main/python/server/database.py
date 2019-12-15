@@ -418,6 +418,55 @@ class ClipSqlDatabase(ClipDatabase):
             result['parent'] = item[5]
         return result
 
+    def _get_parent_clip(self, child):
+        return self.get_clip_by_id(child['parent'])
+
+    def _get_children(self, parent):
+        conn = self._get_connection()
+        cursor = list(conn.execute(self.statement_get_child_clips, (parent['_id'],)))
+        results = []
+        for item in cursor:
+            results.append(self._get_clip_from_cursor_item(item))
+        return results
+
+    # TODO!
+    def _find_best_match(self, parent, preferred_types):
+        """
+        Searches all children of parent if a direct match for
+        the specified mimetypes can be found.
+        :param parent: Mongo-object, should have children in db
+        :param preferred_types: List of tuples representing the Accept-header
+            of the request. Format: ('text/plain', 1.0).
+            The list is to be sorted by the rules of the Accept-header
+        :return: The Mongo-object with the closes match. None, if no match
+        """
+        if 'parent' in parent:  # If requested entity is a child itself, get parent!
+            parent = self._get_parent_clip(parent)
+
+        children = self._get_children(parent)
+
+        # first round, exact match
+        for curr_type in preferred_types:
+            for child in children:
+                if child['mimetype'] == curr_type[0]:
+                    return child
+
+        # second round, wildcard match
+        for curr_type in preferred_types:
+            # Check if mimestring is wildcard and get part before the /
+            mime_base = curr_type[0]
+            if '*' in mime_base:
+                mime_base = mime_base.split('/')[0]
+
+                for child in children:
+                    if mime_base in child['mimetype']:
+                        return child
+
+        # No exact or wildcard match, default to parent
+        return parent
+
+
+
     # RECIPIENT OPERATIONS
 
     # Return all registered recipients

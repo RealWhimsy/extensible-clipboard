@@ -12,6 +12,8 @@ from server.exceptions import (GrandchildException, ParentNotFoundException)
 
 from util.context import Context
 
+import json
+
 class ClipDatabase:
     """
     This database is mainly for storing single clips. A clip is an object
@@ -135,6 +137,8 @@ class ClipDatabase:
         return None
 
     def save_clip(self, data):
+
+        print("Clip", data)
         """
         Inserts a new clip-object into the database.
         This method also adds ISO-Timestamps to the new object
@@ -479,6 +483,7 @@ class ClipSqlDatabase(ClipDatabase):
         _id = str(uuid4())
         date = datetime.now()
         new_clip = {}
+        parsed_data = json.loads(data['data'])
 
         if 'parent' in data:
             parent_id = str(data.pop('parent'))
@@ -490,7 +495,8 @@ class ClipSqlDatabase(ClipDatabase):
                 raise GrandchildException
             new_clip['parent'] = parent_id
         conn = self._get_connection()
-        conn.execute(self.statement_add_clip, (_id, date.isoformat(), date.isoformat(), data['mimetype'], data['data']))
+        print("Add", parsed_data)
+        conn.execute(self.statement_add_clip, (_id, date.isoformat(), date.isoformat(), parsed_data['mimetype'], parsed_data['data']))
         conn.commit()
         conn.close()
         return self.get_clip_by_id(_id)
@@ -519,8 +525,10 @@ class ClipSqlDatabase(ClipDatabase):
             return None
         else:
             item = self._get_clip_from_cursor_item(cursor[0])
+            item = self._to_json(item)
+            print(item)
             # TODO: find best match!
-            return self._to_json(item)
+            return item
 
 
 

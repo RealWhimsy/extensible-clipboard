@@ -85,6 +85,7 @@ class Clip(BaseClip):
 
     # @decorators.pre_hooks
     def get(self, clip_id=None):
+        print("Get clip!", request)
         clip = None
         # gets the siblings and parent or children of a clip
         if request.url.endswith('/get_alternatives/'):

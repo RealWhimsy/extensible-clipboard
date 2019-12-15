@@ -423,13 +423,12 @@ class ClipSqlDatabase(ClipDatabase):
 
     def _get_children(self, parent):
         conn = self._get_connection()
-        cursor = list(conn.execute(self.statement_get_child_clips, (parent['_id'],)))
+        cursor = list(conn.execute(self.statement_get_child_clips, (str(parent['_id']),)))
         results = []
         for item in cursor:
             results.append(self._get_clip_from_cursor_item(item))
         return results
 
-    # TODO!
     def _find_best_match(self, parent, preferred_types):
         """
         Searches all children of parent if a direct match for
@@ -544,7 +543,6 @@ class ClipSqlDatabase(ClipDatabase):
         _id = str(uuid4())
         date = datetime.now()
         new_clip = {}
-        parsed_data = json.loads(data['data'])
 
         if 'parent' in data:
             parent_id = str(data.pop('parent'))
@@ -556,8 +554,7 @@ class ClipSqlDatabase(ClipDatabase):
                 raise GrandchildException
             new_clip['parent'] = parent_id
         conn = self._get_connection()
-        print("Add", parsed_data)
-        conn.execute(self.statement_add_clip, (_id, date.isoformat(), date.isoformat(), parsed_data['mimetype'], parsed_data['data']))
+        conn.execute(self.statement_add_clip, (_id, date.isoformat(), date.isoformat(), data['mimetype'], data['data']))
         conn.commit()
         conn.close()
         return self.get_clip_by_id(_id)
@@ -579,6 +576,7 @@ class ClipSqlDatabase(ClipDatabase):
         return result
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
+        print("Get clip",clip_id, "prefer type", preferred_types)
         conn = self._get_connection()
 
         cursor = list(conn.execute(self.statement_get_clip_by_id, (str(clip_id), )))
@@ -588,7 +586,9 @@ class ClipSqlDatabase(ClipDatabase):
         else:
             item = self._get_clip_from_cursor_item(cursor[0])
             if preferred_types and item['mimetype'] is not preferred_types[0]:
-                print("Find best match")
+                print("Find best match!")
+                item = self._find_best_match(item, preferred_types)
+
                 # TODO: find best match!
             item = self._to_json(item)
             print(item)

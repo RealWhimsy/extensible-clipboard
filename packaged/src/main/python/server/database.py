@@ -360,7 +360,8 @@ class ClipSqlDatabase(ClipDatabase):
 
     statement_add_recipient =   """ INSERT INTO clipboards (_id, url, is_hook) VALUES (?, ?, ?); """
     statement_get_recipients =  """ SELECT * FROM clipboards; """
-    statement_get_recipient_by_id =  """ SELECT * FROM clipboards WHERE _id = ?; """
+    statement_get_recipient_by_id =  """ SELECT * FROM clipboards WHERE _id = ? LIMIT 1; """
+    statement_get_recipient_by_url =  """ SELECT * FROM clipboards WHERE url = ? LIMIT 1; """
 
     statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
     statement_get_clips = """ SELECT * FROM clips; """
@@ -435,19 +436,30 @@ class ClipSqlDatabase(ClipDatabase):
 
     # Register another clipboard as recipient
     def add_recipient(self, url, is_hook, subscribed_types):
-        # TODO: check, if url is already registered and update subscribed types
         _id = uuid4().__str__()
-        connection = self._get_connection()
-        connection.execute(self.statement_add_recipient, (_id, url, is_hook))
-        connection.commit()
 
-        new_recipient = list(connection.execute(self.statement_get_recipient_by_id, (_id, )))
-        connection.close()
-        if len(new_recipient) > 0:
-            new_recipient = self._get_recipient_from_cursor_item(new_recipient[0])
+        connection = self._get_connection()
+
+        recipients_with_url = list(connection.execute(self.statement_get_recipient_by_url, (url,)))
+        print("Recipients with url", recipients_with_url)
+        if len(recipients_with_url) > 0:
+            # TODO: update subscribed_types!
+            print("Recipient already existing, updating subscribed types")
+            connection.close()
+            new_recipient = self._get_recipient_from_cursor_item(recipients_with_url[0])
             return self._to_json(new_recipient)
-        else:
-            return None
+        elif len(recipients_with_url) == 0:
+            connection.execute(self.statement_add_recipient, (_id, url, is_hook))
+            connection.commit()
+            new_recipient = list(connection.execute(self.statement_get_recipient_by_id, (_id, )))
+            connection.close()
+            if len(new_recipient) > 0:
+                new_recipient = self._get_recipient_from_cursor_item(new_recipient[0])
+                return self._to_json(new_recipient)
+            else:
+                return None
+
+
 
         """
         old_instance = self.clipboard_collection.find_one({'url': url})
@@ -519,22 +531,23 @@ class ClipSqlDatabase(ClipDatabase):
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
         conn = self._get_connection()
+
         cursor = list(conn.execute(self.statement_get_clip_by_id, (str(clip_id), )))
         conn.close()
         if len(cursor) == 0:
             return None
         else:
             item = self._get_clip_from_cursor_item(cursor[0])
+            if preferred_types and item['mimetype'] is not preferred_types[0]:
+                print("Find best match")
+                # TODO: find best match!
             item = self._to_json(item)
             print(item)
-            # TODO: find best match!
             return item
 
 
 
         """
-            if preferred_types:  # Request specified mimetype
-        if not clip['mimetype'] == preferred_types[0]:
             best_match = self._find_best_match(clip, preferred_types)
             if best_match:
                 clip = best_match

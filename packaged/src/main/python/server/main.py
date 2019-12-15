@@ -63,8 +63,8 @@ class ClipServer():
 
     def __init__(self, argv, port=None):
         # Database for saving clips, currently mongo
-        self.database = ClipDatabase()
-        # self.database = ClipSqlDatabase()
+        # self.database = ClipDatabase()
+        self.database = ClipSqlDatabase()
         # self.database_2_temp.add_recipient("abasdasd", True, [])
         # self.database_2_temp.get_recipients()
         # self.database_2_temp.get_all_clips()

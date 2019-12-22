@@ -335,6 +335,7 @@ class ClipDatabase:
 ################################################################################################
 
 import sqlite3
+import ast
 # Sql Implementation of the extensible clipboard database module
 class ClipSqlDatabase(ClipDatabase):
     statement_create_clip_table = \
@@ -354,14 +355,16 @@ class ClipSqlDatabase(ClipDatabase):
     CREATE TABLE IF NOT EXISTS clipboards (
         _id VARCHAR(40) PRIMARY KEY,
         url VARCHAR(40),
-        is_hook INTEGER
+        is_hook INTEGER,
+        preferred_types VARCHAR(512)
     );
     """
 
-    statement_add_recipient =   """ INSERT INTO clipboards (_id, url, is_hook) VALUES (?, ?, ?); """
+    statement_add_recipient =   """ INSERT INTO clipboards (_id, url, is_hook, preferred_types) VALUES (?, ?, ?, ?); """
     statement_get_recipients =  """ SELECT * FROM clipboards; """
     statement_get_recipient_by_id =  """ SELECT * FROM clipboards WHERE _id = ? LIMIT 1; """
     statement_get_recipient_by_url =  """ SELECT * FROM clipboards WHERE url = ? LIMIT 1; """
+    statement_update_recipient_preferred_types =  """ UPDATE clipboards SET preferred_types = ? WHERE url = ?; """
 
     statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
     statement_get_clips = """ SELECT * FROM clips; """
@@ -393,7 +396,8 @@ class ClipSqlDatabase(ClipDatabase):
         return {
             '_id': UUID(item[0]),
             'url': item[1],
-            'is_hook': bool(item[2])
+            'is_hook': bool(item[2]),
+            'preferred_types': ast.literal_eval(item[3])
         }
 
     # transform
@@ -485,19 +489,16 @@ class ClipSqlDatabase(ClipDatabase):
     # Register another clipboard as recipient
     def add_recipient(self, url, is_hook, subscribed_types):
         _id = uuid4().__str__()
-
         connection = self._get_connection()
-
         recipients_with_url = list(connection.execute(self.statement_get_recipient_by_url, (url,)))
-        print("Recipients with url", recipients_with_url)
         if len(recipients_with_url) > 0:
-            # TODO: update subscribed_types!
-            print("Recipient already existing, updating subscribed types")
+            connection.execute(self.statement_update_recipient_preferred_types, (repr(subscribed_types), url))
+            connection.commit()
             connection.close()
             new_recipient = self._get_recipient_from_cursor_item(recipients_with_url[0])
             return self._to_json(new_recipient)
         elif len(recipients_with_url) == 0:
-            connection.execute(self.statement_add_recipient, (_id, url, is_hook))
+            connection.execute(self.statement_add_recipient, (_id, url, is_hook, repr(subscribed_types)))
             connection.commit()
             new_recipient = list(connection.execute(self.statement_get_recipient_by_id, (_id, )))
             connection.close()
@@ -507,34 +508,6 @@ class ClipSqlDatabase(ClipDatabase):
             else:
                 return None
 
-
-
-        """
-        old_instance = self.clipboard_collection.find_one({'url': url})
-        if old_instance is not None:
-            if subscribed_types:
-                old_instance = self.clipboard_collection.find_one_and_update(
-                    {'url': url},
-                    {'$set': {'subscribed_types': subscribed_types}},
-                    return_document=ReturnDocument.AFTER)
-            return self._build_json_response_clip(old_instance)
-
-        _id = uuid4()
-        _id = self._create_binary_uuid(str(_id))
-        new_clipboard = {}
-
-        new_clipboard['_id'] = _id
-        new_clipboard['url'] = url
-        new_clipboard['is_hook'] = is_hook
-        if subscribed_types:
-            new_clipboard['subscribed_types'] = subscribed_types
-
-        self.clipboard_collection.insert_one(new_clipboard)
-        new_clipboard = self.clipboard_collection.find_one({'_id': _id})
-
-        return self._build_json_response_clip(new_clipboard)
-
-        """
 
     # CLIP OPERATIONS
 
@@ -565,7 +538,6 @@ class ClipSqlDatabase(ClipDatabase):
         result = []
         conn = self._get_connection()
         cursor = list(conn.execute(self.statement_get_clips))
-        # cursor = list(conn.execute('SELECT * FROM clips;'))
         if len(cursor) == 0:
             return None
         for row in cursor:
@@ -578,7 +550,6 @@ class ClipSqlDatabase(ClipDatabase):
     def get_clip_by_id(self, clip_id, preferred_types=None):
         print("Get clip",clip_id, "prefer type", preferred_types)
         conn = self._get_connection()
-
         cursor = list(conn.execute(self.statement_get_clip_by_id, (str(clip_id), )))
         conn.close()
         if len(cursor) == 0:
@@ -586,12 +557,8 @@ class ClipSqlDatabase(ClipDatabase):
         else:
             item = self._get_clip_from_cursor_item(cursor[0])
             if preferred_types and item['mimetype'] is not preferred_types[0]:
-                print("Find best match!")
                 item = self._find_best_match(item, preferred_types)
-
-                # TODO: find best match!
             item = self._to_json(item)
-            print(item)
             return item
 
 

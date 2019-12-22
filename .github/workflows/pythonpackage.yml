@@ -9,7 +9,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.5]
+        python-version: [3.7.5]
 
     steps:
     - uses: actions/checkout@v1
@@ -18,19 +18,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: Install and run
       run: |
         cd ./packaged
         python3 -m venv venv
         source venv/bin/activate
-        pip install --upgrade pip
+        pip3 install --upgrade pip
         pip3 install -r requirements.txt
-        
-    - name: Run
-      run: |
-        cd ./packaged
-        python3 -m venv venv
-        python3 ./src/main/python/main.py        
+        python3 -m fbs freeze
+          
 #    - name: Build
 #      run: |
 #        cd ./packaged

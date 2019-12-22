@@ -407,7 +407,7 @@ class ClipSqlDatabase(ClipDatabase):
         if 'parent' in result:
             result['parent'] = result(result['parent'])
         if 'data' in result:
-            result['data'] = str(result['data'])
+            result['data'] = result['data'].decode('UTF-8')
         return result
 
     def _get_clip_from_cursor_item(self, item):

@@ -28,6 +28,10 @@ if __name__ == '__main__':
                     help="Do not start a clipboard server. This may be useful, if you want to host a remote server.")
     ap.add_argument("-cbsport", '--clipboardserverport',
                     help="Define the port for the clipboardserver. (pattern: 8080)")
+    ap.add_argument("-cbsdomain", '--clipboardserverdomain',
+                    help="Define the domain for the clipboard server. (pattern: http://10.0.2.2)")
+    ap.add_argument("-cbssync", '--clipboardserversync',
+                    help="Define, whether the clipboard syncs itself to the host server. (pattern: True/False)")
     cl_arguments = ap.parse_args()
     print("Command Line Arguments", cl_arguments)
 
@@ -64,13 +68,19 @@ if __name__ == '__main__':
     if cl_arguments.noclipboardserver is not True:
         if system_config['system'].getboolean('is_instantiating_clipboard_server'):
             port = clipboard_port
+            domain = clipboard_domain
+            is_syncing = clipboard_is_syncing
             if cl_arguments.clipboardserverport:
                 port = cl_arguments.clipboardserverport
+            if cl_arguments.clipboardserverdomain:
+                domain = cl_arguments.clipboardserverdomain
+            if cl_arguments.clipboardserversync:
+                is_syncing = cl_arguments.clipboardserversync
             clipboard = ClipboardServerApp(
                 port,
                 clipboard_main_server_address,
-                clipboard_domain,
-                clipboard_is_syncing,
+                domain,
+                is_syncing,
                 sys.argv,
                 Context.ctx.app
             )

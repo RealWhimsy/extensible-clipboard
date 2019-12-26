@@ -1,1 +1,0 @@
-pgreg mongo > kill

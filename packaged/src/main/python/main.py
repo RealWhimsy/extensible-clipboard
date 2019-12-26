@@ -12,9 +12,6 @@ from util.context import Context
 
 from configparser import ConfigParser
 from argparse import ArgumentParser
-
-
-
 from importlib import machinery
 
 if __name__ == '__main__':
@@ -24,9 +21,13 @@ if __name__ == '__main__':
                     help="Do not start a clip server. You need to define a host clipserver!")
     ap.add_argument("-cshost", '--clipserverhost',
                     help="Define the address of a host clipserver. (pattern: http://123.123.123.123:1234/)")
+    ap.add_argument("-csport", '--clipserverport',
+                    help="Define the port for the clipserver. (pattern: 8080)")
     ap.add_argument("-nocbs", "--noclipboardserver",
                     action="store_true",
                     help="Do not start a clipboard server. This may be useful, if you want to host a remote server.")
+    ap.add_argument("-cbsport", '--clipboardserverport',
+                    help="Define the port for the clipboardserver. (pattern: 8080)")
     cl_arguments = ap.parse_args()
     print("Command Line Arguments", cl_arguments)
 
@@ -48,8 +49,10 @@ if __name__ == '__main__':
 
     if cl_arguments.noclipserver is not True:
         if system_config['system'].getboolean('is_instantiating_main_server'):
-            print(system_config['system']['is_instantiating_main_server'])
-            server = ClipServer(sys.argv, main_server_port)
+            port = main_server_port
+            if cl_arguments.clipserverport:
+                port = cl_arguments.clipserverport
+            server = ClipServer(sys.argv, port)
             server.main()
             # TODO: quite messy way of waiting for the server to finish starting, but it should do the trick for now
             time.sleep(1)
@@ -60,8 +63,11 @@ if __name__ == '__main__':
 
     if cl_arguments.noclipboardserver is not True:
         if system_config['system'].getboolean('is_instantiating_clipboard_server'):
+            port = clipboard_port
+            if cl_arguments.clipboardserverport:
+                port = cl_arguments.clipboardserverport
             clipboard = ClipboardServerApp(
-                clipboard_port,
+                port,
                 clipboard_main_server_address,
                 clipboard_domain,
                 clipboard_is_syncing,

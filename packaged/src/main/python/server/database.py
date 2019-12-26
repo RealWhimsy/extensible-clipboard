@@ -467,14 +467,13 @@ class ClipSqlDatabase(ClipDatabase):
         return parent
 
 
-
     # RECIPIENT OPERATIONS
 
     # Return all registered recipients
     def get_recipients(self):
         conn = self._get_connection()
-        cursor = conn.execute(self.statement_get_recipients)
-        if len(list(cursor)) == 0:
+        cursor = list(conn.execute(self.statement_get_recipients))
+        if len(cursor) == 0:
             return None
         result = []
         for row in cursor:

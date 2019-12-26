@@ -39,7 +39,7 @@ class ConnectionHandler(QObject):
         elif domain == 'public':
             self.domain = NetworkUtil.get_public_ipv4(self.port)
         else:
-            self.domain = domain
+            self.domain = domain + ':' + str(self.port) + '/'
 
         # needed to add the route here, because self.flask_app needs to be set
         @self.flask_app.route('/', methods=['POST'])

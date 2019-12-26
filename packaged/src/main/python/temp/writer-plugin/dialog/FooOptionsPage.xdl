@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="FooOptionsPage" dlg:left="111" dlg:top="52" dlg:width="174" dlg:height="147" dlg:help-url="org.openoffice.demo.OptionsPageDemo:textoptionsdemoxml" dlg:closeable="true" dlg:moveable="true" dlg:withtitlebar="false">
+ <dlg:styles>
+  <dlg:style dlg:style-id="0" dlg:background-color="0xeeeeee"/>
+ </dlg:styles>
+ <dlg:bulletinboard>
+  <dlg:text dlg:style-id="0" dlg:id="labelURL" dlg:tab-index="2" dlg:left="8" dlg:top="8" dlg:width="135" dlg:height="12" dlg:value="Server Url"/>
+  <dlg:textfield dlg:id="txtUrl" dlg:tab-index="3" dlg:left="8" dlg:top="20" dlg:width="157" dlg:height="13" dlg:value="http://192.178.168.21:5000/"/>
+ </dlg:bulletinboard>
+</dlg:window>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>root</class>
+ <widget class="QWidget" name="root">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>457</width>
+    <height>332</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="btn_run">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>451</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start Clip Server</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_run_hookserver">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>50</y>
+     <width>451</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start Webhook Server</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btn_run_clipboard_server">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>100</y>
+     <width>451</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start Clipboard Server</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="display_log">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>441</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::WinPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_eventmonitor">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>160</y>
+     <width>431</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Event Monitor</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body onload="initApp()">
+    <div id="heading">Extended Clipboard - C<sup>2</sup></div>
+    <div id="controls">
+      <div id="syncButton">
+        <img src="images/sync.svg"/>
+      </div>
+    </div>
+    <div id="clipTable">
+      <div class="clipRow">
+        <div class="clipDate">Date</div>
+        <div class="clipType">Mimetype</div>
+        <div class="clipPaste">Paste</div>
+        <div class="clipOpen">Open</div>
+        <div class="clipDelete">Delete</div>
+      </div>
+    </div>
+    <div id="clipList">
+    </div>
+
+
+    <script id="clipTemplate2" type="text/x-handlebars-template">
+      {{#each clips}}
+        {{#if parent}}
+          <div class="clipRow childRow" data-id={{this._id}}>
+        {{else}}
+          <div class="clipRow" data-id={{this._id}}>
+        {{/if}}
+        <div class="clipDate">{{this.date}}</div>
+        <div class="clipType">{{this.clipType}}</div>
+        <div class="clipPaste"></div>
+        <div class="clipOpen"></div>
+        <div class="clipDelete"></div>
+      </div>
+      {{/each}}
+    </script>
+
+    <script src="libs/handlebars-v4.0.12.js"></script>
+    <script src="libs/jquery-3.3.1.min.js"></script>
+    <script src="requestBuilder.js"></script>
+    <script src="clipboard_api.js"></script>
+    <script src="popup.js"></script>
+    <script>
+        function initApp() {
+            app.init()
+        }
+    </script>
+  </body>
+</html>

@@ -1,7 +1,0 @@
-bin/
-build/
-dist/
-types.rdb
-StarterProject.jar
-.project
-.classpath

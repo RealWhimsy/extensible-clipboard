@@ -111,7 +111,6 @@ class ClipboardServerApp():
         self.server_thread.start()
 
     def __init__(self, port, clipserver_address, domain, is_syncing, argv=sys.argv, app=None):
-        print("Port", port)
         # super(ClipboardServerApp, self).__init__(argv)
         self.app = app
         self.flask_server = Flask(__name__)

@@ -47,8 +47,7 @@ class ConnectionHandler(QObject):
             return self.handle_request(request)
 
     def _die(self, message):
-        print(message)
-        print("Networking X.X")
+        print("Clipboard Server: Networking has died")
         # This causes the app to crash if connection fails
         # TODO: add slot for error messages
         # sys.exit(1)
@@ -107,7 +106,6 @@ class ConnectionHandler(QObject):
             m += 'Message from server: {}'.format(response.text)
             self._die(m)
 
-        print(response)
         self.recipient_id_got.emit(response.json()['_id'])
 
 

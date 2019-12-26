@@ -137,8 +137,6 @@ class ClipDatabase:
         return None
 
     def save_clip(self, data):
-
-        print("Clip", data)
         """
         Inserts a new clip-object into the database.
         This method also adds ISO-Timestamps to the new object
@@ -548,7 +546,6 @@ class ClipSqlDatabase(ClipDatabase):
         return result
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
-        print("Get clip",clip_id, "prefer type", preferred_types)
         conn = self._get_connection()
         cursor = list(conn.execute(self.statement_get_clip_by_id, (str(clip_id), )))
         conn.close()
@@ -560,15 +557,6 @@ class ClipSqlDatabase(ClipDatabase):
                 item = self._find_best_match(item, preferred_types)
             item = self._to_json(item)
             return item
-
-
-
-        """
-            best_match = self._find_best_match(clip, preferred_types)
-            if best_match:
-                clip = best_match
-        
-        """
 
     # Get alternatives to clip item
     def get_alternatives(self, clip_id):

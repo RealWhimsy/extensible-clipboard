@@ -67,7 +67,7 @@ class FlaskServer(Flask):
         ))
 
     def send_to_clipboards(self, data, force_propagation=False):
-        print(self.clipboards)
+        print("Send to clipboards", self.clipboards)
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource

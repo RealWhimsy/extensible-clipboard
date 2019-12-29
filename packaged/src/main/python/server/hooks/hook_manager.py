@@ -1,8 +1,10 @@
 from importlib import import_module, machinery
 from os import listdir
 import os
+from util.context import Context
+
+# TODO: this may be a bit cumbersome, but currently seems like the best solution
 from server.hooks.basehook import BaseHook
-from server.hooks.trusted_client_hook import ClientIsTrustedHook
 
 
 class HookManager:
@@ -16,22 +18,28 @@ class HookManager:
         TODO: packaging the application did break the dynamic hook system by Matthias
         - A dynamic hook system could be implemented using context resources, but this would require a bigger refactor
         """
-        self.hooks.append(ClientIsTrustedHook())
-        """
-        files = listdir(os.path.dirname(__file__))
+        # self.hooks.append(ClientIsTrustedHook())
+
+        base_path = Context.ctx.get_resource('hooks/')
+        files = listdir(base_path)
         # Remove all files not ending on _hook.py
         hook_files = [f for f in files if f.endswith('_hook.py')]
         for file_name in hook_files:
-            module = import_module('server.hooks.' + file_name[:-3])
+            # module = import_module('server.hooks.' + file_name[:-3])
+            modname = file_name[:-3]
+            module = machinery.SourceFileLoader(modname, base_path+'/'+file_name).load_module()
             members = dir(module)
             for m in members:
                 # Do not even check underscored stuff and Parent class
-                if not m.startswith('_') and 'BaseHook'not in m:
-                    hook = getattr(module, m)()  # instanciate found class
+                # TODO: document, that Hook modules have to include the word 'Hook'
+                if not m.startswith('_') and 'BaseHook'not in m and 'Hook' in m:
+                    try:
+                        hook = getattr(module, m)()  # instanciate found class
+                    except TypeError:
+                        print("Could not instantiate hook", m, 'from module', modname)
                     if isinstance(hook, BaseHook):  # is child of BaseHook
-                        print(hook)
                         self.hooks.append(hook)
-        """
+
 
     def call_hooks(self, request):
         for h in self.hooks:

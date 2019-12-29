@@ -6,8 +6,13 @@ from flask.views import MethodView
 import server.decorators as decorators
 from server.exceptions import (GrandchildException, ParentNotFoundException,
                         SameMimetypeException)
-from server.hooks.hook_manager import HookManager
 from server.parser import RequestParser
+
+import importlib
+
+from util.context import Context
+from server.hooks.hook_manager import HookManager
+
 """
 The classes in this file act as the views for Flask and expose the application
 to the network. Extension of the API should happen here and new classes
@@ -15,7 +20,7 @@ introduced should inherit from BaseClip.
 Here, the concept of Clip is introduced used throughout the whole project.
 A clip is the representation of an object in the clipboard. Apart from its
 data it must contain a mimetype. Several other pieces of data can be sent
-with custom HTTP-headers. Please refert to parser.py for a specification
+with custom HTTP-headers. Please refer to parser.py for a specification
 of those.
 Apart from Recipient, the classes were added to split the logic of processing
 the incoming data into different methods as to make the code more readable.
@@ -34,6 +39,7 @@ class BaseClip(MethodView):
 
     def __init__(self):
         self.parser = RequestParser()
+
         self.pre_hooks = HookManager()
 
     def _load_pre_hooks(self):

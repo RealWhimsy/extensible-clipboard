@@ -1,8 +1,12 @@
-from server.hooks.basehook import BaseHook
 from util.context import Context
+import server
+from importlib import machinery
 import json
 
-class ClientIsTrustedHook(BaseHook):
+
+from server.hooks.basehook import BaseHook
+
+class TrustedClientHook(BaseHook):
     """
     Hook for restricting or allowing access to the clipboard server.
 
@@ -11,6 +15,7 @@ class ClientIsTrustedHook(BaseHook):
     """
 
     def do_work(self, request):
+        print("WERK IT")
         file = open(Context.ctx.get_resource("config/trusted-clients-config.json"))
         trusted_addresses = json.load(file)
         file.close()

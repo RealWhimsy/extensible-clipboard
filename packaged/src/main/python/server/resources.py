@@ -39,7 +39,6 @@ class BaseClip(MethodView):
 
     def __init__(self):
         self.parser = RequestParser()
-
         self.pre_hooks = HookManager()
 
     def _load_pre_hooks(self):
@@ -89,7 +88,7 @@ class Clip(BaseClip):
     its contents or getting alternative representations of the same data.
     """
 
-    # @decorators.pre_hooks
+    @decorators.pre_hooks
     def get(self, clip_id=None):
         print("Get clip!", request)
         clip = None

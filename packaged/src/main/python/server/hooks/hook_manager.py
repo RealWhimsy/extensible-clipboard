@@ -14,11 +14,6 @@ class HookManager:
         # Rebuild hooks if method is called manually fore some reason
         if self.hooks:
             self.hooks = []
-        """
-        TODO: packaging the application did break the dynamic hook system by Matthias
-        - A dynamic hook system could be implemented using context resources, but this would require a bigger refactor
-        """
-        # self.hooks.append(ClientIsTrustedHook())
 
         base_path = Context.ctx.get_resource('hooks/')
         files = listdir(base_path)
@@ -31,19 +26,18 @@ class HookManager:
             members = dir(module)
             for m in members:
                 # Do not even check underscored stuff and Parent class
-                # TODO: document, that Hook modules have to include the word 'Hook'
                 if not m.startswith('_') and 'BaseHook'not in m and 'Hook' in m:
                     try:
                         hook = getattr(module, m)()  # instanciate found class
                     except TypeError:
                         print("Could not instantiate hook", m, 'from module', modname)
                     if isinstance(hook, BaseHook):  # is child of BaseHook
+                        print(hook)
                         self.hooks.append(hook)
 
 
     def call_hooks(self, request):
         for h in self.hooks:
-            print("Call hook", h)
             if not h.do_work(request):
                 return False
         return True

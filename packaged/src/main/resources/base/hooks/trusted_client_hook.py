@@ -15,7 +15,6 @@ class TrustedClientHook(BaseHook):
     """
 
     def do_work(self, request):
-        print("WERK IT")
         file = open(Context.ctx.get_resource("config/trusted-clients-config.json"))
         trusted_addresses = json.load(file)
         file.close()

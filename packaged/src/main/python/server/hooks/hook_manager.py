@@ -32,7 +32,6 @@ class HookManager:
                     except TypeError:
                         print("Could not instantiate hook", m, 'from module', modname)
                     if isinstance(hook, BaseHook):  # is child of BaseHook
-                        print(hook)
                         self.hooks.append(hook)
 
 

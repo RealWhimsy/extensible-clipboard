@@ -116,6 +116,7 @@ class Clip(BaseClip):
         self.set_headers(res, clip)
         return res
 
+    @decorators.pre_hooks
     def put(self, clip_id=None):
         """
         Updates the clip specified by clip_id
@@ -136,6 +137,7 @@ class Clip(BaseClip):
         else:
             return jsonify(error='No clip with specified id'), 404
 
+    @decorators.pre_hooks
     def delete(self, clip_id=None):
         """
         Deletes the clip specified by clip_id. When a parent is deleted,
@@ -151,6 +153,7 @@ class Clip(BaseClip):
         else:
             return jsonify(error='No clip with specified id'), 404
 
+    @decorators.pre_hooks
     def post(self, clip_id=None):
         if request.url.endswith('/call_hooks'):
             current_app.call_hooks(clip_id)
@@ -164,6 +167,7 @@ class Clips(BaseClip):
     Class responsible for handling a set of Clips
     """
 
+    @decorators.pre_hooks
     def post(self):
         """
         Create a new clip
@@ -202,6 +206,7 @@ class ChildClipAdder(BaseClip):
     Introduced to simplify the flow of the application.
     """
 
+    @decorators.pre_hooks
     def post(self, clip_id=None):
         data = self.parser.get_data_from_request(request)
         if not data:

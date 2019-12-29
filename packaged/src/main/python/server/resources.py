@@ -232,6 +232,10 @@ class Recipient(MethodView):
     specific mimetypes it is interested in.
     """
 
+    def __init__(self):
+        self.parser = RequestParser()
+        self.pre_hooks = HookManager()
+
     def is_url(self, url):
         """
         Sanity-check to see if the data sent by the recipient seems to be
@@ -239,6 +243,7 @@ class Recipient(MethodView):
         """
         return re.match(r'^http://', url)
 
+    @decorators.pre_hooks
     def post(self):
         """
         Adds another recipient. Depending on the URL, the request was sent

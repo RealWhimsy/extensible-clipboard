@@ -9,6 +9,7 @@ the functionality of the system clipboard.
 
 🚨 Running extensible clipboard is currently **not supported on OS X platforms** due to 
 restrictions of the PyQT framework. 
+
 🚨 Also, **building will currently not work on Windows platforms**, so please use `fbs run` instead.
 
 ## Features

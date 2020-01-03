@@ -30,6 +30,7 @@ following commands:
     source venv/bin/activate
     pip3 install --upgrade pip
     pip3 install -r requirements.txt
+ 
     
 ## Building
 Before you are able to use the extensible clipboard, you need to build it for your platform:
@@ -38,6 +39,8 @@ Before you are able to use the extensible clipboard, you need to build it for yo
     cd ./packaged
     source venv/bin/activate
     fbs freeze
+
+If python states, that objdump has not been found, please try installing **binutils** on your system.
     
 ## Running 
 After building the executable, you can run it through the console:

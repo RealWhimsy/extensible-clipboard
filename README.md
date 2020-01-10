@@ -27,6 +27,10 @@ If you run extensible clipboard for the first time, please initialize it with th
 following commands:
 
     # Install dependencies for extensible clipboard
+    sudo apt-get install python3-venv && \
+    sudo apt-get install python3-dev && \
+    sudo apt-get install binutils
+    # 
     cd ./packaged
     python3 -m venv venv
     source venv/bin/activate

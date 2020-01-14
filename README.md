@@ -91,7 +91,7 @@ For only running the clipboard, enter:
 
     # Start extensible clipboard, clipboard-only
     cd ./packaged
-    'target/ExtensibleClipboard/ExtensibleClipboard' -nocs -cbsdomain=http://mydomain -cbsport=12345 -cshost=http://myserverdomain:12345
+    'target/ExtensibleClipboard/ExtensibleClipboard' -nocs -cbsdomain=http://mydomain -cbsport=12345 -cshost=http://myserverdomain:12345/
 
 This configuration is suitable for setups, where you might connect your local 
 clipboard to a remote server.

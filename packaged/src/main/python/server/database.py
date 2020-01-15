@@ -405,7 +405,11 @@ class ClipSqlDatabase(ClipDatabase):
         if 'parent' in result:
             result['parent'] = result(result['parent'])
         if 'data' in result:
-            result['data'] = result['data'].decode('UTF-8')
+            try:
+                result['data'] = result['data'].decode('UTF-8')
+            except UnicodeDecodeError:
+                result['data'] = "COULD NOT UTF-DECODE FILE " + data['mimetype']
+                pass
         return result
 
     def _get_clip_from_cursor_item(self, item):
@@ -554,7 +558,7 @@ class ClipSqlDatabase(ClipDatabase):
             item = self._get_clip_from_cursor_item(cursor[0])
             if preferred_types and item['mimetype'] is not preferred_types[0]:
                 item = self._find_best_match(item, preferred_types)
-            item = self._to_json(item)
+            # item = self._to_json(item)
             return item
 
     # Get alternatives to clip item

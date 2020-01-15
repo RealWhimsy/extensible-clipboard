@@ -116,3 +116,5 @@ dmypy.json
 /tags
 tmux_startup
 run_tests.sh
+
+packaged/clip_collection.db

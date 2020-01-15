@@ -365,6 +365,7 @@ class ClipSqlDatabase(ClipDatabase):
     statement_update_recipient_preferred_types =  """ UPDATE clipboards SET preferred_types = ? WHERE url = ?; """
 
     statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
+    statement_add_child_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data, parent) VALUES (?, ?, ?, ?, ?, ?);"""
     statement_get_clips = """ SELECT * FROM clips; """
     # https://stackoverflow.com/questions/22200587/get-records-for-the-latest-timestamp-in-sqlite
     statement_get_latest_clip = """ SELECT * FROM clips ORDER BY creation_date DESC LIMIT 1; """
@@ -403,7 +404,7 @@ class ClipSqlDatabase(ClipDatabase):
         result = deepcopy(item)
         result['_id'] = str(result['_id'])
         if 'parent' in result:
-            result['parent'] = result(result['parent'])
+            result['parent'] = str(result['parent'])
         if 'data' in result:
             try:
                 result['data'] = result['data'].decode('UTF-8')
@@ -518,8 +519,11 @@ class ClipSqlDatabase(ClipDatabase):
         new_clip = {}
 
         if 'parent' in data:
-            parent_id = str(data.pop('parent'))
+            print("Parent in data")
+            print(data['parent'])
+            parent_id = str(data['parent'])
             parent = self.get_clip_by_id(parent_id)
+            print("Parent is", parent)
             # Abandon insert, when parent-id not in db
             if parent is None:
                 raise ParentNotFoundException
@@ -527,7 +531,10 @@ class ClipSqlDatabase(ClipDatabase):
                 raise GrandchildException
             new_clip['parent'] = parent_id
         conn = self._get_connection()
-        conn.execute(self.statement_add_clip, (_id, date.isoformat(), date.isoformat(), data['mimetype'], data['data']))
+        if('parent' in new_clip):
+            conn.execute(self.statement_add_child_clip, (_id, date.isoformat(), date.isoformat(), data['mimetype'], data['data'], new_clip['parent']))
+        else:
+            conn.execute(self.statement_add_clip, (_id, date.isoformat(), date.isoformat(), data['mimetype'], data['data']))
         conn.commit()
         conn.close()
         return self.get_clip_by_id(_id)

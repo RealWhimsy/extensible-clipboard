@@ -1,3 +1,4 @@
+![alt text](logo.png)
 # Extensible Clipboard
 This is the improved repository of Extensible Clipboard, 
 which has been initially developed by Matthias Rösl. 

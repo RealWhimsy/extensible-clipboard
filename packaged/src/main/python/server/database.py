@@ -408,8 +408,7 @@ class ClipSqlDatabase(ClipDatabase):
             try:
                 result['data'] = result['data'].decode('UTF-8')
             except UnicodeDecodeError:
-                result['data'] = "COULD NOT UTF-DECODE FILE " + data['mimetype']
-                pass
+                result['data'] = "COULD NOT UTF-DECODE FILE " + result['mimetype']
         return result
 
     def _get_clip_from_cursor_item(self, item):

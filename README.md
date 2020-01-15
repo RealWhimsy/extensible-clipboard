@@ -7,8 +7,10 @@ traditional clipboard, enabling users enhanced functionality
 and the capability to create own applications, tapping into 
 the functionality of the system clipboard.
 
-🚨 Extensible clipboard is currently not supported on OS X platforms due to 
-restrictions of the PyQT framework.
+🚨 Running extensible clipboard is currently **not supported on OS X platforms** due to 
+restrictions of the PyQT framework. 
+
+🚨 Also, **building will currently not work on Windows platforms**, so please use `fbs run` instead.
 
 ## Features
 - 🌏  Remotely set the clipboard on multiple systems via HTTP-Requests
@@ -21,15 +23,26 @@ formats)
 - 🔒 Control access to your clipboard by whitelisting clients
 
 ## Installation
+We recommend installing extensible clipboard from the built version, since it is the most convenient way and does not require insatlling all packages:
+
+- [Download Debian build (14.1.2020)](https://files.mi.ur.de/f/81159d53bc/?dl=1)
+
+
+
 If you run extensible clipboard for the first time, please initialize it with the 
 following commands:
 
     # Install dependencies for extensible clipboard
+    sudo apt-get install python3-venv && \
+    sudo apt-get install python3-dev && \
+    sudo apt-get install binutils
+    # 
     cd ./packaged
     python3 -m venv venv
     source venv/bin/activate
     pip3 install --upgrade pip
     pip3 install -r requirements.txt
+ 
     
 ## Building
 Before you are able to use the extensible clipboard, you need to build it for your platform:
@@ -38,6 +51,8 @@ Before you are able to use the extensible clipboard, you need to build it for yo
     cd ./packaged
     source venv/bin/activate
     fbs freeze
+
+If python states, that objdump has not been found, please try installing **binutils** on your system.
     
 ## Running 
 After building the executable, you can run it through the console:
@@ -82,7 +97,7 @@ For only running the clipboard, enter:
 
     # Start extensible clipboard, clipboard-only
     cd ./packaged
-    'target/ExtensibleClipboard/ExtensibleClipboard' -nocs -cbsdomain=http://mydomain -cbsport=12345 -cshost=http://myserverdomain:12345
+    'target/ExtensibleClipboard/ExtensibleClipboard' -nocs -cbsdomain=http://mydomain -cbsport=12345 -cshost=http://myserverdomain:12345/
 
 This configuration is suitable for setups, where you might connect your local 
 clipboard to a remote server.

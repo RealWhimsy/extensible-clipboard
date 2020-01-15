@@ -1,4 +1,4 @@
-![alt text](https://raw.githubusercontent.com/FelixRDL/extensible-clipboard/master/logo.png)
+![alt text](logo.png)
 # Extensible Clipboard
 This is the improved repository of Extensible Clipboard, 
 which has been initially developed by Matthias Rösl. 

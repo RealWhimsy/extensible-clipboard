@@ -23,6 +23,12 @@ formats)
 - 🔒 Control access to your clipboard by whitelisting clients
 
 ## Installation
+We recommend installing extensible clipboard from the built version, since it is the most convenient way and does not require insatlling all packages:
+
+- [Download Debian build (14.1.2020)](https://files.mi.ur.de/f/81159d53bc/?dl=1)
+
+
+
 If you run extensible clipboard for the first time, please initialize it with the 
 following commands:
 

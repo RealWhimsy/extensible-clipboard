@@ -26,6 +26,11 @@ jobs:
         pip3 install --upgrade pip
         pip3 install -r requirements.txt
         python3 -m fbs freeze
+
+        cd ..
+        apt install zip
+        mkdir build
+        zip -r ./build/release.zip ./packaged/target/ExtensibleClipboard
           
 #    - name: Build
 #      run: |

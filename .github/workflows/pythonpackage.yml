@@ -28,7 +28,7 @@ jobs:
         python3 -m fbs freeze
 
         cd ..
-        apt install zip
+        sudo apt-get install zip
         mkdir build
         zip -r ./build/release.zip ./packaged/target/ExtensibleClipboard
           

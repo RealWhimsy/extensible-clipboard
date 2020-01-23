@@ -32,7 +32,7 @@ jobs:
         mkdir dist
         mkdir dist/build
         mkdir dist/build/ExtensibleClipboard
-        cp -r ./packaged/target/ExtensibleCliboard ./dist/build/ExtensibleClipboard
+        cp -r ./packaged/target/ExtensibleClipboard ./dist/build/ExtensibleClipboard
         zip -r ./dist/release.zip ./dist/build/ExtensibleClipboard
     - name: Archive build
       uses: actions/upload-artifact@v1
@@ -46,7 +46,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: release_${{ github.ref }}
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false

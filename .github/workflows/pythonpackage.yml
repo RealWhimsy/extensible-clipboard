@@ -31,6 +31,8 @@ jobs:
         sudo apt-get install zip
         mkdir build
         zip -r ./build/release.zip ./packaged/target/ExtensibleClipboard
+        git commit -m "Automatic release"
+        git push
           
 #    - name: Build
 #      run: |

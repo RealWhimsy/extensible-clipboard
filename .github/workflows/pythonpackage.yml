@@ -29,16 +29,13 @@ jobs:
 
         cd ..
         sudo apt-get install zip
-        mkdir releases
-        zip -r ./releases/release.zip ./packaged/target/ExtensibleClipboard
-
-        git config --global github.user ${{github.ref}}
-        git config --global github.token ${{secrets.GITHUB_TOKEN}}
-        git config --global user.name ${{github.ref}}
-        git add .
-        git commit -m "Automatic release"
-        git push
-          
+        mkdir dist
+        zip -r ./dist/release.zip ./packaged/target/ExtensibleClipboard
+      - name: Archive release build
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist
 #    - name: Build
 #      run: |
 #        cd ./packaged

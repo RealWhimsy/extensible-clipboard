@@ -30,10 +30,11 @@ jobs:
         cd ..
         sudo apt-get install zip
         mkdir build
-        zip -r ./build/release.zip ./packaged/target/ExtensibleClipboard
+        zip -r ./releases/release.zip ./packaged/target/ExtensibleClipboard
 
         git config --global github.user ${{github.ref}}
         git config --global github.token ${{secrets.GITHUB_TOKEN}}
+        git config --global git.user github.user
         git add .
         git commit -m "Automatic release"
         git push

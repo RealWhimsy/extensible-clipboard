@@ -34,7 +34,7 @@ jobs:
 
         git config --global github.user ${{github.ref}}
         git config --global github.token ${{secrets.GITHUB_TOKEN}}
-        git config --global git.user github.user
+        git config --global user github.user
         git add .
         git commit -m "Automatic release"
         git push

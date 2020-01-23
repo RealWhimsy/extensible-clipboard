@@ -31,11 +31,11 @@ jobs:
         sudo apt-get install zip
         mkdir dist
         zip -r ./dist/release.zip ./packaged/target/ExtensibleClipboard
-      - name: Archive release build
-        uses: actions/upload-artifact@v1
-        with:
-          name: dist
-          path: dist
+    - name: Archive release build
+      uses: actions/upload-artifact@v1
+      with:
+        name: dist
+        path: dist
 #    - name: Build
 #      run: |
 #        cd ./packaged

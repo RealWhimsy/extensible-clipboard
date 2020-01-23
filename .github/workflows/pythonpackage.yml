@@ -30,7 +30,10 @@ jobs:
         cd ..
         sudo apt-get install zip
         mkdir dist
-        zip -r ./dist/release.zip ./packaged/target/ExtensibleClipboard
+        mkdir dist/build
+        mkdir dist/build/ExtensibleClipboard
+        cp -r ./packaged/target/ExtensibleCliboard ./dist/build/ExtensibleClipboard
+        zip -r ./dist/release.zip ./dist/build/ExtensibleClipboard
     - name: Archive build
       uses: actions/upload-artifact@v1
       with:

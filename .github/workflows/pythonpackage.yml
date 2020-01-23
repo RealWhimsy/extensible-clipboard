@@ -32,7 +32,7 @@ jobs:
         mkdir dist
         mkdir dist/build
         mkdir dist/build/ExtensibleClipboard
-        cp -r ./packaged/target/ExtensibleClipboard ./dist/build/
+        cp -r ./packaged/target/ExtensibleClipboard/ExtensibleClipboard ./dist/build/ExtensibleClipboard
         zip -r ./dist/release.zip ./dist/build/ExtensibleClipboard
     - name: Archive build
       uses: actions/upload-artifact@v1

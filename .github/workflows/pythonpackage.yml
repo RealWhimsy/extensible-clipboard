@@ -20,7 +20,7 @@ jobs:
 
     - name: Install and run
       run: |
-        cd ./packaged
+        cd ./servers
         python3 -m venv venv
         source venv/bin/activate
         pip3 install --upgrade pip
@@ -32,7 +32,7 @@ jobs:
         mkdir dist
         mkdir dist/build
         mkdir dist/build/ExtensibleClipboard
-        cp -r ./packaged/target/ExtensibleClipboard ./
+        cp -r ./servers/target/ExtensibleClipboard ./
         zip -r ./dist/release.zip ./ExtensibleClipboard
     - name: Archive build
       uses: actions/upload-artifact@v1

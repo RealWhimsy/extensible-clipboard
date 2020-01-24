@@ -59,7 +59,7 @@ If python states, that objdump has not been found, please try installing **binut
 After building the executable, you can run it through the console:
 
     # Start extensible clipboard
-    cd ./packaged
+    cd ./servers
     'target/ExtensibleClipboard/ExtensibleClipboard'
   
 It's easy as that!
@@ -81,14 +81,14 @@ use cases, that we have encountered
 For deploying the complete system with server and clipboard, simply run:
 
     # Start extensible clipboard full environment
-    cd ./packaged
+    cd ./servers
     'target/ExtensibleClipboard/ExtensibleClipboard'
 
 #### Server only
 For only running a server, enter:
 
     # Start extensible clipboard server
-    cd ./packaged
+    cd ./servers
     'target/ExtensibleClipboard/ExtensibleClipboard' -nocbs
 
 This may come in handy, if you want to offer a centralized, remote server.
@@ -97,7 +97,7 @@ This may come in handy, if you want to offer a centralized, remote server.
 For only running the clipboard, enter:
 
     # Start extensible clipboard, clipboard-only
-    cd ./packaged
+    cd ./servers
     'target/ExtensibleClipboard/ExtensibleClipboard' -nocs -cbsdomain=http://mydomain -cbsport=12345 -cshost=http://myserverdomain:12345/
 
 This configuration is suitable for setups, where you might connect your local 

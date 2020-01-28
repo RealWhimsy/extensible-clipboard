@@ -420,6 +420,7 @@ class ClipSqlDatabase(ClipDatabase):
             'last_modified': item[2],
             'mimetype': item[3],
             'data': item[4],
+            'src_app': item[6]
         }
         if item[5] is not None:
             result['parent'] = item[5]
@@ -437,8 +438,6 @@ class ClipSqlDatabase(ClipDatabase):
         return results
 
     def _find_best_match(self, parent, preferred_types):
-        print("Find Best Match")
-        print(parent)
         """
         Searches all children of parent if a direct match for
         the specified mimetypes can be found.
@@ -517,8 +516,6 @@ class ClipSqlDatabase(ClipDatabase):
 
     # Insert a new clip
     def save_clip(self, data):
-        print("SAVE!")
-        print(data)
         _id = str(uuid4())
         date = datetime.now()
         new_clip = {}

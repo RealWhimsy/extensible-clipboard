@@ -344,6 +344,7 @@ class ClipSqlDatabase(ClipDatabase):
         last_modified VARCHAR(40),
         mimetype VARCHAR(40),
         data BLOB,
+        src_app VARCHAR(40),
         parent VARCHAR(40)      
     );
     """
@@ -364,8 +365,8 @@ class ClipSqlDatabase(ClipDatabase):
     statement_get_recipient_by_url =  """ SELECT * FROM clipboards WHERE url = ? LIMIT 1; """
     statement_update_recipient_preferred_types =  """ UPDATE clipboards SET preferred_types = ? WHERE url = ?; """
 
-    statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data) VALUES (?, ?, ?, ?, ?);"""
-    statement_add_child_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data, parent) VALUES (?, ?, ?, ?, ?, ?);"""
+    statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data, src_app) VALUES (?, ?, ?, ?, ?, ?);"""
+    statement_add_child_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data, parent, src_app) VALUES (?, ?, ?, ?, ?, ?, ?);"""
     statement_get_clips = """ SELECT * FROM clips; """
     # https://stackoverflow.com/questions/22200587/get-records-for-the-latest-timestamp-in-sqlite
     statement_get_latest_clip = """ SELECT * FROM clips ORDER BY creation_date DESC LIMIT 1; """
@@ -514,27 +515,47 @@ class ClipSqlDatabase(ClipDatabase):
 
     # Insert a new clip
     def save_clip(self, data):
+        print("SAVE!")
+        print(data)
         _id = str(uuid4())
         date = datetime.now()
         new_clip = {}
 
         if 'parent' in data:
-            print("Parent in data")
-            print(data['parent'])
             parent_id = str(data['parent'])
             parent = self.get_clip_by_id(parent_id)
-            print("Parent is", parent)
             # Abandon insert, when parent-id not in db
             if parent is None:
                 raise ParentNotFoundException
             if 'parent' in parent:
                 raise GrandchildException
             new_clip['parent'] = parent_id
+
+        if 'src_app' not in data:
+            data['src_app'] = None
+
+
         conn = self._get_connection()
         if('parent' in new_clip):
-            conn.execute(self.statement_add_child_clip, (_id, date.isoformat(), date.isoformat(), data['mimetype'], data['data'], new_clip['parent']))
+            conn.execute(
+                self.statement_add_child_clip,
+                (_id,
+                 date.isoformat(),
+                 date.isoformat(),
+                 data['mimetype'],
+                 data['data'],
+                 new_clip['parent'],
+                 data['src_app'])
+            )
         else:
-            conn.execute(self.statement_add_clip, (_id, date.isoformat(), date.isoformat(), data['mimetype'], data['data']))
+            conn.execute(
+                self.statement_add_clip,
+                (_id,
+                 date.isoformat(),
+                 date.isoformat(),
+                 data['mimetype'],
+                 data['data'],
+                 data['src_app']))
         conn.commit()
         conn.close()
         return self.get_clip_by_id(_id)

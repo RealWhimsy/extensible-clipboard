@@ -344,8 +344,8 @@ class ClipSqlDatabase(ClipDatabase):
         last_modified VARCHAR(40),
         mimetype VARCHAR(40),
         data BLOB,
-        src_app VARCHAR(40),
-        parent VARCHAR(40)      
+        parent VARCHAR(40),
+        src_app VARCHAR(40)
     );
     """
 
@@ -437,6 +437,8 @@ class ClipSqlDatabase(ClipDatabase):
         return results
 
     def _find_best_match(self, parent, preferred_types):
+        print("Find Best Match")
+        print(parent)
         """
         Searches all children of parent if a direct match for
         the specified mimetypes can be found.

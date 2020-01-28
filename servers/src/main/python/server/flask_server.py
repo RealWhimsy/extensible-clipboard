@@ -67,7 +67,6 @@ class FlaskServer(Flask):
         ))
 
     def send_to_clipboards(self, data, force_propagation=False):
-        print("Send to clipboards", self.clipboards)
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
@@ -109,6 +108,7 @@ class FlaskServer(Flask):
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
         _id = data.get('parent', data['_id'])
+
         for c in self.post_hooks:
             types = c['subscribed_types']
             if data['mimetype'] in types or types == ['*/*']:
@@ -175,6 +175,8 @@ class FlaskServer(Flask):
                         clip_id=new_clip['_id'],
                         _external=True
                 )
+                # this is a quick fix for errors related to #25
+                new_clip['_id'] = str(new_clip['_id'])
                 new_clip['response_url'] = response_url.format(new_clip['_id'])
                 self.send_to_clipboards(new_clip, force_propagation)
 

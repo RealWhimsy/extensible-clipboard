@@ -26,7 +26,7 @@ formats)
 ## Installation
 We recommend installing extensible clipboard from the built version, since it is the most convenient way and does not require installing any packages:
 
-- [Download Debian build (14.01.2020)](https://files.mi.ur.de/f/81159d53bc/?dl=1)
+- [Download Debian build (24.02.2020)](https://files.mi.ur.de/f/81159d53bc/?dl=1)
 
 
 

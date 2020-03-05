@@ -1,6 +1,7 @@
 from datetime import datetime
 from configparser import ConfigParser
 from uuid import UUID, uuid4
+import os
 
 from copy import deepcopy
 
@@ -386,10 +387,11 @@ class ClipSqlDatabase(ClipDatabase):
 
 
     def _get_connection(self):
+        path = os.path.expanduser('~/' + self.file_name)
         # https://stackoverflow.com/questions/16936608/storing-bools-in-sqlite-database?rq=1
         sqlite3.register_adapter(bool, int)
         sqlite3.register_converter("BOOLEAN", lambda v: bool(int(v)))
-        connection = sqlite3.connect(self.file_name)
+        connection = sqlite3.connect(path)
         return connection
 
     def _get_recipient_from_cursor_item(self, item):

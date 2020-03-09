@@ -12,13 +12,14 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        if os.path.exists('~/clip_collection.db'):
+            os.removeFile('~/clip_collection.db')
 
 
     @classmethod
     def tearDownClass(cls):
-        if os.path.exists('~/clipb_collection.db'):
-            os.removeFile('~/clipb_collection.db')
+        if os.path.exists('~/clip_collection.db'):
+            os.removeFile('~/clip_collection.db')
 
     def test_get_returns_json(self):
         r = requests.post(self.CLIP_URL, json={

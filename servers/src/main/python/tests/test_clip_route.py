@@ -13,13 +13,14 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        if os.path.exists('~/clip_collection.db'):
+            os.removeFile('~/clip_collection.db')
 
 
     @classmethod
     def tearDownClass(cls):
-        if os.path.exists('~/clipb_collection.db'):
-            os.removeFile('~/clipb_collection.db')
+        if os.path.exists('~/clip_collection.db'):
+            os.removeFile('~/clip_collection.db')
 
     def test_get_same_mimetype(self):
         headers = {'Content-Type': 'text/plain'}
@@ -158,6 +159,8 @@ class SimpleTextServerTest(unittest.TestCase):
 
     def test_latest_return_404_if_no_item(self):
         r = requests.get(self.CLIP_URL + 'latest/')
+        print("Das Vollkommene")
+        print(r.content.decode())
         self.assertEqual(r.status_code, 404)
 
 

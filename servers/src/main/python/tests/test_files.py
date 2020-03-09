@@ -13,13 +13,14 @@ class FileUploadTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        if os.path.exists('~/clip_collection.db'):
+            os.removeFile('~/clip_collection.db')
 
 
     @classmethod
     def tearDownClass(cls):
-        if os.path.exists('~/clipb_collection.db'):
-            os.removeFile('~/clipb_collection.db')
+        if os.path.exists('~/clip_collection.db'):
+            os.removeFile('~/clip_collection.db')
 
     def test_can_upload_simple_file(self):
         with open(os.path.join(self.res_path, 'res/example.txt'), 'rb') as f:

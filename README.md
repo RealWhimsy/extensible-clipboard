@@ -26,32 +26,22 @@ formats)
 ## Installation
 We recommend installing extensible clipboard from the built version, since it is the most convenient way and does not require installing any packages:
 
-- [Download Debian build (24.02.2020)](https://files.mi.ur.de/f/81159d53bc/?dl=1)
+- [Download Debian build (04.03.2020)](https://files.mi.ur.de/f/81159d53bc/?dl=1)
 
 
 
 If you run extensible clipboard for the first time, please initialize it with the 
-following commands:
-
-    # Install dependencies for extensible clipboard
-    sudo apt-get install python3-venv && \
-    sudo apt-get install python3-dev && \
-    sudo apt-get install binutils
-    # 
-    cd ./packaged
-    python3 -m venv venv
-    source venv/bin/activate
-    pip3 install --upgrade pip
-    pip3 install -r requirements.txt
+following command:
+    
+    # Execute from project root
+    ./build.sh
  
     
 ## Building
-Before you are able to use the extensible clipboard, you need to build it for your platform:
+Before you are able to use the extensible clipboard, you need to build it for your platform. Use the same build script for this purpose:
 
-    # Build extensible clipboard
-    cd ./packaged
-    source venv/bin/activate
-    fbs freeze
+    # Execute from project root
+    ./build.sh
 
 If python states, that objdump has not been found, please try installing **binutils** on your system.
     

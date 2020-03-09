@@ -6,3 +6,4 @@ def wipe():
     conn = sqlite3.connect(path)
     conn.execute('DELETE FROM clips')
     conn.execute('DELETE FROM clipboards')
+    conn.commit()

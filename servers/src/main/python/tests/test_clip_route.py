@@ -15,12 +15,18 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        wipe()
 
 
     @classmethod
     def tearDownClass(cls):
         wipe()
+
+    def test_latest_return_404_if_no_item(self):
+        wipe()
+        print(requests.get(self.CLIP_URL).content.decode())
+        r = requests.get(self.CLIP_URL + 'latest/')
+        self.assertEqual(r.status_code, 404)
 
     def test_get_same_mimetype(self):
         headers = {'Content-Type': 'text/plain'}
@@ -156,13 +162,6 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, 200) 
         self.assertIn('First item', text)
         self.assertNotIn('Second item', text)
-
-    def test_latest_return_404_if_no_item(self):
-        wipe()
-        r = requests.get(self.CLIP_URL + 'latest/')
-        print("Das Vollkommene")
-        print(r.content.decode())
-        self.assertEqual(r.status_code, 404)
 
 
 if __name__ == "__main__":

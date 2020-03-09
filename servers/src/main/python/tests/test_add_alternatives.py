@@ -15,7 +15,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        wipe()
 
 
     @classmethod

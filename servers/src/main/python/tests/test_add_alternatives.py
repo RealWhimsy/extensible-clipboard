@@ -1,8 +1,8 @@
 import requests
 import unittest
 from uuid import uuid4, UUID
-import os
-import sqlite3
+from .t_util import wipe
+
 
 class SimpleTextServerTest(unittest.TestCase):
 
@@ -20,10 +20,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        path = os.path.expanduser('~/clip_collection.db')
-        sqlite3.connect(path)
-        sqlite3.execute('DELETE FROM clips')
-        sqlite3.execute('DELETE FROM clipboards')
+        wipe()
 
     def create_parent(self):
         headers = {'Content-Type': 'text/plain'}

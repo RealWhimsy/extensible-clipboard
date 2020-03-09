@@ -1,7 +1,8 @@
 import requests
 import unittest
 import os
-import sqlite3
+from .t_util import wipe
+
 
 class SimpleTextServerTest(unittest.TestCase):
 
@@ -18,10 +19,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        path = os.path.expanduser('~/clip_collection.db')
-        sqlite3.connect(path)
-        sqlite3.execute('DELETE FROM clips')
-        sqlite3.execute('DELETE FROM clipboards')
+        wipe()
 
     def test_get_returns_json(self):
         r = requests.post(self.CLIP_URL, json={

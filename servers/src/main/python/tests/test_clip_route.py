@@ -2,8 +2,8 @@ import requests
 import unittest
 from uuid import uuid4
 import os
+from .t_util import wipe
 
-import sqlite3
 
 class SimpleTextServerTest(unittest.TestCase):
 
@@ -20,10 +20,7 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        path = os.path.expanduser('~/clip_collection.db')
-        sqlite3.connect(path)
-        sqlite3.execute('DELETE FROM clips')
-        sqlite3.execute('DELETE FROM clipboards')
+        wipe()
 
     def test_get_same_mimetype(self):
         headers = {'Content-Type': 'text/plain'}
@@ -161,6 +158,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertNotIn('Second item', text)
 
     def test_latest_return_404_if_no_item(self):
+        wipe()
         r = requests.get(self.CLIP_URL + 'latest/')
         print("Das Vollkommene")
         print(r.content.decode())

@@ -1,6 +1,7 @@
 import os
 import requests
 import unittest
+import sqlite3
 
 
 class FileUploadTest(unittest.TestCase):
@@ -13,14 +14,15 @@ class FileUploadTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if os.path.exists('~/clip_collection.db'):
-            os.removeFile('~/clip_collection.db')
+        pass
 
 
     @classmethod
     def tearDownClass(cls):
-        if os.path.exists('~/clip_collection.db'):
-            os.removeFile('~/clip_collection.db')
+        path = os.path.expanduser('~/clip_collection.db')
+        sqlite3.connect(path)
+        sqlite3.execute('DELETE FROM clips')
+        sqlite3.execute('DELETE FROM clipboards')
 
     def test_can_upload_simple_file(self):
         with open(os.path.join(self.res_path, 'res/example.txt'), 'rb') as f:

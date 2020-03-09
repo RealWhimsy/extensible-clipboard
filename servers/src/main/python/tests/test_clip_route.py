@@ -3,6 +3,8 @@ import unittest
 from uuid import uuid4
 import os
 
+import sqlite3
+
 class SimpleTextServerTest(unittest.TestCase):
 
     CLIP_URL = 'http://localhost:5000/clip/'
@@ -13,14 +15,15 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if os.path.exists('~/clip_collection.db'):
-            os.removeFile('~/clip_collection.db')
+        pass
 
 
     @classmethod
     def tearDownClass(cls):
-        if os.path.exists('~/clip_collection.db'):
-            os.removeFile('~/clip_collection.db')
+        path = os.path.expanduser('~/clip_collection.db')
+        sqlite3.connect(path)
+        sqlite3.execute('DELETE FROM clips')
+        sqlite3.execute('DELETE FROM clipboards')
 
     def test_get_same_mimetype(self):
         headers = {'Content-Type': 'text/plain'}

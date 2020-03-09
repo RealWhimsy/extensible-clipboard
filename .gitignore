@@ -117,3 +117,4 @@ tmux_startup
 run_tests.sh
 
 servers/clip_collection.db
+*report.html

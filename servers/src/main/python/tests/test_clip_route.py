@@ -13,20 +13,6 @@ class SimpleTextServerTest(unittest.TestCase):
     db = None
     collection = None
 
-    @classmethod
-    def setUpClass(cls):
-        cls.client = MongoClient()
-        cls.db = cls.client.clipboard
-        cls.clip_collection = cls.db['clip-collection']
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.clip_collection.delete_many({})
-
-    def tearDown(self):
-        # Removes all previously saved documents
-        self.clip_collection.delete_many({})
-
     def test_get_same_mimetype(self):
         headers = {'Content-Type': 'text/plain'}
         r = requests.post(self.CLIP_URL, data='Clip 1', headers=headers)

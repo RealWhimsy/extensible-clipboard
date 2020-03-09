@@ -27,7 +27,6 @@ class SimpleTextServerTest(unittest.TestCase):
         r = requests.post(self.CLIP_URL,
                           data='parentClip',
                           headers=headers)
-
         return r.headers['X-C2-_id']
 
     def add_child(self, parent_id):

@@ -374,7 +374,7 @@ class ClipSqlDatabase(ClipDatabase):
     statement_get_child_clips = """ SELECT * FROM clips WHERE parent = ?; """
     statement_get_clip_by_id = """ SELECT * FROM clips WHERE _id = ? ; """
     statement_delete_clip_by_id = """ DELETE FROM clips WHERE _id = ? ; """
-    statement_update_clip_by_id = """ UPDATE clips SET data = ? WHERE _id = ?; """
+    statement_update_clip_by_id = """ UPDATE clips SET data = ?, mimetype = ? WHERE _id = ?; """
 
     def __init__(self):
         config = ConfigParser()
@@ -437,6 +437,7 @@ class ClipSqlDatabase(ClipDatabase):
         results = []
         for item in cursor:
             results.append(self._get_clip_from_cursor_item(item))
+        conn.close()
         return results
 
     def _find_best_match(self, parent, preferred_types):
@@ -604,17 +605,23 @@ class ClipSqlDatabase(ClipDatabase):
 
     # Delete entry by id
     def delete_entry_by_id(self, clip_id):
+        clip = self.get_clip_by_id(str(clip_id))
+        if clip is None:
+            return None
+
+        if 'parent' not in clip:
+            children = self._get_children(clip)
         conn = self._get_connection()
-        cursor = list(conn.execute(self.statement_delete_clip_by_id, (clip_id, )))
+        conn.execute(self.statement_delete_clip_by_id, (str(clip_id), ))
         conn.commit()
         conn.close()
         # TODO: get deleted count
-        pass
+        return
 
     # Update clips by id
-    def update_clip(self, object_id, data):
+    def update_clip(self, object_id, clip):
         conn = self._get_connection()
-        conn.execute(self.statement_update_clip_by_id, (data, object_id))
+        conn.execute(self.statement_update_clip_by_id, (clip['data'], clip['mimetype'], str(object_id)))
         conn.commit()
         conn.close()
         return self.get_clip_by_id(object_id)

@@ -599,7 +599,7 @@ class ClipSqlDatabase(ClipDatabase):
             children = []
             child_cursor = list(conn.execute(self.statement_get_child_clips, (str(parent['_id']), )))
             for item in child_cursor:
-                children.append(self._get_clip_from_cursor_item(item))
+                children.append(self._to_json(self._get_clip_from_cursor_item(item)))
             return children
 
     # Delete entry by id

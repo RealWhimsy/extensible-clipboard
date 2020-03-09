@@ -1,9 +1,7 @@
 import requests
 import unittest
 from uuid import uuid4, UUID
-
-from pymongo import MongoClient
-
+import os
 
 class SimpleTextServerTest(unittest.TestCase):
 
@@ -16,17 +14,13 @@ class SimpleTextServerTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = MongoClient()
-        cls.db = cls.client.clipboard
-        cls.clip_collection = cls.db['clip-collection']
+        pass
+
 
     @classmethod
     def tearDownClass(cls):
-        cls.clip_collection.delete_many({})
-
-    def tearDown(self):
-        # Removes all previously saved documents
-        self.clip_collection.delete_many({})
+        if os.path.exists('~/clipb_collection.db'):
+            os.removeFile('~/clipb_collection.db')
 
     def create_parent(self):
         headers = {'Content-Type': 'text/plain'}
@@ -138,6 +132,9 @@ class SimpleTextServerTest(unittest.TestCase):
                 self.CLIP_URL + child_id,
                 headers=header
         )
+
+        print("Das Vollkommene soll nicht geworden sein")
+        print(r.content.decode())
 
         self.assertIn('parentClip', r.content.decode())
 

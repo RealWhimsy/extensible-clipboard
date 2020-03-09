@@ -2,8 +2,6 @@ import os
 import requests
 import unittest
 
-from pymongo import MongoClient
-
 
 class FileUploadTest(unittest.TestCase):
 
@@ -15,17 +13,13 @@ class FileUploadTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = MongoClient()
-        cls.db = cls.client.clipboard
-        cls.clip_collection = cls.db['clip-collection']
+        pass
+
 
     @classmethod
     def tearDownClass(cls):
-        cls.clip_collection.delete_many({})
-
-    def tearDown(self):
-        # Removes all previously saved documents
-        self.clip_collection.delete_many({})
+        if os.path.exists('~/clipb_collection.db'):
+            os.removeFile('~/clipb_collection.db')
 
     def test_can_upload_simple_file(self):
         with open(os.path.join(self.res_path, 'res/example.txt'), 'rb') as f:

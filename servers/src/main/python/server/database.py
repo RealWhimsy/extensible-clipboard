@@ -610,7 +610,8 @@ class ClipSqlDatabase(ClipDatabase):
         clip = self.get_clip_by_id(str(clip_id))
         children = []
         if clip is None:
-            return None
+            # Resources expects count of 0 to produce 404 #39
+            return 0
 
         if 'parent' not in clip:
             children = self._get_children(clip)

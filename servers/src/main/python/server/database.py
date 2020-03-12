@@ -606,6 +606,7 @@ class ClipSqlDatabase(ClipDatabase):
     # Delete entry by id
     def delete_entry_by_id(self, clip_id):
         clip = self.get_clip_by_id(str(clip_id))
+        children = []
         if clip is None:
             return None
 
@@ -615,6 +616,8 @@ class ClipSqlDatabase(ClipDatabase):
         conn.execute(self.statement_delete_clip_by_id, (str(clip_id), ))
         conn.commit()
         conn.close()
+        for child in children:
+            self.delete_entry_by_id(str(child["_id"]))
         # TODO: get deleted count
         return
 

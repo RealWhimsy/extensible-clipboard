@@ -132,9 +132,6 @@ class SimpleTextServerTest(unittest.TestCase):
                 headers=header
         )
 
-        print("Das Vollkommene soll nicht geworden sein")
-        print(r.content.decode())
-
         self.assertIn('parentClip', r.content.decode())
 
     def test_delete_parent_will_delete_children(self):

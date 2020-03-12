@@ -41,7 +41,6 @@ class FileUploadTest(unittest.TestCase):
         with open(os.path.join(self.res_path, 'res/example.txt'), 'rb') as f:
             files = {'file': ('example.txt', f, 'text/plain')}
             r = requests.post(self.CLIP_URL, files=files)
-
             filename = r.headers['X-C2-filename']
             received_data = r.content
 

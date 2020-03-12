@@ -346,7 +346,8 @@ class ClipSqlDatabase(ClipDatabase):
         mimetype VARCHAR(40),
         data BLOB,
         parent VARCHAR(40),
-        src_app VARCHAR(40)
+        src_app VARCHAR(40),
+        filename VARCHAR(128)
     );
     """
 
@@ -366,8 +367,8 @@ class ClipSqlDatabase(ClipDatabase):
     statement_get_recipient_by_url =  """ SELECT * FROM clipboards WHERE url = ? LIMIT 1; """
     statement_update_recipient_preferred_types =  """ UPDATE clipboards SET preferred_types = ? WHERE url = ?; """
 
-    statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data, src_app) VALUES (?, ?, ?, ?, ?, ?);"""
-    statement_add_child_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data, parent, src_app) VALUES (?, ?, ?, ?, ?, ?, ?);"""
+    statement_add_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data, src_app, filename) VALUES (?, ?, ?, ?, ?, ?, ?);"""
+    statement_add_child_clip = """ INSERT INTO clips (_id, creation_date, last_modified, mimetype, data, parent, src_app, filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
     statement_get_clips = """ SELECT * FROM clips; """
     # https://stackoverflow.com/questions/22200587/get-records-for-the-latest-timestamp-in-sqlite
     statement_get_latest_clip = """ SELECT * FROM clips ORDER BY creation_date DESC LIMIT 1; """
@@ -375,6 +376,7 @@ class ClipSqlDatabase(ClipDatabase):
     statement_get_clip_by_id = """ SELECT * FROM clips WHERE _id = ? ; """
     statement_delete_clip_by_id = """ DELETE FROM clips WHERE _id = ? ; """
     statement_update_clip_by_id = """ UPDATE clips SET data = ?, mimetype = ? WHERE _id = ?; """
+    statement_add_filename_to_clip_with_id = """ UPDATE clips SET filename = ? WHERE _id = ?; """
 
     def __init__(self):
         config = ConfigParser()
@@ -426,6 +428,8 @@ class ClipSqlDatabase(ClipDatabase):
         }
         if item[5] is not None:
             result['parent'] = item[5]
+        if item[7] is not None:
+            result['filename'] = item[7]
         return result
 
     def _get_parent_clip(self, child):
@@ -537,31 +541,40 @@ class ClipSqlDatabase(ClipDatabase):
 
         if 'src_app' not in data:
             data['src_app'] = None
+        if 'filename' not in data:
+            data['filename'] = None
 
 
         conn = self._get_connection()
         if('parent' in new_clip):
             conn.execute(
                 self.statement_add_child_clip,
-                (_id,
-                 date.isoformat(),
-                 date.isoformat(),
-                 data['mimetype'],
-                 data['data'],
-                 new_clip['parent'],
-                 data['src_app'])
+                (
+                    _id,
+                     date.isoformat(),
+                     date.isoformat(),
+                     data['mimetype'],
+                     data['data'],
+                     new_clip['parent'],
+                     data['src_app'],
+                 data['filename']
+                 )
             )
         else:
             conn.execute(
                 self.statement_add_clip,
-                (_id,
-                 date.isoformat(),
-                 date.isoformat(),
-                 data['mimetype'],
-                 data['data'],
-                 data['src_app']))
+                (
+                    _id,
+                     date.isoformat(),
+                     date.isoformat(),
+                     data['mimetype'],
+                     data['data'],
+                     data['src_app'],
+                     data['filename']
+                 ))
         conn.commit()
         conn.close()
+
         return self.get_clip_by_id(_id)
 
 

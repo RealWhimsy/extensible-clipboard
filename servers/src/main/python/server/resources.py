@@ -90,7 +90,6 @@ class Clip(BaseClip):
 
     @decorators.pre_hooks
     def get(self, clip_id=None):
-        print("Get clip!", request)
         clip = None
         # gets the siblings and parent or children of a clip
         if request.url.endswith('/get_alternatives/'):
@@ -111,7 +110,6 @@ class Clip(BaseClip):
 
         if clip is None:
             return jsonify(error='No clip with specified id'), 404
-
         res = make_response(clip.pop('data'), 200)
         self.set_headers(res, clip)
         return res

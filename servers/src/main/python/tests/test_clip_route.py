@@ -149,19 +149,20 @@ class SimpleTextServerTest(unittest.TestCase):
         self.assertEqual(r.status_code, 404)
 
     def test_can_get_latest_item_by_shortcut(self):
+        headers = {'Content-Type': 'text/plain'}
         requests.post(self.CLIP_URL,
-                      json={'mimetype': 'text/plain',
-                            'data': 'First item'})
+                          data='First item',
+                          headers=headers)
         requests.post(self.CLIP_URL,
-                      json={'mimetype': 'text/plain',
-                            'data': 'Second item'})
+                          data='Second item',
+                          headers=headers)
 
         r = requests.get(self.CLIP_URL + 'latest/')
         text = r.text
 
         self.assertEqual(r.status_code, 200) 
-        self.assertIn('First item', text)
-        self.assertNotIn('Second item', text)
+        self.assertNotIn('First item', text)
+        self.assertIn('Second item', text)
 
 
 if __name__ == "__main__":

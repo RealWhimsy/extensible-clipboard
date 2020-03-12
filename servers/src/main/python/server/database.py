@@ -457,6 +457,8 @@ class ClipSqlDatabase(ClipDatabase):
 
         # first round, exact match
         for curr_type in preferred_types:
+            if parent['mimetype'] == curr_type[0]:
+                return parent
             for child in children:
                 if child['mimetype'] == curr_type[0]:
                     return child

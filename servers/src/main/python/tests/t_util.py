@@ -7,3 +7,4 @@ def wipe():
     conn.execute('DELETE FROM clip')
     conn.execute('DELETE FROM clipboard')
     conn.commit()
+    conn.close()

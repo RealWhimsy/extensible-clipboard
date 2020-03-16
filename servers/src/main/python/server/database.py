@@ -350,7 +350,8 @@ class Clip(BaseModel):
     data = BlobField()
     src_app = CharField(null=True)
     filename = CharField(null=True)
-    parent = ForeignKeyField('self', backref="children", null=True)
+    #parent = ForeignKeyField('self', backref="children", null=True)
+    parent = CharField(null=True)
 
 
 
@@ -480,13 +481,12 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
             src_app=data.get('src_app'),
             filename=data.get('filename'),
             parent=data.get('parent')
-
         )
         clip.save()
         return model_to_dict(Clip.get(Clip._id==id))
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
-        clipCursor = Clip.select().where(_id=clip_id).execute()
+        clipCursor = Clip.select().where(Clip._id==clip_id).execute()
         if(clipCursor.count < 1):
             return None
         else:
@@ -504,8 +504,8 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
 
     def get_latest(self):
         clipModels = Clip.select().order_by(Clip.creation_date.desc()).execute()
-        if len(clipModels) > 0:
-            return model_to_dict(clipModels[0])
+        if clipModels.count > 0:
+            return model_to_dict(clipModels.get())
         else:
             return None
 
@@ -517,9 +517,9 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         Returns all siblings and the parent for clip_id
         as a list of dicts
         """
-        parentCursor = Clip.select().where(Clip._id == clip_id)
-        if parentCursor.count() < 1:
-            return None
+        parentCursor = Clip.select().where(Clip._id == clip_id).execute()
+        if parentCursor.count < 1:
+            return []
         else:
             parent = model_to_dict(parentCursor.get())
             childCursor = Clip.select().where(Clip.parent == clip_id)
@@ -529,7 +529,7 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
             return results
 
     def update_clip(self, object_id, data):
-        clipCursor = Clip.select().where(Clip._id == object_id)
+        clipCursor = Clip.select().where(Clip._id == object_id).execute()
         if clipCursor.count < 1:
             return None
         else:

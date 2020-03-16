@@ -344,16 +344,15 @@ class BaseModel(Model):
 
 class Clip(BaseModel):
     _id = CharField(primary_key=True)
-    creation_date = DateField()
-    last_modified = DateField()
+    creation_date = CharField()
+    last_modified = CharField()
     mimetype = CharField()
     data = BlobField()
-    src_app = CharField()
-    filename = CharField()
+    src_app = CharField(null=True)
+    filename = CharField(null=True)
+    parent = ForeignKeyField('self', backref="children", null=True)
 
 
-# since it does not seem to be possible to reference the same class from within the class definition, this is necessary
-Clip.parent = ForeignKeyField(Clip, backref="children")
 
 
 class Clipboard(BaseModel):
@@ -404,8 +403,7 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
                 for type in subscribed_types:
                     newItem = PreferredTypes.create(parent=id, type=type)
                     newItem.save()
-            return model_to_dict(clipboard.get(Clipboard._id==id))
-
+            return model_to_dict(Clipboard.get(Clipboard._id==id))
 
     def get_recipients(self):
         recipients = Clipboard.select().execute()
@@ -417,7 +415,24 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
             results.append(model_to_dict(rec))
         return results
 
+    def save_clip(self, data):
+        id = self.__get_uuidv4__()
+        clip = Clip.create(
+            _id=id,
+            mimetype=data['mimetype'],
+            creation_date=str(datetime.now()),
+            last_modified=str(datetime.now()),
+            data=data['data'],
+            src_app=data.get('src_app'),
+            filename=data.get('filename'),
+            parent=data.get('parent')
 
+        )
+        clip.save()
+        return model_to_dict(Clip.get(Clip._id==id))
+
+    def get_clip_by_id(self, clip_id, preferred_types=None):
+        return model_to_dict(Clip.get_by_id(clip_id))
 
 
 ################################################################################################

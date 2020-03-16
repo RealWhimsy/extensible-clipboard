@@ -444,11 +444,28 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
     def get_latest(self):
         clipModels = Clip.select().order_by(Clip.creation_date.desc()).execute()
         if len(clipModels) > 0:
-            print(model_to_dict(clipModels[0]))
             return model_to_dict(clipModels[0])
         else:
             return None
 
+    def delete_entry_by_id(self, clip_id):
+        return Clip.delete().where(Clip._id==clip_id).execute()
+
+    def get_alternatives(self, clip_id):
+        """
+        Returns all siblings and the parent for clip_id
+        as a list of dicts
+        """
+        parentCursor = Clip.select().where(Clip._id == clip_id)
+        if parentCursor.count() < 1:
+            return None
+        else:
+            parent = model_to_dict(parentCursor.get())
+            childCursor = Clip.select().where(Clip.parent == clip_id)
+            results = []
+            for child in childCursor:
+                results.append(model_to_dict(child))
+            return results
 
 ################################################################################################
 #

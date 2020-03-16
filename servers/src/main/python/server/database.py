@@ -506,9 +506,9 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         return results
 
     def get_latest(self):
-        clipModels = Clip.select().order_by(Clip.creation_date.desc()).execute()
-        if clipModels.count > 0:
-            return model_to_dict(clipModels.get())
+        q = Clip.select().order_by(Clip.creation_date.desc())
+        if q.count() > 0:
+            return model_to_dict(q.get())
         else:
             return None
 
@@ -520,22 +520,22 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         Returns all siblings and the parent for clip_id
         as a list of dicts
         """
-        clipCursor = Clip.select().where(Clip._id == clip_id).execute()
-        if clipCursor.count < 1:
+        q = Clip.select().where(Clip._id == clip_id)
+        if q.count() < 1:
             return []
         else:
-            clip = model_to_dict(clipCursor.get())
+            clip = model_to_dict(q.get())
             parent = self._get_parent(clip)
             children = self.__get_children(clip)
             result = children.append(parent)
             return result
 
     def update_clip(self, object_id, data):
-        clipCursor = Clip.select().where(Clip._id == object_id).execute()
-        if clipCursor.count < 1:
+        q = Clip.select().where(Clip._id == object_id)
+        if q.count() < 1:
             return None
         else:
-            clip = clipCursor.get()
+            clip = q.get()
             clip.data = data['data']
             clip.last_modified = str(datetime.now())
             clip.save()

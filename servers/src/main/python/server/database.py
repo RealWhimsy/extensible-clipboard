@@ -526,9 +526,9 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         else:
             clip = model_to_dict(q.get())
             parent = self._get_parent(clip)
-            children = self.__get_children(clip)
-            result = children.append(parent)
-            return result
+            children = self._get_children(parent)
+            children.append(parent)
+            return children
 
     def update_clip(self, object_id, data):
         q = Clip.select().where(Clip._id == object_id)

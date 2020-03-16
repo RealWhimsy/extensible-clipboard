@@ -434,6 +434,21 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
     def get_clip_by_id(self, clip_id, preferred_types=None):
         return model_to_dict(Clip.get_by_id(clip_id))
 
+    def get_all_clips(self):
+        clipModels = Clip.select().execute()
+        results = []
+        for model in clipModels:
+            results.append(model_to_dict(model))
+        return results
+
+    def get_latest(self):
+        clipModels = Clip.select().order_by(Clip.creation_date.desc()).execute()
+        if len(clipModels) > 0:
+            print(model_to_dict(clipModels[0]))
+            return model_to_dict(clipModels[0])
+        else:
+            return None
+
 
 ################################################################################################
 #

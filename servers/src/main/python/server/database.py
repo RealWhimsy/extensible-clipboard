@@ -14,6 +14,8 @@ from server.exceptions import (GrandchildException, ParentNotFoundException)
 from util.context import Context
 
 import json
+import sqlite3
+
 
 class ClipDatabase:
     """
@@ -326,6 +328,97 @@ class ClipDatabase:
         if self.clipboard_collection.count_documents({}) is 0:
             return None
         return list(self.clipboard_collection.find({}))
+
+
+
+from peewee import Model, DateField, PrimaryKeyField, ForeignKeyField, CharField, BlobField, IntegerField, SqliteDatabase, BooleanField
+from playhouse.shortcuts import model_to_dict
+path = os.path.expanduser('~/clip_collection.db')
+database = SqliteDatabase(path)
+
+
+class BaseModel(Model):
+    class Meta:
+        database = database
+
+
+class Clip(BaseModel):
+    _id = CharField(primary_key=True)
+    creation_date = DateField()
+    last_modified = DateField()
+    mimetype = CharField()
+    data = BlobField()
+    src_app = CharField()
+    filename = CharField()
+
+
+# since it does not seem to be possible to reference the same class from within the class definition, this is necessary
+Clip.parent = ForeignKeyField(Clip, backref="children")
+
+
+class Clipboard(BaseModel):
+    _id = CharField(primary_key=True)
+    url = CharField()
+    is_hook = BooleanField()
+
+class PreferredTypes(BaseModel):
+    parent = ForeignKeyField(Clipboard, backref="preferred_types")
+    type = CharField()
+
+
+
+################################################################################################
+#
+# SQLite peewee Implementation of database
+#
+################################################################################################
+
+class ClipSqlPeeweeDatabase(ClipDatabase):
+
+    def __init__(self):
+        database.create_tables([Clip, Clipboard, PreferredTypes])
+
+    def __get_uuidv4__(self):
+        return (uuid4().__str__())
+
+    def add_recipient(self, url, is_hook, subscribed_types):
+        """
+        Adds a recipient to the database. If there is already an recipient
+        with the same URL, this will be returned instead. Subscribed types
+        for a hook will be updated beforehand.
+
+        :param url: The URL the recipient can be reached at
+        :param is_hook: True, if recipient is a hook otherwise it will be
+                        treated as a clipboard
+        :param subscribed_types: List of mimetypes the hook is interested in.
+                                 Will be ignored for clipboards
+        """
+        clipboards_with_url = Clipboard.select(Clipboard.url == url).execute()
+        if clipboards_with_url.count > 0:
+            return model_to_dict(clipboards_with_url.get())
+        else:
+            id = self.__get_uuidv4__()
+            clipboard = Clipboard.create(_id=id,url=url,is_hook=is_hook)
+            clipboard.save()
+            if subscribed_types:
+                for type in subscribed_types:
+                    newItem = PreferredTypes.create(parent=id, type=type)
+                    newItem.save()
+            return model_to_dict(clipboard.get(Clipboard._id==id))
+
+
+    def get_recipients(self):
+        recipients = Clipboard.select().execute()
+        results = []
+        """
+        Returns a list of all saved recipients represented as dicts
+        """
+        for rec in recipients:
+            results.append(model_to_dict(rec))
+        return results
+
+
+
 
 ################################################################################################
 #

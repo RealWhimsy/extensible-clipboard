@@ -377,6 +377,60 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
     def __init__(self):
         database.create_tables([Clip, Clipboard, PreferredTypes])
 
+    def _get_parent(self, child):
+        if(child.parent is None):
+            return child
+        else:
+            parentCursor = Clip.select().where(Clip._id == child.parent).execute()
+            if(parentCursor.count < 1):
+                return None
+            else:
+                return model_to_dict(parentCursor.get())
+
+    def __get_children(self, parent):
+        childrenCursor = Clip.select().where(Clip._id == parent._id).execute()
+        result = []
+        for item in childrenCursor:
+            result.append(model_to_dict(item))
+        return result
+
+
+    def _find_best_match(self, clip, preferred_types):
+        """
+        Searches all children of parent if a direct match for
+        the specified mimetypes can be found.
+        :param parent: Mongo-object, should have children in db
+        :param preferred_types: List of tuples representing the Accept-header
+            of the request. Format: ('text/plain', 1.0).
+            The list is to be sorted by the rules of the Accept-header
+        :return: The Mongo-object with the closes match. None, if no match
+        """
+        parent = self._get_parent(clip)
+        children = self._get_children(parent)
+
+        # first round, exact match
+        for curr_type in preferred_types:
+            if parent['mimetype'] == curr_type[0]:
+                return parent
+            for child in children:
+                if child['mimetype'] == curr_type[0]:
+                    return child
+
+        # second round, wildcard match
+        for curr_type in preferred_types:
+            # Check if mimestring is wildcard and get part before the /
+            mime_base = curr_type[0]
+            if '*' in mime_base:
+                mime_base = mime_base.split('/')[0]
+
+                for child in children:
+                    if mime_base in child['mimetype']:
+                        return child
+
+        # No exact or wildcard match, default to parent
+        return parent
+
+
     def __get_uuidv4__(self):
         return (uuid4().__str__())
 
@@ -432,7 +486,14 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         return model_to_dict(Clip.get(Clip._id==id))
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
-        return model_to_dict(Clip.get_by_id(clip_id))
+        clipCursor = Clip.select().where(_id=clip_id).execute()
+        if(clipCursor.count < 1):
+            return None
+        else:
+            clip = model_to_dict(clipCursor.get())
+        if preferred_types and clip['mimetype'] is not preferred_types[0]:
+            clip = self._find_best_match(clip, preferred_types)
+        return clip
 
     def get_all_clips(self):
         clipModels = Clip.select().execute()
@@ -466,6 +527,17 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
             for child in childCursor:
                 results.append(model_to_dict(child))
             return results
+
+    def update_clip(self, object_id, data):
+        clipCursor = Clip.select().where(Clip._id == object_id)
+        if clipCursor.count < 1:
+            return None
+        else:
+            clip = clipCursor.get()
+            clip.data = data['data']
+            clip.last_modified = str(datetime.now())
+            clip.save()
+            return model_to_dict(Clip.get_by_id(object_id))
 
 ################################################################################################
 #

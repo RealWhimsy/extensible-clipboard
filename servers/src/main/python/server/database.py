@@ -379,17 +379,17 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         database.create_tables([Clip, Clipboard, PreferredTypes])
 
     def _get_parent(self, child):
-        if(child.parent is None):
+        if(child['parent'] is None):
             return child
         else:
-            parentCursor = Clip.select().where(Clip._id == child.parent).execute()
-            if(parentCursor.count < 1):
+            q = Clip.select().where(Clip._id == child['parent'])
+            if(q.count() < 1):
                 return None
             else:
-                return model_to_dict(parentCursor.get())
+                return model_to_dict(q.get())
 
-    def __get_children(self, parent):
-        childrenCursor = Clip.select().where(Clip._id == parent._id).execute()
+    def _get_children(self, parent):
+        childrenCursor = Clip.select().where(Clip._id == parent['_id']).execute()
         result = []
         for item in childrenCursor:
             result.append(model_to_dict(item))
@@ -472,7 +472,7 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
 
     def save_clip(self, data):
         id = self.__get_uuidv4__()
-        if (data.get('parent') is not None and Clip.select().where(Clip._id == data['parent']).count() < 1):
+        if data.get('parent') is not None and Clip.select().where(Clip._id == data['parent']).count() < 1:
             raise ParentNotFoundException
         clip = Clip.create(
             _id=id,
@@ -488,11 +488,12 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         return model_to_dict(Clip.get(Clip._id==id))
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
-        clipCursor = Clip.select().where(Clip._id==clip_id).execute()
-        if(clipCursor.count < 1):
-            return None
+        q = Clip.select().where(Clip._id == clip_id)
+        clip = None
+        if(q.count() < 1):
+            return clip
         else:
-            clip = model_to_dict(clipCursor.get())
+            clip = model_to_dict(q.get())
         if preferred_types and clip['mimetype'] is not preferred_types[0]:
             clip = self._find_best_match(clip, preferred_types)
         return clip
@@ -519,16 +520,15 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         Returns all siblings and the parent for clip_id
         as a list of dicts
         """
-        parentCursor = Clip.select().where(Clip._id == clip_id).execute()
-        if parentCursor.count < 1:
+        clipCursor = Clip.select().where(Clip._id == clip_id).execute()
+        if clipCursor.count < 1:
             return []
         else:
-            parent = model_to_dict(parentCursor.get())
-            childCursor = Clip.select().where(Clip.parent == clip_id)
-            results = []
-            for child in childCursor:
-                results.append(model_to_dict(child))
-            return results
+            clip = model_to_dict(clipCursor.get())
+            parent = self._get_parent(clip)
+            children = self.__get_children(clip)
+            result = children.append(parent)
+            return result
 
     def update_clip(self, object_id, data):
         clipCursor = Clip.select().where(Clip._id == object_id).execute()

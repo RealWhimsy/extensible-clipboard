@@ -503,7 +503,15 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         return clip
 
     def get_all_clips(self):
-        clipModels = Clip.select().execute()
+        # Exclude 'data' from fetch (would be too large)
+        clipModels = Clip.select(
+            Clip._id,
+            Clip.mimetype,
+            Clip.creation_date,
+            Clip.src_app,
+            Clip.filename,
+            Clip.parent
+        ).execute()
         results = []
         for model in clipModels:
             results.append(model_to_dict(model))

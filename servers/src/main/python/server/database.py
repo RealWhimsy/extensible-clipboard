@@ -536,11 +536,19 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         if q.count() < 1:
             return []
         else:
-            clip = model_to_dict(q.get())
-            parent = self._get_parent(clip)
-            children = self._get_children(parent)
-            children.append(parent)
-            return children
+            clips = []
+            clipsCursor = Clip.select(
+                Clip._id,
+                Clip.mimetype,
+                Clip.creation_date,
+                Clip.src_app,
+                Clip.filename,
+                Clip.parent
+            ).where((Clip._id==clip_id) | (Clip.parent==clip_id))\
+            .execute()
+            for clipItem in clipsCursor:
+                clips.append(model_to_dict(clipItem))
+            return clips
 
     def update_clip(self, object_id, data):
         q = Clip.select().where(Clip._id == object_id)

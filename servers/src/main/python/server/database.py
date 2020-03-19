@@ -472,8 +472,12 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
 
     def save_clip(self, data):
         id = self.__get_uuidv4__()
-        if data.get('parent') is not None and Clip.select().where(Clip._id == data['parent']).count() < 1:
-            raise ParentNotFoundException
+        if data.get('parent') is not None:
+            if Clip.select().where(Clip._id == data['parent']).count() < 1:
+                raise ParentNotFoundException
+            elif model_to_dict(Clip.select().where(Clip._id == data['parent']).get())['parent'] is not None:
+                raise GrandchildException
+
         clip = Clip.create(
             _id=id,
             mimetype=data['mimetype'],

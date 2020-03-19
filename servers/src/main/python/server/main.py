@@ -1,7 +1,7 @@
 import os
 import sys
 
-from server.database import ClipDatabase, ClipSqlDatabase
+from server.database import ClipDatabase, ClipSqlDatabase, ClipSqlPeeweeDatabase
 from server.flask_server import FlaskServer
 from server.resources import Clip, Clips, ChildClipAdder, Recipient
 
@@ -63,7 +63,7 @@ class ClipServer():
 
     def __init__(self, argv, port=None):
         # self.database = ClipDatabase()
-        self.database = ClipSqlDatabase()
+        self.database = ClipSqlPeeweeDatabase()
 
         # The flask-server itself
         if port is not None:

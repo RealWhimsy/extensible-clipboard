@@ -44,6 +44,7 @@ class FlaskServer(Flask):
         webhooks and clipboards
         """
         result = self.db.get_recipients() or []
+        print(result)
         self.post_hooks = []
         self.clipboards = []
         for r in result:

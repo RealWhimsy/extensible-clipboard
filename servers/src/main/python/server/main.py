@@ -1,7 +1,7 @@
 import os
 import sys
 
-from server.database import ClipDatabase, ClipSqlDatabase, ClipSqlPeeweeDatabase
+from server.database import ClipDatabase, ClipSqlPeeweeDatabase
 from server.flask_server import FlaskServer
 from server.resources import Clip, Clips, ChildClipAdder, Recipient
 

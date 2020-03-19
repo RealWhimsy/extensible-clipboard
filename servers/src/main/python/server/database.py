@@ -389,7 +389,7 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
                 return model_to_dict(q.get())
 
     def _get_children(self, parent):
-        childrenCursor = Clip.select().where(Clip._id == parent['_id']).execute()
+        childrenCursor = Clip.select().where(Clip.parent == parent['_id']).execute()
         result = []
         for item in childrenCursor:
             result.append(model_to_dict(item))

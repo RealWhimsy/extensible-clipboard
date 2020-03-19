@@ -517,7 +517,7 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
             return None
 
     def delete_entry_by_id(self, clip_id):
-        return Clip.delete().where(Clip._id==clip_id).execute()
+        return Clip.delete().where((Clip._id==clip_id) | (Clip.parent==clip_id)).execute()
 
     def get_alternatives(self, clip_id):
         """

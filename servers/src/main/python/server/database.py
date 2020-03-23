@@ -395,7 +395,6 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
             result.append(model_to_dict(item))
         return result
 
-
     def _find_best_match(self, clip, preferred_types):
         """
         Searches all children of parent if a direct match for
@@ -431,9 +430,10 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         # No exact or wildcard match, default to parent
         return parent
 
-
     def __get_uuidv4__(self):
         return (uuid4().__str__())
+
+
 
     def add_recipient(self, url, is_hook, subscribed_types):
         """
@@ -447,8 +447,8 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         :param subscribed_types: List of mimetypes the hook is interested in.
                                  Will be ignored for clipboards
         """
-        clipboards_with_url = Clipboard.select(Clipboard.url == url).execute()
-        if clipboards_with_url.count > 0:
+        clipboards_with_url = Clipboard.select(Clipboard.url == url)
+        if clipboards_with_url.count() > 0:
             return model_to_dict(clipboards_with_url.get())
         else:
             id = self.__get_uuidv4__()

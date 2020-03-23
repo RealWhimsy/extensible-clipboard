@@ -68,20 +68,25 @@ class FlaskServer(Flask):
         ))
 
     def send_to_clipboards(self, data, force_propagation=False):
+        print("Send To Clipboards")
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
         """
         parent = data.get('parent')
+        print(parent)
+        print(data)
         if parent and self.current_clip != parent:
             # Update was not to current clip
             return
 
         for c in self.clipboards:
-            print('\n', c['url'])
+            print('\nClipboard:', c['url'])
             if force_propagation or self.last_sender != c['_id']:
                 try:
                     send_data = data.get('data')
+                    print("parent", data.get('parent'))
+                    print("_id", data.get('_id'))
                     response_url = url_for('child_adder',
                                            clip_id=data.get('parent',
                                                             data['_id']),
@@ -92,11 +97,15 @@ class FlaskServer(Flask):
                         if key != 'data' and key != 'mimetype':
                             headers['X-C2-{}'.format(key)] = value
 
+                    print("POST")
                     requests.post(c['url'],
                                   data=send_data,
                                   headers=headers,
                                   timeout=5)
+
+                    print("POSTED")
                 except Exception as e:
+                    print("Oy, vey")
                     print(e)
                     self._send_failed(c)
 

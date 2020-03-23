@@ -1,3 +1,4 @@
+#!/bin/sh
 sudo apt install python3-venv python3-dev binutils
 cd ./servers
 python3 -m venv venv

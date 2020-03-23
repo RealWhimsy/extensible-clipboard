@@ -78,13 +78,12 @@ class FlaskServer(Flask):
             return
 
         for c in self.clipboards:
-            print('\n', c['url'])
+            print('\nSend To Clipboard:', c['url'])
             if force_propagation or self.last_sender != c['_id']:
                 try:
                     send_data = data.get('data')
                     response_url = url_for('child_adder',
-                                           clip_id=data.get('parent',
-                                                            data['_id']),
+                                           clip_id=data['_id'],
                                            _external=True)
                     headers = {'X-C2-response_url': response_url}
                     headers['Content-Type'] = data.get('mimetype')
@@ -96,6 +95,7 @@ class FlaskServer(Flask):
                                   data=send_data,
                                   headers=headers,
                                   timeout=5)
+
                 except Exception as e:
                     print(e)
                     self._send_failed(c)

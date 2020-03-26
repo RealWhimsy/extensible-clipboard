@@ -6,7 +6,7 @@ from .t_util import wipe
 
 class FileUploadTest(unittest.TestCase):
 
-    CLIP_URL = 'http://localhost:5000/clip/'
+    CLIP_URL = 'http://localhost:5000/clips/'
     client = None
     db = None
     collection = None

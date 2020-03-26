@@ -6,9 +6,9 @@ from .t_util import wipe
 
 class SimpleTextServerTest(unittest.TestCase):
 
-    CLIP_URL = 'http://localhost:5000/clip/'
-    CLIP_ID_URL = 'http://localhost:5000/clip/{}/'
-    ADD_CHILD_URL = CLIP_URL + 'add_child'
+    CLIP_URL = 'http://localhost:5000/clips/'
+    CLIP_ID_URL = 'http://localhost:5000/clips/{}/'
+    ADD_CHILD_URL = CLIP_URL + 'children'
     client = None
     db = None
     collection = None
@@ -32,7 +32,7 @@ class SimpleTextServerTest(unittest.TestCase):
     def add_child(self, parent_id):
         headers = {'Content-Type': 'text/html'}
         r = requests.post(
-                self.CLIP_URL + parent_id + '/add_child',
+                self.CLIP_URL + parent_id + '/children',
                 data='<h1>Child text</h1>',
                 headers=headers)
         return r
@@ -41,7 +41,7 @@ class SimpleTextServerTest(unittest.TestCase):
         fake_id = uuid4()
 
         r = requests.post(
-                self.CLIP_URL + str(fake_id) + '/add_child',
+                self.CLIP_URL + str(fake_id) + '/children',
                 json={'mimetype': 'text/plain',
                       'data': 'ClipChild',
                       'parent': str(fake_id)})
@@ -67,7 +67,7 @@ class SimpleTextServerTest(unittest.TestCase):
         parent_id = self.create_parent()
 
         r = requests.post(
-                self.CLIP_URL + parent_id + '/add_child',
+                self.CLIP_URL + parent_id + '/children',
                 json={'mimetype': 'text/plain',
                       'data': 'ClipChild',
                       'parent': parent_id})
@@ -92,7 +92,7 @@ class SimpleTextServerTest(unittest.TestCase):
         self.add_child(parent_id)
 
         r = requests.post(
-                self.CLIP_URL + parent_id + '/add_child',
+                self.CLIP_URL + parent_id + '/children',
                 json={'mimetype': 'application/json',
                       'data': '{"key": "json-child"}',
                       'parent': parent_id
@@ -151,7 +151,7 @@ class SimpleTextServerTest(unittest.TestCase):
         parent_id = self.create_parent()
         child = self.add_child(parent_id)
         child_id = child.headers['X-C2-_id']
-        r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')
+        r = requests.get(self.CLIP_URL + parent_id + '/alternatives/')
         self.assertEqual(r.status_code, 300)
 
         self.assertIn(parent_id, r.text)
@@ -166,7 +166,7 @@ class SimpleTextServerTest(unittest.TestCase):
                                 'data': 'WrongTurn'})
 
         wrong_id = r.headers['X-C2-_id']
-        r = requests.get(self.CLIP_URL + parent_id + '/get_alternatives/')
+        r = requests.get(self.CLIP_URL + parent_id + '/alternatives/')
 
         self.assertIn(parent_id, r.text)
         self.assertIn(child_id, r.text)

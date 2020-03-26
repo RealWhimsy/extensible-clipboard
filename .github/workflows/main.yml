@@ -26,5 +26,5 @@ jobs:
         pip3 install --upgrade pip
         pip3 install -r requirements.txt
         python3 -m fbs freeze
-        ./src/main/python/tests/run_tests.sh
+        sh ./src/main/python/tests/run_tests.sh
         

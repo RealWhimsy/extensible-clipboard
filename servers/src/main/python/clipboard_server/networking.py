@@ -32,7 +32,7 @@ class ConnectionHandler(QObject):
         super(QObject, self).__init__()
         self.flask_app = flask_app
         self.port = port
-        self.clip_server_url = clip_server_url + "clipboard/register"
+        self.clip_server_url = clip_server_url + "clipboards/register"
         if domain == 'http://localhost':
             self.domain = domain + ':' + str(self.port) + '/'
         # Request own ip through external service for more convenience
@@ -115,9 +115,9 @@ class ClipSender:
     """
 
     def __init__(self, clip_server_url, id_updater):
-        self.post_url = clip_server_url + "clip/"
-        self.call_hook_url = self.post_url + "{}/call_hooks"
-        self.add_child_url = self.post_url + "{}/add_child"
+        self.post_url = clip_server_url + "clips/"
+        self.call_hook_url = self.post_url + "{}/hooks/call"
+        self.add_child_url = self.post_url + "{}/children"
         self.id_updater = id_updater
 
     def _post_clip(self, clip, parent_id=None):

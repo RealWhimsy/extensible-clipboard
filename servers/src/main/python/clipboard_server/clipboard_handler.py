@@ -16,6 +16,7 @@ class ClipboardHandler(QObject):
     clipboard = None
 
     def _save_to_local_clipboard(self, data):
+        print("CBH", "Save to local clipboard!")
         """
         Saves data to the local clipboard. Uses a QClipboard
         :param data: Data to be saved
@@ -23,6 +24,7 @@ class ClipboardHandler(QObject):
         self.clipboard.save(data)
 
     def put_into_storage(self, data):
+        print("CBH", "Put into storage")
         """
         Responsible for storing data on a higher level.
         This function should be called when you want to save

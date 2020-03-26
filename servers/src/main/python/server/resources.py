@@ -92,7 +92,7 @@ class Clip(BaseClip):
     def get(self, clip_id=None):
         clip = None
         # gets the siblings and parent or children of a clip
-        if request.url.endswith('/get_alternatives/'):
+        if request.url.endswith('/alternatives/'):
             clips = current_app.get_alternatives(clip_id)
             for c in clips:
                 c['url'] = url_for('clip', clip_id=c['_id'], _external=True)
@@ -153,7 +153,7 @@ class Clip(BaseClip):
 
     @decorators.pre_hooks
     def post(self, clip_id=None):
-        if request.url.endswith('/call_hooks'):
+        if request.url.endswith('/hooks/call'):
             current_app.call_hooks(clip_id)
             return '', 204
         else:

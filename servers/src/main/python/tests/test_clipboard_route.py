@@ -6,8 +6,8 @@ from .t_util import wipe
 
 class SimpleTextServerTest(unittest.TestCase):
 
-    CLIP_URL = 'http://localhost:5000/clip/'
-    CLIPBOARD_URL = 'http://localhost:5000/clipboard/'
+    CLIP_URL = 'http://localhost:5000/clips/'
+    CLIPBOARD_URL = 'http://localhost:5000/clipboards/'
     client = None
     db = None
     collection = None
@@ -35,12 +35,12 @@ class SimpleTextServerTest(unittest.TestCase):
         headers = {'content-type': 'application/json'}
         r = requests.post(self.CLIPBOARD_URL + 'register',
                           headers=headers,
-                          json={'url': 'http://localhost:5555/'})
+                          json={'url': 'http://localhost:5010/'})
         self.assertEqual(r.status_code, 201)
 
     def test_server_only_accepts_json(self):
         r = requests.post(self.CLIPBOARD_URL + 'register',
-                          data={'url': 'http://localhost:5555/'})
+                          data={'url': 'http://localhost:5010/'})
         self.assertEqual(r.status_code, 415)
 
     def test_server_refuses_non_url(self):

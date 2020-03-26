@@ -7,8 +7,8 @@ from .t_util import wipe
 
 class SimpleTextServerTest(unittest.TestCase):
 
-    CLIP_URL = 'http://localhost:5000/clip/'
-    CLIP_ID_URL = 'http://localhost:5000/clip/{}/'
+    CLIP_URL = 'http://localhost:5000/clips/'
+    CLIP_ID_URL = 'http://localhost:5000/clips/{}/'
     client = None
     db = None
     collection = None

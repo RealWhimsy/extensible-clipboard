@@ -9,7 +9,7 @@ var clipboardApi = (function(){
 
     that = {}
     let base_url = 'http://localhost:5000/'
-    let base_clip_url = base_url.concat('clip/')
+    let base_clip_url = base_url.concat('clips/')
 
     function onUrlChanged(url) {
         /**
@@ -25,7 +25,7 @@ var clipboardApi = (function(){
             return
         }
         base_url = url;
-        base_clip_url = base_url.concat('clip/');
+        base_clip_url = base_url.concat('clips/');
     }
 
     function saveClip(data, mimetype, src_url=null, src_app=null, download_request=false){

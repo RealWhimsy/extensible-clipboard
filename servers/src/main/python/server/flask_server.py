@@ -73,12 +73,12 @@ class FlaskServer(Flask):
         :param data: The data (text, binary) received by the Resource
         """
         parent = data.get('parent')
+
         if parent and self.current_clip != parent:
             # Update was not to current clip
             return
 
         for c in self.clipboards:
-            print('\nSend To Clipboard:', c['url'])
             if force_propagation or self.last_sender != c['_id']:
                 try:
                     send_data = data.get('data')
@@ -169,7 +169,7 @@ class FlaskServer(Flask):
 
             # Creation successful
             if new_clip:
-                if 'parent' not in new_clip:
+                if new_clip['parent'] is None:
                     self.current_clip = new_clip['_id']
                 response_url = url_for(
                         'child_adder',
@@ -230,7 +230,6 @@ class FlaskServer(Flask):
         with the specified options
         :return: The UUID of the created recipient as a UUID-string
         """
-        print("Add Rec", url)
         r = self.db.add_recipient(url, is_hook, subscribed_types)
         self._build_recipients()
         return r['_id']

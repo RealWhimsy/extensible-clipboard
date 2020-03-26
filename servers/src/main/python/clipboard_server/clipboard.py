@@ -60,7 +60,12 @@ class Clipboard(QObject):
         :param data: The data that will be saved in the clipboard
         """
         mime_type = data['mimetype']
-        self.mime_data = QMimeData()
+
+        # Create new mime data, when parent is incoming, else add mime type to existing data
+        if data['parent'] is None:
+            self.mime_data = QMimeData()
+        else:
+            self.mime_data = self.clipboard.mimeData()
 
         prepared_data = self._prepare_data(data['data'])
 
@@ -69,7 +74,7 @@ class Clipboard(QObject):
         self.clipboard.clear()
         self.clipboard.setMimeData(self.mime_data)
 
-        if data.get('parent'):  # If child gotten first, should not happen
+        if data['parent'] is not None:  # If child gotten first, should not happen
             self.current_id = data['parent']
         else:
             self.current_id = data['_id']

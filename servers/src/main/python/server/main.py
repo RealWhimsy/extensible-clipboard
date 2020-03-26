@@ -28,30 +28,30 @@ class ClipServer():
         child_add_view = ChildClipAdder.as_view('child_adder')
         recipient_view = Recipient.as_view('recipient')
 
-        self.flask_server.add_url_rule('/clip/',
+        self.flask_server.add_url_rule('/clips/',
                                        view_func=clip_list_view,
                                        methods=['GET', 'POST'])
-        self.flask_server.add_url_rule('/clip/latest/',
+        self.flask_server.add_url_rule('/clips/latest/',
                                        view_func=clip_view,
                                        methods=['GET'])
-        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/',
+        self.flask_server.add_url_rule('/clips/<uuid:clip_id>/',
                                        view_func=clip_details,
                                        methods=['GET', 'DELETE',
                                                 'PUT', ])
-        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/'
-                                       + 'get_alternatives/',
+        self.flask_server.add_url_rule('/clips/<uuid:clip_id>/'
+                                       + 'alternatives/',
                                        view_func=clip_view,
                                        methods=['GET'])
-        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/call_hooks',
+        self.flask_server.add_url_rule('/clips/<uuid:clip_id>/hooks/call',
                                        view_func=clip_view,
                                        methods=['POST'])
-        self.flask_server.add_url_rule('/clip/<uuid:clip_id>/add_child',
+        self.flask_server.add_url_rule('/clips/<uuid:clip_id>/children',
                                        view_func=child_add_view,
                                        methods=['POST'])
-        self.flask_server.add_url_rule('/clipboard/register',
+        self.flask_server.add_url_rule('/clipboards/register',
                                        view_func=recipient_view,
                                        methods=['POST'])
-        self.flask_server.add_url_rule('/hook/register',
+        self.flask_server.add_url_rule('/hooks/register',
                                        view_func=recipient_view,
                                        methods=['POST'])
 

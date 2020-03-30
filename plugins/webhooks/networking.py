@@ -45,7 +45,7 @@ class ConnectionHandler():
         self.flask_app = flask_app
         self.port = port
         self.clipserver = clipserver
-        self.register_url = clipserver + "hook/register"
+        self.register_url = clipserver + "hooks/register"
         if domain == 'http://localhost':
             domain = domain + ':' + str(self.port) + '/'
         self.domain = domain

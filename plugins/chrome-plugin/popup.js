@@ -36,21 +36,29 @@ let app = (function(){
                    timezone: 'UTC+1', hour: 'numeric', minute: 'numeric'};
         clip.date = date.toLocaleString('de-DE', options);
         return clip
-    
+    }
+
+    function createNode(elType, cl, content) {
+        let el = document.createElement("div")
+        el.innerHTML = content;
+        el.className = cl;
+        return el;
     }
 
     function onClipsGet(data, textStatus, jqXHR){
+        alert(JSON.stringify(data))
         /**
          * Called when the request of all items from the server returns.
          * If successful, it populates the popup with all items in a
          * chronologically sorted, hierachical view
         */
+
+        let clipList = document.getElementById('clipList');
         if (jqXHR.status === 200 ){
             let clips = [];
-            let clipList = document.getElementById('clipList');
             // builds a list of parents
             for (let i = 0; i < data.length; i++){
-                if (!( 'parent' in data[i] )) {
+                if (( data[i]['parent'] == null )) {
                     clips.push(createClip(data[i]));
                 }
             }
@@ -73,12 +81,40 @@ let app = (function(){
                     flattened.push(clips[i].children[j])
                 }
             }
-            let context = {"clips": flattened}
+
+
+            flattened.forEach(function(entry) {
+                let row = document.createElement("div");
+                row.className = "clipRow";
+                // row.innerHTML = JSON.stringify(entry);
+
+                row.appendChild(createNode('div', 'clipDate', entry.date));
+                row.appendChild(createNode('div', 'clipType', entry.clipType));
+                row.appendChild(createNode('div', 'clipPaste', ''));
+                row.appendChild(createNode('div', 'clipOpen', ''));
+                row.appendChild(createNode('div', 'clipDelete', ''));
+
+
+                clipList.appendChild(row);
+
+
+
+                /*
+
+                        <div class="clipDate">{{this.date}}</div>
+        <div class="clipType">{{this.clipType}}</div>
+        <div class="clipPaste"></div>
+        <div class="clipOpen"></div>
+        <div class="clipDelete"></div>
+                */
+                // alert(entry);
+            });
+            /*let context = {"clips": flattened}
             $('#clipList').append(this.clipTemplate(context))
             $('.clipDelete').click(onDeleteClick)
             $('.clipPaste').click(onPasteClick)
             $('.clipOpen').click(onOpenClick)
-            $('.clipType').click(onOpenClick)
+            $('.clipType').click(onOpenClick)*/
         }
         else {
             console.log(data)
@@ -134,8 +170,8 @@ let app = (function(){
     }
 
     function init(){
-        let source = document.getElementById("clipTemplate2").innerHTML;
-        this.clipTemplate = Handlebars.compile(source)
+        // let source = document.getElementById("clipTemplate2").innerHTML;
+        // this.clipTemplate = Handlebars.compile(source)
         this.syncButton = $('#syncButton')
         this.syncButton.click(onSyncButtonClick)
 
@@ -147,3 +183,6 @@ let app = (function(){
 
     return that;
 }());
+
+document.addEventListener('DOMContentLoaded', app.init(), false);
+

@@ -110,7 +110,7 @@ class FlaskServer(Flask):
         _id = data.get('parent', data['_id'])
 
         for c in self.post_hooks:
-            types = c['subscribed_types']
+            types = c['preferred_types']
             if data['mimetype'] in types or types == ['*/*']:
                 try:
                     send_data = data.pop('data')

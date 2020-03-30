@@ -361,6 +361,7 @@ class Clipboard(BaseModel):
     url = CharField()
     is_hook = BooleanField()
 
+
 class PreferredTypes(BaseModel):
     parent = ForeignKeyField(Clipboard, backref="preferred_types")
     type = CharField()
@@ -468,7 +469,10 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         Returns a list of all saved recipients represented as dicts
         """
         for rec in recipients:
-            results.append(model_to_dict(rec))
+            current_recipient = model_to_dict(rec, backrefs=True)
+            # TODO: refactor this to avoid cumbersome mapping
+            current_recipient['preferred_types'] = list(map(lambda item: item['type'], current_recipient['preferred_types']))
+            results.append(current_recipient)
         return results
 
     def save_clip(self, data):

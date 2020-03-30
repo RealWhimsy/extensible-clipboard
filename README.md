@@ -16,7 +16,7 @@ restrictions of the PyQT framework.
 ## Features
 - 🌏  Remotely set the clipboard on multiple systems via HTTP-Requests
 
-- ⏳ Access the clipboard history via HTTP-Requests
+- ⏳ Access the clipboard history via HTTP-Requests [Read the API doc here...](/wiki/API-Documentation)
 
 - 📋 Full portation of clipboard functionality to REST-interface (e.g. alternative data 
 formats)

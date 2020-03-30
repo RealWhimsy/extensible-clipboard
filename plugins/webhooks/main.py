@@ -38,7 +38,7 @@ class Webhook():
         parser.add_argument('-c', '--clipserver', type=str, dest='clipserver',
                             help='URL this server can register itself '
                             + 'to the clipboard-server',
-                            required=True)
+                            default='http://localhost:5000/')
         self.args = parser.parse_args()
         self.app = Flask(__name__)
         self.flask_server = ConnectionHandler(self.app,

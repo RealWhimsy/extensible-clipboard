@@ -361,6 +361,7 @@ class Clipboard(BaseModel):
     url = CharField()
     is_hook = BooleanField()
 
+
 class PreferredTypes(BaseModel):
     parent = ForeignKeyField(Clipboard, backref="preferred_types")
     type = CharField()
@@ -447,7 +448,8 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         :param subscribed_types: List of mimetypes the hook is interested in.
                                  Will be ignored for clipboards
         """
-        clipboards_with_url = Clipboard.select(Clipboard.url == url)
+
+        clipboards_with_url = Clipboard.select().where(Clipboard.url==url)
         if clipboards_with_url.count() > 0:
             return model_to_dict(clipboards_with_url.get())
         else:
@@ -467,7 +469,10 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         Returns a list of all saved recipients represented as dicts
         """
         for rec in recipients:
-            results.append(model_to_dict(rec))
+            current_recipient = model_to_dict(rec, backrefs=True)
+            # TODO: refactor this to avoid cumbersome mapping
+            current_recipient['preferred_types'] = list(map(lambda item: item['type'], current_recipient['preferred_types']))
+            results.append(current_recipient)
         return results
 
     def save_clip(self, data):

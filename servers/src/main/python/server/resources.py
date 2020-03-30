@@ -255,11 +255,12 @@ class Recipient(MethodView):
             return jsonify(error='No url specified'), 400
         url = data['url']
         if self.is_url(url):
-            is_hook = 'hook' in request.url
+            is_hook = 'hooks' in request.url
             _id = current_app.add_recipient(
-                    data['url'],
+                    url,
                     is_hook,
                     data.get('subscribed_types', None))
+            # TODO? clip to clips
             return jsonify(_id=_id,
                            response_url=url_for('clip', _external=True)), 201
         else:

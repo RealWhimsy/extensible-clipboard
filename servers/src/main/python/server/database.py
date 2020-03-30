@@ -447,7 +447,8 @@ class ClipSqlPeeweeDatabase(ClipDatabase):
         :param subscribed_types: List of mimetypes the hook is interested in.
                                  Will be ignored for clipboards
         """
-        clipboards_with_url = Clipboard.select(Clipboard.url == url)
+
+        clipboards_with_url = Clipboard.select().where(Clipboard.url==url)
         if clipboards_with_url.count() > 0:
             return model_to_dict(clipboards_with_url.get())
         else:

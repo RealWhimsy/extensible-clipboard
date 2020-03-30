@@ -1,5 +1,4 @@
 #!/bin/sh
-sudo apt-get install coverage
 cd "$(dirname "$0")"
 cd ..
 . ./../../../venv/bin/activate

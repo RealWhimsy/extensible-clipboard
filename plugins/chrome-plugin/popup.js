@@ -46,7 +46,6 @@ let app = (function(){
     }
 
     function onClipsGet(data, textStatus, jqXHR){
-        alert(JSON.stringify(data))
         /**
          * Called when the request of all items from the server returns.
          * If successful, it populates the popup with all items in a
@@ -86,35 +85,20 @@ let app = (function(){
             flattened.forEach(function(entry) {
                 let row = document.createElement("div");
                 row.className = "clipRow";
-                // row.innerHTML = JSON.stringify(entry);
-
+                row.setAttribute('id', entry._id);
+                let pasteNode = createNode('div', 'clipPaste', '');
+                let openNode = createNode('div', 'clipOpen', '');
+                let deleteNode = createNode('div', 'clipDelete', '');
                 row.appendChild(createNode('div', 'clipDate', entry.date));
                 row.appendChild(createNode('div', 'clipType', entry.clipType));
-                row.appendChild(createNode('div', 'clipPaste', ''));
-                row.appendChild(createNode('div', 'clipOpen', ''));
-                row.appendChild(createNode('div', 'clipDelete', ''));
-
-
+                row.appendChild(pasteNode);
+                row.appendChild(openNode);
+                row.appendChild(deleteNode);
                 clipList.appendChild(row);
-
-
-
-                /*
-
-                        <div class="clipDate">{{this.date}}</div>
-        <div class="clipType">{{this.clipType}}</div>
-        <div class="clipPaste"></div>
-        <div class="clipOpen"></div>
-        <div class="clipDelete"></div>
-                */
-                // alert(entry);
             });
-            /*let context = {"clips": flattened}
-            $('#clipList').append(this.clipTemplate(context))
-            $('.clipDelete').click(onDeleteClick)
-            $('.clipPaste').click(onPasteClick)
-            $('.clipOpen').click(onOpenClick)
-            $('.clipType').click(onOpenClick)*/
+            $('.clipPaste').click(onPasteClick);
+            $('.clipOpen').click(onOpenClick);
+            $('.clipDelete').click(onDeleteClick);
         }
         else {
             console.log(data)
@@ -125,7 +109,8 @@ let app = (function(){
         /**
          * Called when the request to delete an item from the server returns
         */
-        $("[data-id=" + data._id + "]").remove()
+        //             $("[id=" + data._id + "]").remove();
+        onSyncButtonClick();
     }
 
     function onDeleteClick(e){
@@ -133,7 +118,7 @@ let app = (function(){
          * User clicked on the delete-button, issues request to server
          * for deltion of clicked item
         */
-        _id = $(e.currentTarget).parent().data('id');
+        _id = e.currentTarget.parentNode.getAttribute('id');
         clipboardApi.deleteClip(_id, onClipDeleted)
     }
 
@@ -142,7 +127,7 @@ let app = (function(){
          * User clicked on open-button. Opens a new tab with the Url
          * representing the item on the server
         */
-        _id = $(e.currentTarget).parent().data('id');
+        _id = e.currentTarget.parentNode.getAttribute('id');
         if ( _id !== undefined ) {
             clipboardApi.openLink(_id)
         }
@@ -165,7 +150,7 @@ let app = (function(){
          * User clicked on pase-button. Request the complete clip from the
          * server and then sends it to the content-script
         */
-        _id = $(e.currentTarget).parent().data('id');
+        _id = e.currentTarget.parentNode.getAttribute('id');
         clipboardApi.getClip(_id, onClipGet)
     }
 

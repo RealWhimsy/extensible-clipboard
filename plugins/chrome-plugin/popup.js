@@ -36,7 +36,13 @@ let app = (function(){
                    timezone: 'UTC+1', hour: 'numeric', minute: 'numeric'};
         clip.date = date.toLocaleString('de-DE', options);
         return clip
-    
+    }
+
+    function createNode(elType, cl, content) {
+        let el = document.createElement("div")
+        el.innerHTML = content;
+        el.className = cl;
+        return el;
     }
 
     function onClipsGet(data, textStatus, jqXHR){
@@ -45,12 +51,13 @@ let app = (function(){
          * If successful, it populates the popup with all items in a
          * chronologically sorted, hierachical view
         */
+
+        let clipList = document.getElementById('clipList');
         if (jqXHR.status === 200 ){
             let clips = [];
-            let clipList = document.getElementById('clipList');
             // builds a list of parents
             for (let i = 0; i < data.length; i++){
-                if (!( 'parent' in data[i] )) {
+                if (( data[i]['parent'] == null )) {
                     clips.push(createClip(data[i]));
                 }
             }
@@ -73,12 +80,25 @@ let app = (function(){
                     flattened.push(clips[i].children[j])
                 }
             }
-            let context = {"clips": flattened}
-            $('#clipList').append(this.clipTemplate(context))
-            $('.clipDelete').click(onDeleteClick)
-            $('.clipPaste').click(onPasteClick)
-            $('.clipOpen').click(onOpenClick)
-            $('.clipType').click(onOpenClick)
+
+
+            flattened.forEach(function(entry) {
+                let row = document.createElement("div");
+                row.className = "clipRow";
+                row.setAttribute('id', entry._id);
+                let pasteNode = createNode('div', 'clipPaste', '');
+                let openNode = createNode('div', 'clipOpen', '');
+                let deleteNode = createNode('div', 'clipDelete', '');
+                row.appendChild(createNode('div', 'clipDate', entry.date));
+                row.appendChild(createNode('div', 'clipType', entry.clipType));
+                row.appendChild(pasteNode);
+                row.appendChild(openNode);
+                row.appendChild(deleteNode);
+                clipList.appendChild(row);
+            });
+            $('.clipPaste').click(onPasteClick);
+            $('.clipOpen').click(onOpenClick);
+            $('.clipDelete').click(onDeleteClick);
         }
         else {
             console.log(data)
@@ -89,7 +109,8 @@ let app = (function(){
         /**
          * Called when the request to delete an item from the server returns
         */
-        $("[data-id=" + data._id + "]").remove()
+        //             $("[id=" + data._id + "]").remove();
+        onSyncButtonClick();
     }
 
     function onDeleteClick(e){
@@ -97,7 +118,7 @@ let app = (function(){
          * User clicked on the delete-button, issues request to server
          * for deltion of clicked item
         */
-        _id = $(e.currentTarget).parent().data('id');
+        _id = e.currentTarget.parentNode.getAttribute('id');
         clipboardApi.deleteClip(_id, onClipDeleted)
     }
 
@@ -106,7 +127,7 @@ let app = (function(){
          * User clicked on open-button. Opens a new tab with the Url
          * representing the item on the server
         */
-        _id = $(e.currentTarget).parent().data('id');
+        _id = e.currentTarget.parentNode.getAttribute('id');
         if ( _id !== undefined ) {
             clipboardApi.openLink(_id)
         }
@@ -129,13 +150,13 @@ let app = (function(){
          * User clicked on pase-button. Request the complete clip from the
          * server and then sends it to the content-script
         */
-        _id = $(e.currentTarget).parent().data('id');
+        _id = e.currentTarget.parentNode.getAttribute('id');
         clipboardApi.getClip(_id, onClipGet)
     }
 
     function init(){
-        let source = document.getElementById("clipTemplate2").innerHTML;
-        this.clipTemplate = Handlebars.compile(source)
+        // let source = document.getElementById("clipTemplate2").innerHTML;
+        // this.clipTemplate = Handlebars.compile(source)
         this.syncButton = $('#syncButton')
         this.syncButton.click(onSyncButtonClick)
 
@@ -147,3 +168,6 @@ let app = (function(){
 
     return that;
 }());
+
+document.addEventListener('DOMContentLoaded', app.init(), false);
+

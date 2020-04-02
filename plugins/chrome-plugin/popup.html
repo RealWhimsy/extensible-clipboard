@@ -3,7 +3,8 @@
   <head>
     <link rel="stylesheet" href="popup.css">
   </head>
-  <body onload="initApp()">
+  <!--<body onload="initApp()">-->
+  <body>
     <div id="heading">Extended Clipboard - C<sup>2</sup></div>
     <div id="controls">
       <div id="syncButton">
@@ -23,7 +24,7 @@
     </div>
 
 
-    <script id="clipTemplate2" type="text/x-handlebars-template">
+    <!--<script id="clipTemplate2" type="text/x-handlebars-template">
       {{#each clips}}
         {{#if parent}}
           <div class="clipRow childRow" data-id={{this._id}}>
@@ -37,17 +38,17 @@
         <div class="clipDelete"></div>
       </div>
       {{/each}}
-    </script>
+    </script>-->
 
     <script src="libs/handlebars-v4.0.12.js"></script>
     <script src="libs/jquery-3.3.1.min.js"></script>
     <script src="requestBuilder.js"></script>
     <script src="clipboard_api.js"></script>
     <script src="popup.js"></script>
-    <script>
+    <!--<script>
         function initApp() {
             app.init()
         }
-    </script>
+    </script>-->
   </body>
 </html>

@@ -23,7 +23,7 @@ restrictions of the PyQT framework.
 
 - 🔒 Control access to your clipboard by whitelisting clients
 
-## Installation
+## Installation & Building
 We recommend installing extensible clipboard from the built version, since it is the most convenient way and does not require installing any packages:
 
 - [Download Debian build (04.03.2020)](https://files.mi.ur.de/f/81159d53bc/?dl=1)
@@ -35,15 +35,6 @@ following command:
     
     # Execute from project root
     ./build.sh
- 
-    
-## Building
-Before you are able to use the extensible clipboard, you need to build it for your platform. Use the same build script for this purpose:
-
-    # Execute from project root
-    ./build.sh
-
-If python states, that objdump has not been found, please try installing **binutils** on your system.
     
 ## Running 
 After building the executable, you can run it through the console:

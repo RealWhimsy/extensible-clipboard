@@ -8,6 +8,7 @@ packages:
 	pip3 install -r requirements.txt
 
 run:
+	. venv/bin/activate
 	python3 src/main.py
 
 clean:

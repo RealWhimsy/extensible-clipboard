@@ -1,10 +1,8 @@
-from importlib import import_module, machinery
+from importlib import machinery
 from os import listdir
-import os
-from util.context import Context
 
 # TODO: this may be a bit cumbersome, but currently seems like the best solution
-from server.hooks.basehook import BaseHook
+from hooks.basehook import BaseHook
 
 
 class HookManager:
@@ -15,7 +13,7 @@ class HookManager:
         if self.hooks:
             self.hooks = []
 
-        base_path = Context.ctx.get_resource('hooks/')
+        base_path = './hooks'
         files = listdir(base_path)
         # Remove all files not ending on _hook.py
         hook_files = [f for f in files if f.endswith('_hook.py')]

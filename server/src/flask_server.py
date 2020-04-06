@@ -3,7 +3,7 @@ from uuid import UUID
 
 from flask import Flask, url_for
 
-from server.exceptions import (GrandchildException, ParentNotFoundException,
+from exceptions import (GrandchildException, ParentNotFoundException,
                         SameMimetypeException)
 
 

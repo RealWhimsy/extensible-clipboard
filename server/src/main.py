@@ -1,9 +1,9 @@
 import os
 import sys
 
-from server.database import ClipDatabase, ClipSqlPeeweeDatabase
-from server.flask_server import FlaskServer
-from server.resources import Clip, Clips, ChildClipAdder, Recipient
+from database import ClipSqlPeeweeDatabase
+from flask_server import FlaskServer
+from resources import Clip, Clips, ChildClipAdder, Recipient
 
 from threading import Thread
 

@@ -7,5 +7,8 @@ packages:
 	. venv/bin/activate
 	pip3 install -r requirements.txt
 
+run:
+	python3 src/main.py
+
 clean:
 	rm -rf venv

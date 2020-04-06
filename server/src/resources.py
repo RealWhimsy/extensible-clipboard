@@ -3,15 +3,12 @@ import re
 from flask import abort, current_app, jsonify, make_response, request, url_for
 from flask.views import MethodView
 
-import server.decorators as decorators
-from server.exceptions import (GrandchildException, ParentNotFoundException,
+import decorators as decorators
+from exceptions import (GrandchildException, ParentNotFoundException,
                         SameMimetypeException)
-from server.parser import RequestParser
+from parser import RequestParser
 
-import importlib
-
-from util.context import Context
-from server.hooks.hook_manager import HookManager
+from hooks.hook_manager import HookManager
 
 """
 The classes in this file act as the views for Flask and expose the application

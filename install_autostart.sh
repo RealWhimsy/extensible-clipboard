@@ -5,7 +5,7 @@
 # Note: THE SCRIPT HAS TO BE PLACED INSIDE THE FOLDER OF A BUILT PROJECT, ON THE SAME LEVEL AS THE EXECUTABLE!
 #
 target_file=~/.config/autostart/extensible_clipboard_autostart.desktop
-executable="$(realpath .)"/ExtensibleClipboard
+executable="$(realpath .)"
 desktop_contents="
 [Desktop Entry]
 Encoding=UTF-8
@@ -13,7 +13,7 @@ Version=0.9.4
 Type=Application
 Name=Startup Extensible Clipboard App
 Comment=
-Exec=%s
+Exec=sh %s
 StartupNotify=false
 Terminal=false
 Hidden=false

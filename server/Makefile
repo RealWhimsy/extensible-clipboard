@@ -9,7 +9,8 @@ packages:
 
 run:
 	. venv/bin/activate
-	cd src  && python3 ./main.py $(ARGS) &
+	python3 ./src/main.py $(ARGS) &
+	echo "Server running as process $!"
 
 clean:
 	rm -rf venv

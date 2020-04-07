@@ -5,7 +5,7 @@ from database import ClipSqlPeeweeDatabase
 from flask_server import FlaskServer
 from resources import Clip, Clips, ChildClipAdder, Recipient
 from configparser import ConfigParser
-from threading import Thread
+from argparse import ArgumentParser
 
 """
 This class is responsible for starting the whole application.
@@ -59,29 +59,18 @@ class ClipServer():
         self.add_resources()
         self.flask_server.start_server()
 
-    def __init__(self, argv, in_port=None):
-        config = ConfigParser()
-        config.read('./../config/config.ini')
+    def __init__(self, port):
         self.database = ClipSqlPeeweeDatabase()
-
-        if len(argv) > 1 and argv[1] == '-h':
-            print('A port can be specified as the first argument')
-            print('5000 will be used otherwise')
-            sys.exit()
-            return
-        else:
-            port = None
-            if in_port:
-                port = in_port
-            elif len(argv) > 1 and argv[1].isdigit():
-                port = argv[1]
-            else:
-                port = config['networking']['port']
-
-            self.flask_server = FlaskServer(__name__, self.database, port)
+        self.flask_server = FlaskServer(__name__, self.database, port)
 
 if __name__ == "__main__":
+    config = ConfigParser()
+    argparser = ArgumentParser()
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
-    q_app = ClipServer(sys.argv)
-    print (sys.argv)
+    config.read('./../config/config.ini')
+    argparser.add_argument("-p", '--port',
+                    help="The port used for providing the server.",
+                    default=config['networking']['port'])
+    args, unknown = argparser.parse_known_args()
+    q_app = ClipServer(args.port)
     q_app.main()

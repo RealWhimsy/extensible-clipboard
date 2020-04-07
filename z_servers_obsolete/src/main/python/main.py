@@ -1,5 +1,3 @@
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
-
 import sys
 import time
 
@@ -36,7 +34,7 @@ if __name__ == '__main__':
     print("Command Line Arguments", cl_arguments)
 
     network_config = ConfigParser()
-    network_config.read(ApplicationContext().get_resource('config/networking.ini'))
+    network_config.read(ApplicationContext().get_resource('config/config.ini'))
     system_config = ConfigParser()
     system_config.read(ApplicationContext().get_resource('config/system.ini'))
 

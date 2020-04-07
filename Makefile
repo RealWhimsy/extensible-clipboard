@@ -1,11 +1,8 @@
-.PHONY: all packages clean
+.PHONY: all packages
 
 all: packages
 
 packages:
-	sudo apt install python3-venv python3-dev python3-pip binutils
+	sudo apt install python3-venv python3-dev python3-pip binutils coverage
 	$(MAKE) -C server
 	$(MAKE) -C clipboard
-
-clean:
-	$(MAKE) clean server

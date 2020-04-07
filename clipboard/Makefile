@@ -9,4 +9,4 @@ clean:
 	rm -rf venv
 
 run:
-	. venv/bin/activate;cd src; python3 main.py
+	. venv/bin/activate;cd src; python3 main.py $(ARGS)

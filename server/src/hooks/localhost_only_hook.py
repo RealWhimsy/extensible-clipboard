@@ -1,10 +1,4 @@
-from util.context import Context
-import server
-from importlib import machinery
-import json
-
-
-from server.hooks.basehook import BaseHook
+from hooks.basehook import BaseHook
 
 class LocalhostOnlyHook(BaseHook):
     """

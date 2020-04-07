@@ -19,6 +19,7 @@ class FlaskServer(Flask):
     MAX_CONTENT_LENGTH = 15 * 1024 * 1024
 
     def __init__(self, app_name, database, port=5000):
+        print("Port", port)
         super(FlaskServer, self).__init__(app_name)
         self.db = database
         self.port = port

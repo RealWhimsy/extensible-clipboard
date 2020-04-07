@@ -57,31 +57,31 @@ class ClipServer():
 
     def main(self):
         self.add_resources()
-        server_thread = Thread(target=self.flask_server.start_server)
-        server_thread.daemon = True
-        server_thread.start()
+        self.flask_server.start_server()
 
-    def __init__(self, argv, port=None):
-        # self.database = ClipDatabase()
+    def __init__(self, argv, in_port=None):
+        config = ConfigParser()
+        config.read('./../config/config.ini')
         self.database = ClipSqlPeeweeDatabase()
 
-        # The flask-server itself
-        if port is not None:
-            self.flask_server = FlaskServer(__name__, self.database, port)
-        elif len(argv) > 1 and argv[1].isdigit():
-            m_port = argv[1]
-            self.flask_server = FlaskServer(__name__, self.database, m_port)
-        elif len(argv) > 1 and argv[1] == '-h':
+        if len(argv) > 1 and argv[1] == '-h':
             print('A port can be specified as the first argument')
             print('5000 will be used otherwise')
-            # TODO: this may cause problems? should be removed later on
             sys.exit()
+            return
         else:
-            self.flask_server = FlaskServer(__name__, self.database)
+            port = None
+            if in_port:
+                port = in_port
+            elif len(argv) > 1 and argv[1].isdigit():
+                port = argv[1]
+            else:
+                port = config['networking']['port']
 
+            self.flask_server = FlaskServer(__name__, self.database, port)
 
 if __name__ == "__main__":
-    # Changes into dir for imports to work as expected
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
     q_app = ClipServer(sys.argv)
+    print (sys.argv)
     q_app.main()

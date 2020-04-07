@@ -1,4 +1,4 @@
-.PHONY: all packages clean
+.PHONY: all packages clean run
 
 all: packages
 
@@ -9,7 +9,7 @@ packages:
 
 run:
 	. venv/bin/activate
-	python3 src/main.py
+	cd src  && python3 ./main.py $(ARGS) &
 
 clean:
 	rm -rf venv

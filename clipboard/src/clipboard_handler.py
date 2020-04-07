@@ -2,7 +2,7 @@ import sys
 
 from PyQt5.QtCore import QObject, pyqtSlot
 
-from clipboard_server.clipboard import Clipboard
+from clipboard import Clipboard
 
 
 class ClipboardHandler(QObject):

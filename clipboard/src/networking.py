@@ -6,7 +6,7 @@ import requests
 from requests import exceptions as req_exceptions
 
 from PyQt5.QtCore import QObject, pyqtSignal
-from clipboard_server.utils import NetworkUtil
+from utils import NetworkUtil
 
 """
 This file contains the two classes needed to provide the communication

@@ -1,19 +1,18 @@
 from argparse import ArgumentParser
+from configparser import ConfigParser
 import mimetypes
 import os
 import signal
 import sys
-import subprocess
 from urllib.parse import unquote
 
 from flask import Flask
 
-from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 
-from clipboard_server.clipboard_handler import ClipboardHandler
-from clipboard_server.networking import ConnectionHandler, ClipSender
+from clipboard_handler import ClipboardHandler
+from networking import ConnectionHandler, ClipSender
 
 """
 This starts the clipboard-server. It acts as a bridge to the OS-clipboard
@@ -130,23 +129,25 @@ class ClipboardServerApp():
 
 def parse_args():
     parser = ArgumentParser()
+    config = ConfigParser()
+    config.read('./../config/config.ini')
     parser.add_argument('-p', '--port', type=int, dest='port',
                         help='Port THIS server shall listen on, \
-                              defaults to 5555', default=5555)
+                              defaults to 5555', default=config['networking']['port'])
     parser.add_argument('-d', '--domain', type=str, dest='domain',
                         help='URL THIS server can be reached under, \
                               must contain specified port, \
                               defaults to localhost, set to "public" for exposing clipboard ' \
                              'to a remote clipserver',
-                        default='http://localhost')
+                        default=config['networking']['domain'])
     parser.add_argument('-s', '--sync-clipboard', type=bool,
-                        dest='sync_clipboard', default=False,
+                        dest='sync_clipboard', default=config['networking']['is_syncing'],
                         help='If True, content of clipboard will be \
                         monitored and changes will be sent to server. \
                         Defaults to False')
     parser.add_argument('-c', '--clipserver', type=str, dest='clipserver',
                         help='URL this server can register itself \
-                              to the clipboard-server', required=True)
+                              to the clipboard-server', default=config['networking']['main_server_address'])
     return parser.parse_args()
 
 
@@ -157,4 +158,4 @@ if __name__ == "__main__":
     app = QApplication([])
     q_app = ClipboardServerApp(args.port, args.clipserver, args.domain, args.sync_clipboard, sys.argv, app)
     q_app.main()
-    sys.exit(q_app.exec_())
+    sys.exit(app.exec_())

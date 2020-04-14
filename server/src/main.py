@@ -3,7 +3,7 @@ import sys
 
 from database import ClipSqlPeeweeDatabase
 from networking import FlaskServer
-from resources import Clip, Clips, ChildClipAdder, Recipient
+from resources import Clip, Clips, ChildClip, Recipient
 from configparser import ConfigParser
 from argparse import ArgumentParser
 
@@ -25,12 +25,12 @@ class ClipServer():
         clip_view = Clip.as_view('clip')  # 'clip' can be used in url_for
         clip_details = Clip.as_view('clip_details')
         clip_list_view = Clips.as_view('clip_list')
-        child_add_view = ChildClipAdder.as_view('child_adder')
+        child_add_view = ChildClip.as_view('child_adder')
         recipient_view = Recipient.as_view('recipient')
 
         self.flask_server.add_url_rule('/clips/',
                                        view_func=clip_list_view,
-                                       methods=['GET', 'POST'])
+                                       methods=['GET', 'POST', 'DELETE'])
         self.flask_server.add_url_rule('/clips/latest/',
                                        view_func=clip_view,
                                        methods=['GET'])

@@ -208,12 +208,18 @@ class FlaskServer(Flask):
         """
         return self.db.get_latest()
 
-    def delete_entry_by_id(self, clip_id):
+    def delete_clip_by_id(self, clip_id):
         """
         Deletes a clip from the collection.
         :return: Number of deleted items, can be 0 if no match found
         """
-        return self.db.delete_entry_by_id(clip_id)
+        return self.db.delete_clip_by_id(clip_id)
+
+    def delete_clips(self, before_date=None):
+        if before_date is None :
+            return self.db.delete_all_clips()
+        else:
+            return self.db.delete_clips_before(before_date)
 
     def get_alternatives(self, clip_id):
         """

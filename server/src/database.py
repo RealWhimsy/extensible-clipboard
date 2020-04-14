@@ -84,6 +84,7 @@ class ClipSqlPeeweeDatabase:
 
         # first round, exact match
         for curr_type in preferred_types:
+            print(curr_type)
             if parent['mimetype'] == curr_type[0]:
                 return parent
             for child in children:
@@ -101,8 +102,8 @@ class ClipSqlPeeweeDatabase:
                     if mime_base in child['mimetype']:
                         return child
 
-        # No exact or wildcard match, default to parent
-        return parent
+        # No exact or wildcard match, default to sent-in clip
+        return clip
 
     def __get_uuidv4__(self):
         return (uuid4().__str__())

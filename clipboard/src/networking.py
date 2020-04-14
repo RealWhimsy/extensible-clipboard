@@ -96,6 +96,7 @@ class ConnectionHandler(QObject):
                     timeout=5
             )
             response.raise_for_status()
+            self.recipient_id_got.emit(response.json()['_id'])
         except req_exceptions.ConnectionError as e:
             self._die('Connection refused by remote server')
         except req_exceptions.Timeout as e:
@@ -105,8 +106,6 @@ class ConnectionHandler(QObject):
                 response.status_code)
             m += 'Message from server: {}'.format(response.text)
             self._die(m)
-
-        self.recipient_id_got.emit(response.json()['_id'])
 
 
 class ClipSender:

@@ -129,9 +129,6 @@ class SimpleTextServerTest(unittest.TestCase):
 
         self.assertEqual(r.status_code, 200)
 
-    def test_delete_needs_id(self):
-        r = requests.delete(self.CLIP_URL)
-        self.assertEqual(r.status_code, 405)
 
     def test_deleted_item_get_no_longer_returned(self):
         r = requests.post(self.CLIP_URL,

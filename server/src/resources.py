@@ -141,7 +141,7 @@ class Clip(BaseClip):
         if clip_id is None:
             return jsonify(
                     error='Please specify an existing object to delete'), 404
-        item = current_app.delete_entry_by_id(clip_id=clip_id)
+        item = current_app.delete_clip_by_id(clip_id=clip_id)
 
         if item is not 0:
             return jsonify(_id=clip_id), 200
@@ -195,11 +195,11 @@ class Clips(BaseClip):
             return jsonify(clips), 200
 
     @decorators.pre_hooks
-    def delete(self, since=None):
+    def delete(self):
         """
         Remove all clips from database, or by option just the ones older than a certain date.
         """
-        current_app.delete_clips(since)
+        current_app.delete_clips(request.args.get('before'))
         return "Clips Deleted Successfully", 200
 
 

@@ -149,10 +149,6 @@ class ClipSqlPeeweeDatabase:
             results.append(current_recipient)
         return results
 
-    def delete_all_clips(self):
-        return Clip.delete().execute()
-
-
     def save_clip(self, data):
         id = self.__get_uuidv4__()
         if data.get('parent') is not None:
@@ -200,6 +196,12 @@ class ClipSqlPeeweeDatabase:
             results.append(model_to_dict(model))
         return results
 
+    def delete_all_clips(self):
+        return Clip.delete().execute()
+
+    def delete_clips_before(self, date):
+        return Clip.delete().where(Clip.creation_date < date).execute()
+
     def get_latest(self):
         q = Clip.select().order_by(Clip.creation_date.desc())
         if q.count() > 0:
@@ -207,7 +209,7 @@ class ClipSqlPeeweeDatabase:
         else:
             return None
 
-    def delete_entry_by_id(self, clip_id):
+    def delete_clip_by_id(self, clip_id):
         return Clip.delete().where((Clip._id==clip_id) | (Clip.parent==clip_id)).execute()
 
     def get_alternatives(self, clip_id):

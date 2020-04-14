@@ -215,6 +215,12 @@ class FlaskServer(Flask):
         """
         return self.db.delete_entry_by_id(clip_id)
 
+    def delete_clips(self, since=None):
+        if(since is None) :
+            return self.db.delete_all_clips()
+        else:
+            return
+
     def get_alternatives(self, clip_id):
         """
         Gets a Json-Array containg id and mimetype of all related

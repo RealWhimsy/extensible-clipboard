@@ -30,7 +30,7 @@ class ClipServer():
 
         self.flask_server.add_url_rule('/clips/',
                                        view_func=clip_list_view,
-                                       methods=['GET', 'POST'])
+                                       methods=['GET', 'POST', 'DELETE'])
         self.flask_server.add_url_rule('/clips/latest/',
                                        view_func=clip_view,
                                        methods=['GET'])

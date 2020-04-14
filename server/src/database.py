@@ -149,6 +149,10 @@ class ClipSqlPeeweeDatabase:
             results.append(current_recipient)
         return results
 
+    def delete_all_clips(self):
+        return Clip.delete().execute()
+
+
     def save_clip(self, data):
         id = self.__get_uuidv4__()
         if data.get('parent') is not None:

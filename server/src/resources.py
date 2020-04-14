@@ -194,6 +194,14 @@ class Clips(BaseClip):
         else:
             return jsonify(clips), 200
 
+    @decorators.pre_hooks
+    def delete(self, since=None):
+        """
+        Remove all clips from database, or by option just the ones older than a certain date.
+        """
+        current_app.delete_clips(since)
+        return "Clips Deleted Successfully", 200
+
 
 class ChildClip(BaseClip):
     """

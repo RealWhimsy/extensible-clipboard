@@ -2,7 +2,7 @@ import os
 import sys
 
 from database import ClipSqlPeeweeDatabase
-from flask_server import FlaskServer
+from networking import FlaskServer
 from resources import Clip, Clips, ChildClipAdder, Recipient
 from configparser import ConfigParser
 from argparse import ArgumentParser

@@ -1,7 +1,7 @@
 import re
 import requests
 
-from flask_server import FlaskServer as server
+from networking import FlaskServer as server
 
 
 class RequestParser():

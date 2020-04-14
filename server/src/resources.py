@@ -195,7 +195,7 @@ class Clips(BaseClip):
             return jsonify(clips), 200
 
 
-class ChildClipAdder(BaseClip):
+class ChildClip(BaseClip):
     """
     Responsible for adding a child to an existing clip.
     Introduced to simplify the flow of the application.

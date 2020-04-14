@@ -1,7 +1,8 @@
 import re
 import requests
 
-from networking import FlaskServer as server
+# TODO this dependency is problematic and should be removed
+from server import Server as server
 
 
 class RequestParser():

@@ -4,7 +4,7 @@ import sys
 
 from flask import Flask
 
-from networking import ConnectionHandler
+from server import ConnectionHandler
 
 """
 A webhook is a program that registers itself to teh remote clip-server.
@@ -22,7 +22,7 @@ class Webhook():
     """
 
     def main(self):
-        self.flask_server.start_server()
+        self.flask_server.start()
 
     def __init__(self, argv):
         parser = ArgumentParser()

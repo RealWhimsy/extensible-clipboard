@@ -1,7 +1,7 @@
 from exceptions import ParentNotFoundException, SameMimetypeException, GrandchildException
 from hooks.hook_manager import HookManager
 from parser import RequestParser
-from flask import abort, current_app, jsonify, make_response, request, url_for
+from flask import current_app, jsonify, url_for
 from flask.views import MethodView
 
 class BaseClip(MethodView):

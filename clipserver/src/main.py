@@ -14,7 +14,6 @@ if __name__ == "__main__":
     config = ConfigParser()
     argparser = ArgumentParser()
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
-
     config.read('./../config/config.ini')
     argparser.add_argument("-p", '--port',
                     help="The port used for providing the server.",

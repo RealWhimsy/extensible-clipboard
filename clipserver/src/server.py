@@ -234,10 +234,6 @@ class Server(Flask):
 
         return new_clip
 
-    def get_clip_by_id(self, _id, preferred_type=None):
-
-        return self.db.__get_clip_by_id__(_id, preferred_type)
-
     def get_all_clips(self):
         """
         Returns all the clips from the database.
@@ -246,12 +242,6 @@ class Server(Flask):
         """
         return self.db.get_all_clips()
 
-    def delete_clip_by_id(self, clip_id):
-        """
-        Deletes a clip from the collection.
-        :return: Number of deleted items, can be 0 if no match found
-        """
-        return self.db.delete_clip_by_id(clip_id)
 
     def delete_clips(self, before_date=None):
         if before_date is None :

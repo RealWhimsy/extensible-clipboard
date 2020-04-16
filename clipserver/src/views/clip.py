@@ -69,6 +69,8 @@ class Clip(BaseClip):
     def put(self, clip_id=None):
         """
         Updates the clip specified by clip_id
+
+        # TODO refactor
         """
         if clip_id is None:
             return jsonify(
@@ -89,21 +91,26 @@ class Clip(BaseClip):
     @decorators.pre_hooks
     def delete(self, clip_id=None):
         """
-        Deletes the clip specified by clip_id. When a parent is deleted,
-        all its children will be removed also.
+        Deletes a clip from the collection. If a parent is deleted, this will also delete its children.
+        :return: Id of deleted clip
         """
         if clip_id is None:
             return jsonify(
                     error='Please specify an existing object to delete'), 404
-        item = current_app.delete_clip_by_id(clip_id=clip_id)
+        n_deleted_items = self.db.delete_clip_by_id(clip_id=clip_id)
 
-        if item is not 0:
+        if n_deleted_items is not 0:
             return jsonify(_id=clip_id), 200
         else:
             return jsonify(error='No clip with specified id'), 404
 
     @decorators.pre_hooks
     def post(self, clip_id=None):
+        """
+        TODO: rethink, whether this makes sense
+        :param clip_id:
+        :return:
+        """
         if request.url.endswith('/hooks/call'):
             current_app.call_hooks(clip_id)
             return '', 204
@@ -112,5 +119,8 @@ class Clip(BaseClip):
 
     @staticmethod
     def __add_url__(clip):
+        """"
+        Map method to add the url for a clip
+        """
         clip['url'] = url_for('clip', clip_id=clip['_id'], _external=True)
         return clip

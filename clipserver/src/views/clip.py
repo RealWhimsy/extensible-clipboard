@@ -78,9 +78,9 @@ class Clip(BaseClip):
         data = self.parser.get_data_from_request(request)
         if not data:
             return jsonify(error='Could not parse data'), 400
+        # TODO: save method is problematic since it is doing too much
         clip = current_app.save_in_database(_id=clip_id,
                                             data=data,)
-
         if clip is not None:
             res = make_response(clip.pop('data'), 200)
             self.set_headers(res, clip)
@@ -107,7 +107,7 @@ class Clip(BaseClip):
     @decorators.pre_hooks
     def post(self, clip_id=None):
         """
-        TODO: rethink, whether this makes sense
+        TODO: rethink, whether this makes sense and is necessary
         :param clip_id:
         :return:
         """

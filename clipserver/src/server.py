@@ -234,24 +234,6 @@ class Server(Flask):
 
         return new_clip
 
-    def get_all_clips(self):
-        """
-        Returns all the clips from the database.
-        TODO: When different users, only returns the clips a user may access
-        :return: A json-array containing all clips
-        """
-        return self.db.get_all_clips()
-
-
-    def delete_clips(self, before_date=None):
-        if before_date is None :
-            return self.db.delete_all_clips()
-        else:
-            return self.db.delete_clips_before(before_date)
-
-    def get_alternatives(self, clip_id):
-        return self.db.__get_alternatives__(clip_id)
-
     def add_recipient(self, url, is_hook, subscribed_types):
         """
         Adds a recipient (webhook or clipboard to the database)

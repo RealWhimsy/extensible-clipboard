@@ -11,6 +11,7 @@ class Clips(BaseClip):
     def post(self):
         """
         Create a new clip
+        # TODO: refactor save_in_database
         """
         data = self.parser.get_data_from_request(request)
         if not data:
@@ -32,7 +33,7 @@ class Clips(BaseClip):
         the amount of data sent to the clients. To get the data, one has
         to request the clip directly by its url ( /clip/{CLIP_ID}/
         """
-        clips = current_app.get_all_clips()
+        clips = self.db.get_all_clips()
 
         if clips is None:
             return jsonify(error='No clips saved yet'), 404
@@ -44,5 +45,13 @@ class Clips(BaseClip):
         """
         Remove all clips from database, or by option just the ones older than a certain date.
         """
-        current_app.delete_clips(request.args.get('before'))
-        return "Clips Deleted Successfully", 200
+        before_date = request.args.get('before')
+        result = None
+        if before_date is None :
+            result = self.db.delete_all_clips()
+        else:
+            result = self.db.delete_clips_before(before_date)
+        if result is not None:
+            return "Clips Deleted Successfully", 200
+        else:
+            return "Error deleting multiple clips", 500

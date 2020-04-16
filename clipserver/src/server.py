@@ -3,6 +3,7 @@ from uuid import UUID
 
 from flask import Flask, url_for
 
+from event_emitter import ClipEventEmitter
 from exceptions import (GrandchildException, ParentNotFoundException,
                         SameMimetypeException)
 
@@ -26,6 +27,10 @@ class Server(Flask):
         super(Server, self).__init__(app_name)
         self.db = database
         self.port = port
+        self.emitter = ClipEventEmitter(database)
+
+
+        # TODO: these instance variables belong somewhere else
         self.clipboards = []
         self.post_hooks = []
         self.current_clip = ''
@@ -85,101 +90,9 @@ class Server(Flask):
         self.run(debug=False, use_reloader=False,
                  host='0.0.0.0', port=self.port)
 
+    # TODO: take care of this
     def _build_recipients(self):
-        """
-        Refreshes the lists of all recipients for data on the server,
-        webhooks and clipboards
-        """
-        result = self.db.get_recipients() or []
-        self.post_hooks = []
-        self.clipboards = []
-        for r in result:
-            if r['is_hook']:
-                self.post_hooks.append(r)
-            else:
-                self.clipboards.append(r)
-            r['error_count'] = 0
-
-    def _send_failed(self, recipient):
-        """
-        Called when sending data to a recipient failed. Currently ony counts
-        errors and prints them. Could be used to remove the recipient after
-        a certain number of consecutive failures.
-        """
-        recipient['error_count'] += 1
-        print('Could not send data to {}'.format(recipient['url']))
-        print('Errors for {}: {}'.format(
-            recipient['url'],
-            recipient['error_count']
-        ))
-
-    # TODO Since this method is part of the save_in_database method, which is used across multiple
-    def send_to_clipboards(self, data, force_propagation=False):
-        """
-        Passes data to the recipient clipboards
-        :param data: The data (text, binary) received by the Resource
-        """
-        parent = data.get('parent')
-
-        # Handle child transmitted to
-        if parent and self.current_clip != parent:
-            # Update was not to current clip
-            return
-
-        for c in self.clipboards:
-            if force_propagation or self.last_sender != c['_id']:
-                try:
-                    # TODO: this runs identical to send to hooks
-                    send_data = data.get('data')
-                    response_url = url_for('child_adder',
-                                           clip_id=data['_id'],
-                                           _external=True)
-                    headers = {'X-C2-response_url': response_url}
-                    headers['Content-Type'] = data.get('mimetype')
-                    # TODO: this mapping can also be
-                    for key, value in data.items():
-                        if key != 'data' and key != 'mimetype':
-                            headers['X-C2-{}'.format(key)] = value
-
-                    requests.post(c['url'],
-                                  data=send_data,
-                                  headers=headers,
-                                  timeout=5)
-
-                except Exception as e:
-                    print(e)
-                    self._send_failed(c)
-
-    def send_to_hooks(self, data):
-        """
-        Passes data to the Q-Application so it can put them into the clipboard
-        :param data: The data (text, binary) received by the Resource
-        """
-        """
-        self.native_hooks.call_hooks(data, self.db.save_clip)
-        """
-        _id = data.get('parent', data['_id'])
-
-        for c in self.post_hooks:
-            types = c['preferred_types']
-            if data['mimetype'] in types or types == ['*/*']:
-                try:
-                    send_data = data.pop('data')
-                    # URL used for adding a child to the entry
-                    response_url = url_for('child_adder',
-                                           clip_id=_id,
-                                           _external=True)
-                    headers = {'X-C2-response_url': response_url}
-                    headers['Content-Type'] = data.pop('mimetype')
-                    for key, value in data.items():
-                        headers['X-C2-{}'.format(key)] = value
-                    requests.post(c['url'],
-                                  data=send_data,
-                                  headers=headers,
-                                  timeout=5)
-                except Exception as e:
-                    print(e)
-                    self._send_failed(c)
+        self.emitter.invalidate_listeners()
 
     def call_hooks(self, clip_id):
         """
@@ -193,6 +106,8 @@ class Server(Flask):
         """
         Creates a UUID to identify the client which sent the last clip.
         Returns None if sender_id is not a parsable UUID-string
+
+        TODO: this method is arguable too
         """
         try:
             return UUID(sender_id)
@@ -205,6 +120,8 @@ class Server(Flask):
         :param data: The data (text, binary) received by the Resource
         :param _id: If specified, the object with this id will be updated
         :return: the newly created entry
+
+        TODO: this is the most influential refactoring site... it strongly depends on instance variables,
         """
         new_clip = {}
         self.last_sender = self._get_last_sender_or_None(

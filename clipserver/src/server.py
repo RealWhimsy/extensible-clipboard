@@ -181,7 +181,7 @@ class Server(Flask):
         """
         Gets a clip and sends it to the post hooks
         """
-        clip = self.db.get_clip_by_id(clip_id)
+        clip = self.db.__get_clip_by_id__(clip_id)
         if clip:
             self.send_to_hooks(clip)
 
@@ -235,11 +235,8 @@ class Server(Flask):
         return new_clip
 
     def get_clip_by_id(self, _id, preferred_type=None):
-        """
-        Queries the database for a clip with the specified uuid.
-        :return: Json representation of the clip or None if no clip found
-        """
-        return self.db.get_clip_by_id(_id, preferred_type)
+
+        return self.db.__get_clip_by_id__(_id, preferred_type)
 
     def get_all_clips(self):
         """
@@ -248,12 +245,6 @@ class Server(Flask):
         :return: A json-array containing all clips
         """
         return self.db.get_all_clips()
-
-    def get_latest_clip(self):
-        """
-        Returns the last added parent clip
-        """
-        return self.db.get_latest()
 
     def delete_clip_by_id(self, clip_id):
         """
@@ -269,12 +260,7 @@ class Server(Flask):
             return self.db.delete_clips_before(before_date)
 
     def get_alternatives(self, clip_id):
-        """
-        Gets a Json-Array containg id and mimetype of all related
-        (child, siblings or parent) entries of clip_id
-        :returns: Said array or None, if clip_id not found in db
-        """
-        return self.db.get_alternatives(clip_id)
+        return self.db.__get_alternatives__(clip_id)
 
     def add_recipient(self, url, is_hook, subscribed_types):
         """

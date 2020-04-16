@@ -202,7 +202,7 @@ class ClipSqlPeeweeDatabase:
     def delete_clips_before(self, date):
         return Clip.delete().where(Clip.creation_date < date).execute()
 
-    def get_latest(self):
+    def get_latest_clip(self):
         q = Clip.select().order_by(Clip.creation_date.desc())
         if q.count() > 0:
             return model_to_dict(q.get())

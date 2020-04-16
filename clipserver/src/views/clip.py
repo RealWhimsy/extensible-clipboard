@@ -2,6 +2,7 @@ import decorators as decorators
 from views.base_clip import BaseClip
 from flask import abort, current_app, jsonify, make_response, request, url_for
 
+
 class Clip(BaseClip):
     """
     This class deals with operations on a single clip such as changing
@@ -10,32 +11,59 @@ class Clip(BaseClip):
 
     @decorators.pre_hooks
     def get(self, clip_id=None):
-        clip = None
+        """
+        Reroute get requests on single clip.
+        :param clip_id: The id for the queried clip.
+        :return:  The requested clip, throwing 404 if none is found
+        """
         # gets the siblings and parent or children of a clip
         if request.url.endswith('/alternatives/'):
-            clips = current_app.get_alternatives(clip_id)
-            for c in clips:
-                c['url'] = url_for('clip', clip_id=c['_id'], _external=True)
-            return jsonify(clips), 300
+            return self.__get_alternatives__(clip_id)
+
         # returns the last added parent-clip
         elif request.url.endswith('/latest/'):
-            clip = current_app.get_latest_clip()
+            return self.__get_latest__()
+
         # returns the spcified clip or a sibling according to the CN
         else:
             preferred_type = None
             if request.accept_mimetypes.best != '*/*':  # Default value
                 # Already sorted by Werkzeug
                 preferred_type = request.accept_mimetypes
-            clip = current_app.get_clip_by_id(clip_id, preferred_type)
+            return self.__get_by_id__(clip_id, preferred_type)
 
+    def __get_by_id__(self, clip_id, preferred_type):
+        """
+        Queries the database for a clip with the specified uuid.
+        :return: Json representation of the clip or None if no clip found
+        """
+        clip = current_app.db.get_clip_by_id(clip_id, preferred_type)
         if clip is None:
             return jsonify(error='No clip with specified id'), 404
         res = make_response(clip.pop('data'), 200)
         self.set_headers(res, clip)
         return res
 
-    def get_alternatives(self, clip_id):
-        pass
+    def __get_alternatives__(self, clip_id):
+        """
+        Gets a Json-Array containg id and mimetype of all related
+        (child, siblings or parent) entries of clip_id
+        :returns: Said array or None, if clip_id not found in db
+        """
+        clips = self.db.get_alternatives(clip_id)
+        clips = list(map(Clip.__add_url__, clips))
+        return jsonify(clips), 300
+
+    def __get_latest__(self):
+        """
+        Returns the last added parent clip
+        """
+        clip = self.db.get_latest_clip()
+        if clip is None:
+            return jsonify(error='No clip with specified id'), 404
+        res = make_response(clip.pop('data'), 200)
+        self.set_headers(res, clip)
+        return res
 
     @decorators.pre_hooks
     def put(self, clip_id=None):
@@ -81,3 +109,8 @@ class Clip(BaseClip):
             return '', 204
         else:
             return jsonify(error='Please use put to update a clip'), 400
+
+    @staticmethod
+    def __add_url__(clip):
+        clip['url'] = url_for('clip', clip_id=clip['_id'], _external=True)
+        return clip

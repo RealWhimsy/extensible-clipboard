@@ -15,7 +15,7 @@ class BaseClip(MethodView):
     """
 
     def __init__(self):
-        self.parser = RequestParser()
+        self.parser = RequestParser(current_app.MAX_CONTENT_LENGTH)
         self.pre_hooks = HookManager()
 
     def _load_pre_hooks(self):

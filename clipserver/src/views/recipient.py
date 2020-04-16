@@ -3,7 +3,8 @@ import re
 import decorators as decorators
 from hooks.hook_manager import HookManager
 from parser import RequestParser
-
+from flask import abort, current_app, jsonify, make_response, request, url_for
+from flask.views import MethodView
 
 
 
@@ -18,7 +19,7 @@ class Recipient(MethodView):
     """
 
     def __init__(self):
-        self.parser = RequestParser()
+        self.parser = RequestParser(current_app.MAX_CONTENT_LENGTH)
         self.pre_hooks = HookManager()
 
     def is_url(self, url):
@@ -47,7 +48,6 @@ class Recipient(MethodView):
                     url,
                     is_hook,
                     data.get('subscribed_types', None))
-            # TODO? clip to clips
             return jsonify(_id=_id,
                            response_url=url_for('clip', _external=True)), 201
         else:

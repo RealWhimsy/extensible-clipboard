@@ -1,12 +1,9 @@
 import re
-
 import decorators as decorators
 from hooks.hook_manager import HookManager
-from parser import RequestParser
-from flask import abort, current_app, jsonify, make_response, request, url_for
+from views.__parser__ import RequestParser
+from flask import current_app, jsonify, request, url_for
 from flask.views import MethodView
-
-
 
 
 class Recipient(MethodView):
@@ -21,13 +18,7 @@ class Recipient(MethodView):
     def __init__(self):
         self.parser = RequestParser(current_app.MAX_CONTENT_LENGTH)
         self.pre_hooks = HookManager()
-
-    def is_url(self, url):
-        """
-        Sanity-check to see if the data sent by the recipient seems to be
-        an URL, might be imporoved
-        """
-        return re.match(r'^http://', url)
+        self.db = current_app.db
 
     @decorators.pre_hooks
     def post(self):
@@ -37,18 +28,26 @@ class Recipient(MethodView):
         """
         if request.headers.get('CONTENT-TYPE') not in 'application/json':
             return jsonify(error='Please send aplication/json'), 415
-
         data = request.get_json()
+
         if 'url' not in data:
             return jsonify(error='No url specified'), 400
         url = data['url']
-        if self.is_url(url):
+
+        if Recipient.__is_valid_url__(url):
             is_hook = 'hooks' in request.url
-            _id = current_app.add_recipient(
-                    url,
-                    is_hook,
-                    data.get('subscribed_types', None))
-            return jsonify(_id=_id,
+            r = self.db.add_recipient(url, is_hook, data.get('subscribed_types', None))
+            # TODO: this is not too clean, should be handled elsewhere (maybe as a callback from db?)
+            current_app._build_recipients()
+            return jsonify(_id=r['_id'],
                            response_url=url_for('clip', _external=True)), 201
         else:
-            return ('Sent value for url was not an acceptable url', 422)
+            return 'Sent value for url was not an acceptable url', 422
+
+    @staticmethod
+    def __is_valid_url__(url):
+        """
+        Sanity-check to see if the data sent by the recipient seems to be
+        an URL, might be imporoved
+        """
+        return re.match(r'^http://', url)

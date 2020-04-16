@@ -113,6 +113,7 @@ class Server(Flask):
             recipient['error_count']
         ))
 
+    # TODO Since this method is part of the save_in_database method, which is used across multiple
     def send_to_clipboards(self, data, force_propagation=False):
         """
         Passes data to the recipient clipboards
@@ -120,6 +121,7 @@ class Server(Flask):
         """
         parent = data.get('parent')
 
+        # Handle child transmitted to
         if parent and self.current_clip != parent:
             # Update was not to current clip
             return
@@ -127,12 +129,14 @@ class Server(Flask):
         for c in self.clipboards:
             if force_propagation or self.last_sender != c['_id']:
                 try:
+                    # TODO: this runs identical to send to hooks
                     send_data = data.get('data')
                     response_url = url_for('child_adder',
                                            clip_id=data['_id'],
                                            _external=True)
                     headers = {'X-C2-response_url': response_url}
                     headers['Content-Type'] = data.get('mimetype')
+                    # TODO: this mapping can also be
                     for key, value in data.items():
                         if key != 'data' and key != 'mimetype':
                             headers['X-C2-{}'.format(key)] = value
@@ -181,7 +185,7 @@ class Server(Flask):
         """
         Gets a clip and sends it to the post hooks
         """
-        clip = self.db.__get_clip_by_id__(clip_id)
+        clip = self.db.get_clip_by_id(clip_id)
         if clip:
             self.send_to_hooks(clip)
 
@@ -234,12 +238,3 @@ class Server(Flask):
 
         return new_clip
 
-    def add_recipient(self, url, is_hook, subscribed_types):
-        """
-        Adds a recipient (webhook or clipboard to the database)
-        with the specified options
-        :return: The UUID of the created recipient as a UUID-string
-        """
-        r = self.db.add_recipient(url, is_hook, subscribed_types)
-        self._build_recipients()
-        return r['_id']

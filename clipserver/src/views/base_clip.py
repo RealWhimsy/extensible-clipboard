@@ -1,6 +1,6 @@
 from exceptions import ParentNotFoundException, SameMimetypeException, GrandchildException
 from hooks.hook_manager import HookManager
-from parser import RequestParser
+from views.__parser__ import RequestParser
 from flask import current_app, jsonify, url_for
 from flask.views import MethodView
 

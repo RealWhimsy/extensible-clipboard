@@ -12,7 +12,7 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 
 from clipboard_handler import ClipboardHandler
-from server import ConnectionHandler, ClipSender
+from networking import ConnectionHandler, ClipSender
 
 """
 This starts the clipboard-server. It acts as a bridge to the OS-clipboard
@@ -95,7 +95,7 @@ class ClipboardServerApp():
         Establishes signal-slot connections
         """
         self.flask_qt.moveToThread(self.server_thread)
-        self.server_thread.started.connect(self.flask_qt.start)
+        self.server_thread.started.connect(self.flask_qt.start_server)
 
         # Kills server with whole app
         self.app.aboutToQuit.connect(self.server_thread.terminate)

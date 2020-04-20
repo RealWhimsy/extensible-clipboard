@@ -2,10 +2,8 @@ from flask import url_for
 import requests
 """
     This class handles emitting clips to clipboards and hooks
-
-    Ideas:
-    - handle current clip by broadcast functions
-    - prebuild response-url in views
+    
+    
 
 """
 
@@ -15,8 +13,6 @@ class ClipEventEmitter:
         self.clipboards = []
         self.post_hooks = []
         self.db = db
-        self.current_clip = None
-
         self.invalidate_listeners()
 
     def invalidate_listeners(self):
@@ -41,7 +37,7 @@ class ClipEventEmitter:
         """
         parent = data.get('parent')
         # Handle child transmitted to
-        if parent and self.current_clip != parent:
+        if parent and self.db.get_latest_clip()['_id'] != parent:
             # Update was not to current clip
             return
         for c in self.clipboards:

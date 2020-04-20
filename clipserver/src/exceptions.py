@@ -12,3 +12,8 @@ class GrandchildException(Exception):
 
 class ClipNotFoundException(Exception):
     pass
+
+
+class NoClipsExistingException(Exception):
+    pass
+

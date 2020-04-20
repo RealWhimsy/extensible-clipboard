@@ -24,7 +24,7 @@ class ChildClip(BaseClip):
             res = make_response(new_item.pop('data'), 201)
             self.set_headers(res, new_item)
             return res
-        except (GrandchildException,
-                ParentNotFoundException,
-                SameMimetypeException) as e:
-            return self.resolve_error(new_item)
+        except GrandchildException:
+            return jsonify(error='Can only create child for original entry'), 422
+        except ParentNotFoundException:
+            return jsonify(error='No parent with specified id'), 412

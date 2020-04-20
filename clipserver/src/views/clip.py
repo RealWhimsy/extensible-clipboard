@@ -1,4 +1,5 @@
 import decorators as decorators
+from exceptions import ClipNotFoundException, NoClipsExistingException
 from views.base_clip import BaseClip
 from flask import abort, current_app, jsonify, make_response, request, url_for
 
@@ -37,8 +38,9 @@ class Clip(BaseClip):
         Queries the database for a clip with the specified uuid.
         :return: Json representation of the clip or None if no clip found
         """
-        clip = current_app.db.get_clip_by_id(clip_id, preferred_type)
-        if clip is None:
+        try:
+            clip = current_app.db.get_clip_by_id(clip_id, preferred_type)
+        except ClipNotFoundException:
             return jsonify(error='No clip with specified id'), 404
         res = make_response(clip.pop('data'), 200)
         self.set_headers(res, clip)
@@ -58,12 +60,13 @@ class Clip(BaseClip):
         """
         Returns the last added parent clip
         """
-        clip = self.db.get_latest_clip()
-        if clip is None:
+        try:
+            clip = self.db.get_latest_clip()
+            res = make_response(clip.pop('data'), 200)
+            self.set_headers(res, clip)
+            return res
+        except NoClipsExistingException:
             return jsonify(error='No clip with specified id'), 404
-        res = make_response(clip.pop('data'), 200)
-        self.set_headers(res, clip)
-        return res
 
     @decorators.pre_hooks
     def put(self, clip_id=None):
@@ -76,15 +79,16 @@ class Clip(BaseClip):
         data = self.parser.get_data_from_request(request)
         if not data:
             return jsonify(error='Could not parse data'), 400
-        clip = current_app.db.update_clip(clip_id, data)
-        if clip is not None:
+
+        try:
+            clip = current_app.db.update_clip(clip_id, data)
             current_app.emitter.send_to_clipboards(clip,
                                                    data.pop('from_hook', False),
                                                    data.pop('sender_id', ''))
             res = make_response(clip.pop('data'), 200)
             self.set_headers(res, clip)
             return res
-        else:
+        except ClipNotFoundException:
             return jsonify(error='No clip with specified id'), 404
 
     @decorators.pre_hooks
@@ -96,11 +100,10 @@ class Clip(BaseClip):
         if clip_id is None:
             return jsonify(
                     error='Please specify an existing object to delete'), 404
-        n_deleted_items = self.db.delete_clip_by_id(clip_id=clip_id)
-
-        if n_deleted_items is not 0:
+        try:
+            self.db.delete_clip_by_id(clip_id=clip_id)
             return jsonify(_id=clip_id), 200
-        else:
+        except ClipNotFoundException:
             return jsonify(error='No clip with specified id'), 404
 
     @decorators.pre_hooks

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 import os
-from exceptions import (GrandchildException, ParentNotFoundException, ClipNotFoundException)
+from exceptions import (GrandchildException, ParentNotFoundException, ClipNotFoundException, NoClipsExistingException)
 from peewee import SqliteDatabase
 from persistence.__models__ import Clip, Recipient, PreferredTypes
 from playhouse.shortcuts import model_to_dict
@@ -203,7 +203,7 @@ class Persistence:
         """
         q = Clip.select().where(Clip.parent.is_null()).order_by(Clip.creation_date.desc())
         if q.count() < 1:
-            raise ClipNotFoundException
+            raise NoClipsExistingException
         else:
             return model_to_dict(q.get())
 

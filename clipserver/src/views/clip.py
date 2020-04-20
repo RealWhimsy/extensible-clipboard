@@ -69,8 +69,6 @@ class Clip(BaseClip):
     def put(self, clip_id=None):
         """
         Updates the clip specified by clip_id
-
-        # TODO refactor
         """
         if clip_id is None:
             return jsonify(
@@ -78,10 +76,11 @@ class Clip(BaseClip):
         data = self.parser.get_data_from_request(request)
         if not data:
             return jsonify(error='Could not parse data'), 400
-        # TODO: save method is problematic since it is doing too much
-        clip = current_app.save_in_database(_id=clip_id,
-                                            data=data,)
+        clip = current_app.db.update_clip(clip_id, data)
         if clip is not None:
+            current_app.emitter.send_to_clipboards(clip,
+                                                   data.pop('from_hook', False),
+                                                   data.pop('sender_id', ''))
             res = make_response(clip.pop('data'), 200)
             self.set_headers(res, clip)
             return res

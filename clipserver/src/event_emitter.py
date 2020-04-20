@@ -1,3 +1,5 @@
+from flask import url_for
+import requests
 """
     This class handles emitting clips to clipboards and hooks
 
@@ -31,10 +33,8 @@ class ClipEventEmitter:
                 self.clipboards.append(r)
             r['error_count'] = 0
 
-    def __build_request__(self, data):
-
     # TODO Since this method is part of the save_in_database method, which is used across multiple
-    def send_to_clipboards(self, data, force_propagation=False):
+    def send_to_clipboards(self, data, force_propagation=False, last_sender=None):
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
@@ -44,29 +44,16 @@ class ClipEventEmitter:
         if parent and self.current_clip != parent:
             # Update was not to current clip
             return
-
         for c in self.clipboards:
-            if force_propagation or self.last_sender != c['_id']:
+            if force_propagation or (last_sender and last_sender != c['_id']):
                 try:
                     # TODO: this runs identical to send to hooks
                     send_data = data.get('data')
-                    # TODO: build this somewhere else
-                    response_url = url_for('child_adder',
-                                           clip_id=data['_id'],
-                                           _external=True)
-                    print(response_url)
-                    headers = {'X-C2-response_url': response_url}
-                    headers['Content-Type'] = data.get('mimetype')
-                    # TODO: this mapping can also be
-                    for key, value in data.items():
-                        if key != 'data' and key != 'mimetype':
-                            headers['X-C2-{}'.format(key)] = value
-
+                    headers = self.build_headers(data['_id'], data)
                     requests.post(c['url'],
                                   data=send_data,
                                   headers=headers,
                                   timeout=5)
-
                 except Exception as e:
                     print(e)
                     self._send_failed(c)
@@ -80,20 +67,13 @@ class ClipEventEmitter:
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
         _id = data.get('parent', data['_id'])
-
         for c in self.post_hooks:
             types = c['preferred_types']
             if data['mimetype'] in types or types == ['*/*']:
                 try:
                     send_data = data.pop('data')
                     # URL used for adding a child to the entry
-                    response_url = url_for('child_adder',
-                                           clip_id=_id,
-                                           _external=True)
-                    headers = {'X-C2-response_url': response_url}
-                    headers['Content-Type'] = data.pop('mimetype')
-                    for key, value in data.items():
-                        headers['X-C2-{}'.format(key)] = value
+                    headers = self.build_headers(_id, data)
                     requests.post(c['url'],
                                   data=send_data,
                                   headers=headers,
@@ -114,3 +94,13 @@ class ClipEventEmitter:
             recipient['url'],
             recipient['error_count']
         ))
+
+    def build_headers(self, data, id):
+        response_url = url_for('child_adder',
+                               clip_id=id,
+                               _external=True)
+        headers = {'X-C2-response_url': response_url}
+        headers['Content-Type'] = data.pop('mimetype')
+        for key, value in data.items():
+            headers['X-C2-{}'.format(key)] = value
+        return headers

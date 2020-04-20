@@ -22,7 +22,7 @@ class BaseClip(MethodView):
     def _load_pre_hooks(self):
         return []
 
-    def check_for_errors(self, new_item):
+    def resolve_error(self, new_item):
         """
         Checks if any errors occured during adding of child and
         returns directly aborts the request with an error code

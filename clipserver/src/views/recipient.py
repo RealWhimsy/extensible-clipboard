@@ -37,8 +37,6 @@ class Recipient(MethodView):
         if Recipient.__is_valid_url__(url):
             is_hook = 'hooks' in request.url
             r = self.db.add_recipient(url, is_hook, data.get('subscribed_types', None))
-            # TODO: this is not too clean, should be handled elsewhere (maybe as a callback from db?)
-            current_app._build_recipients()
             return jsonify(_id=r['_id'],
                            response_url=url_for('clip', _external=True)), 201
         else:

@@ -111,7 +111,8 @@ class Clip(BaseClip):
         :return:
         """
         if request.url.endswith('/hooks/call'):
-            current_app.call_hooks(clip_id)
+            clip = current_app.db.get_clip_by_id(clip_id)
+            current_app.emitter.send_to_hooks(clip)
             return '', 204
         else:
             return jsonify(error='Please use put to update a clip'), 400

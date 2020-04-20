@@ -26,14 +26,8 @@ class Server(Flask):
 
 
         # TODO: these instance variables belong somewhere else
-        self.clipboards = []
-        self.post_hooks = []
-        self.current_clip = ''
-        self.last_sender = ''
-
-        self._build_recipients()
+        # self.current_clip = ''
         self.config['MAX_CONTENT_LENGTH'] = self.MAX_CONTENT_LENGTH
-
         self.__init_routing()
 
 
@@ -84,19 +78,3 @@ class Server(Flask):
         """
         self.run(debug=False, use_reloader=False,
                  host='0.0.0.0', port=self.port)
-
-    # TODO: take care of this
-    def _build_recipients(self):
-        self.emitter.invalidate_listeners()
-
-    def call_hooks(self, clip_id):
-        """
-        Gets a clip and sends it to the post hooks
-        TODO:
-        """
-        clip = self.db.get_clip_by_id(clip_id)
-        #if clip:
-        #    self.send_to_hooks(clip)
-
-
-

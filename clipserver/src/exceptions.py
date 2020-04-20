@@ -8,3 +8,7 @@ class SameMimetypeException(Exception):
 
 class GrandchildException(Exception):
     pass
+
+
+class ClipNotFoundException(Exception):
+    pass

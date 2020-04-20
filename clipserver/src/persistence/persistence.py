@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 import os
-from exceptions import (GrandchildException, ParentNotFoundException)
+from exceptions import (GrandchildException, ParentNotFoundException, ClipNotFoundException)
 from peewee import SqliteDatabase
 from persistence.__models__ import Clip, Recipient, PreferredTypes
 from playhouse.shortcuts import model_to_dict
@@ -13,6 +13,7 @@ database = SqliteDatabase(path)
 # SQLite peewee Implementation of database
 #
 ################################################################################################
+
 
 class Persistence:
 
@@ -75,8 +76,6 @@ class Persistence:
     def __get_uuidv4__(self):
         return (uuid4().__str__())
 
-
-
     def add_recipient(self, url, is_hook, subscribed_types):
         """
         Adds a recipient to the database. If there is already an recipient
@@ -104,11 +103,11 @@ class Persistence:
             return model_to_dict(Recipient.get(Recipient._id==id))
 
     def get_recipients(self):
-        recipients = Recipient.select().execute()
-        results = []
         """
         Returns a list of all saved recipients represented as dicts
         """
+        recipients = Recipient.select().execute()
+        results = []
         for rec in recipients:
             current_recipient = model_to_dict(rec, backrefs=True)
             # TODO: refactor this to avoid cumbersome mapping
@@ -116,14 +115,25 @@ class Persistence:
             results.append(current_recipient)
         return results
 
-    def save_clip(self, data):
-        id = self.__get_uuidv4__()
-        if data.get('parent') is not None:
-            if Clip.select().where(Clip._id == data['parent']).count() < 1:
-                raise ParentNotFoundException
-            elif model_to_dict(Clip.select().where(Clip._id == data['parent']).get())['parent'] is not None:
-                raise GrandchildException
+    def create_child_clip(self, data):
+        """
+        Create a child clip.
+        :param data:
+        :return:
+        """
+        if Clip.select().where(Clip._id == data['parent']).count() < 1:
+            raise ParentNotFoundException
+        elif model_to_dict(Clip.select().where(Clip._id == data['parent']).get())['parent'] is not None:
+            raise GrandchildException
+        return self.create_clip(data)
 
+    def create_clip(self, data):
+        """
+        Create a new clip.
+        :param data:
+        :return:
+        """
+        id = self.__get_uuidv4__()
         clip = Clip.create(
             _id=id,
             mimetype=data['mimetype'],
@@ -138,10 +148,16 @@ class Persistence:
         return model_to_dict(Clip.get(Clip._id==id))
 
     def get_clip_by_id(self, clip_id, preferred_types=None):
+        """
+        Get clip with a certain id or a better fitting alternative mimetype for it.
+        :param clip_id:
+        :param preferred_types:
+        :return:
+        """
         q = Clip.select().where(Clip._id == clip_id)
         clip = None
         if(q.count() < 1):
-            return clip
+            raise ClipNotFoundException
         else:
             clip = model_to_dict(q.get())
         if preferred_types and clip['mimetype'] is not preferred_types[0]:
@@ -149,8 +165,12 @@ class Persistence:
         return clip
 
     def get_all_clips(self):
+        """
+        Get overview on all clips
+        :return:
+        """
         # Exclude 'data' from fetch (would be too large)
-        clipModels = Clip.select(
+        clips_cursor = Clip.select(
             Clip._id,
             Clip.mimetype,
             Clip.creation_date,
@@ -158,25 +178,44 @@ class Persistence:
             Clip.filename,
             Clip.parent
         ).execute()
-        results = []
-        for model in clipModels:
-            results.append(model_to_dict(model))
+        results = list(map(lambda item: model_to_dict(item), clips_cursor))
         return results
 
     def delete_all_clips(self):
+        """
+        Delete all clips from database (DANGEROUS, protected through pre_hooks)
+        :return:
+        """
         return Clip.delete().execute()
 
     def delete_clips_before(self, date):
+        """
+        Delete all clips posted earlier than date.
+        :param date:
+        :return:
+        """
         return Clip.delete().where(Clip.creation_date < date).execute()
 
     def get_latest_clip(self):
-        q = Clip.select().order_by(Clip.creation_date.desc())
-        if q.count() > 0:
-            return model_to_dict(q.get())
+        """
+        Fetch the newest parent clip.
+        :return:
+        """
+        q = Clip.select().where(Clip.parent.is_null()).order_by(Clip.creation_date.desc())
+        if q.count() < 1:
+            raise ClipNotFoundException
         else:
-            return None
+            return model_to_dict(q.get())
 
     def delete_clip_by_id(self, clip_id):
+        """
+        Delete clip with specified ID
+        :param clip_id:
+        :return:
+        """
+        q = Clip.select().where(Clip._id == clip_id)
+        if q.count() < 1:
+            raise ClipNotFoundException
         return Clip.delete().where((Clip._id==clip_id) | (Clip.parent==clip_id)).execute()
 
     def get_alternatives(self, clip_id):
@@ -186,30 +225,32 @@ class Persistence:
         """
         q = Clip.select().where(Clip._id == clip_id)
         if q.count() < 1:
-            return []
+            raise ClipNotFoundException
         else:
-            clips = []
-            clipsCursor = Clip.select(
+            clips_cursor = Clip.select(
                 Clip._id,
                 Clip.mimetype,
                 Clip.creation_date,
                 Clip.src_app,
                 Clip.filename,
                 Clip.parent
-            ).where((Clip._id==clip_id) | (Clip.parent==clip_id))\
-            .execute()
-            for clipItem in clipsCursor:
-                clips.append(model_to_dict(clipItem))
+            ).where((Clip._id==clip_id) | (Clip.parent==clip_id)).execute()
+            clips = list(map(lambda item: model_to_dict(item), clips_cursor))
             return clips
 
     def update_clip(self, object_id, data):
+        """
+        Update clip with a certain ID with input data.
+        :param object_id:
+        :param data:
+        :return:
+        """
         q = Clip.select().where(Clip._id == object_id)
         if q.count() < 1:
-            return None
+            raise ClipNotFoundException
         else:
             clip = q.get()
             clip.data = data['data']
             clip.last_modified = str(datetime.now())
             clip.save()
             return model_to_dict(Clip.get_by_id(object_id))
-

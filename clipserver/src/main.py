@@ -1,5 +1,5 @@
 import os
-from database import ClipSqlPeeweeDatabase
+from persistence.persistence import Persistence
 from server import Server
 from configparser import ConfigParser
 from argparse import ArgumentParser
@@ -20,6 +20,6 @@ if __name__ == "__main__":
                     default=config['networking']['port'])
     args, unknown = argparser.parse_known_args()
 
-    db = ClipSqlPeeweeDatabase()
+    db = Persistence()
     flask_server = Server(__name__, db, args.port)
     flask_server.start()

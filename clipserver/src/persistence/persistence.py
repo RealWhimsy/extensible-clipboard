@@ -1,45 +1,12 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 import os
-
 from exceptions import (GrandchildException, ParentNotFoundException)
-
-from peewee import Model, DateField, PrimaryKeyField, ForeignKeyField, CharField, BlobField, IntegerField, SqliteDatabase, BooleanField
+from peewee import SqliteDatabase
+from persistence.__models__ import Clip, Recipient, PreferredTypes
 from playhouse.shortcuts import model_to_dict
 path = os.path.expanduser('~/clip_collection.db')
 database = SqliteDatabase(path)
-
-
-class BaseModel(Model):
-    class Meta:
-        database = database
-
-
-class Clip(BaseModel):
-    _id = CharField(primary_key=True)
-    creation_date = CharField()
-    last_modified = CharField()
-    mimetype = CharField()
-    data = BlobField()
-    src_app = CharField(null=True)
-    filename = CharField(null=True)
-    #parent = ForeignKeyField('self', backref="children", null=True)
-    parent = CharField(null=True)
-
-
-
-
-class Clipboard(BaseModel):
-    _id = CharField(primary_key=True)
-    url = CharField()
-    is_hook = BooleanField()
-
-
-class PreferredTypes(BaseModel):
-    parent = ForeignKeyField(Clipboard, backref="preferred_types")
-    type = CharField()
-
-
 
 ################################################################################################
 #
@@ -47,10 +14,10 @@ class PreferredTypes(BaseModel):
 #
 ################################################################################################
 
-class ClipSqlPeeweeDatabase:
+class Persistence:
 
     def __init__(self):
-        database.create_tables([Clip, Clipboard, PreferredTypes])
+        database.create_tables([Clip, Recipient, PreferredTypes])
 
     def _get_parent(self, child):
         if(child['parent'] is None):
@@ -123,21 +90,21 @@ class ClipSqlPeeweeDatabase:
                                  Will be ignored for clipboards
         """
 
-        clipboards_with_url = Clipboard.select().where(Clipboard.url==url)
+        clipboards_with_url = Recipient.select().where(Recipient.url==url)
         if clipboards_with_url.count() > 0:
             return model_to_dict(clipboards_with_url.get())
         else:
             id = self.__get_uuidv4__()
-            clipboard = Clipboard.create(_id=id,url=url,is_hook=is_hook)
+            clipboard = Recipient.create(_id=id,url=url,is_hook=is_hook)
             clipboard.save()
             if subscribed_types:
                 for type in subscribed_types:
                     newItem = PreferredTypes.create(parent=id, type=type)
                     newItem.save()
-            return model_to_dict(Clipboard.get(Clipboard._id==id))
+            return model_to_dict(Recipient.get(Recipient._id==id))
 
     def get_recipients(self):
-        recipients = Clipboard.select().execute()
+        recipients = Recipient.select().execute()
         results = []
         """
         Returns a list of all saved recipients represented as dicts

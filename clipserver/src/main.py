@@ -1,8 +1,9 @@
 import os
-from persistence.persistence import Persistence
+import sys
 from server import Server
 from configparser import ConfigParser
 from argparse import ArgumentParser
+from persistence.persistence import Persistence
 
 """
 This class is responsible for starting the whole application.

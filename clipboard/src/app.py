@@ -4,7 +4,8 @@ import signal
 import sys
 from urllib.parse import unquote
 from flask import Flask
-from networking import ConnectionHandler, ClipSender
+from networking.server import ConnectionHandler
+from networking.emitter import ClipEmitter
 from clipboard_handler import ClipboardHandler
 import signal
 from PyQt5.QtWidgets import QApplication
@@ -100,9 +101,8 @@ class ClipboardServerApp(QApplication):
                 domain)
         self.server_thread = QtCore.QThread()
 
-
         # Connection to system clipboard
         self.clh = ClipboardHandler(self, is_syncing)
-        self.clip_sender = ClipSender(
+        self.clip_sender = ClipEmitter(
                 clipserver_address,
                 self.on_current_clip_id_get)

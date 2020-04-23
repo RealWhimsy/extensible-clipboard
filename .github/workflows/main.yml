@@ -20,4 +20,4 @@ jobs:
 
     - name: Install and run
       run:
-        make; make run;
+        make

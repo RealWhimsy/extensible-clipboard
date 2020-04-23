@@ -81,8 +81,8 @@ class Clip(BaseClip):
             return jsonify(error='Could not parse data'), 400
 
         try:
-            clip = current_app.db.update_clip(clip_id, data)
-            current_app.emitter.send_to_clipboards(clip,
+            clip = self.db.update_clip(clip_id, data)
+            self.emitter.send_to_clipboards(clip,
                                                    data.pop('from_hook', False),
                                                    data.pop('sender_id', ''))
             res = make_response(clip.pop('data'), 200)
@@ -114,8 +114,8 @@ class Clip(BaseClip):
         :return:
         """
         if request.url.endswith('/hooks/call'):
-            clip = current_app.db.get_clip_by_id(clip_id)
-            current_app.emitter.send_to_hooks(clip)
+            clip = self.db.get_clip_by_id(clip_id)
+            self.emitter.send_to_hooks(clip)
             return '', 204
         else:
             return jsonify(error='Please use put to update a clip'), 400

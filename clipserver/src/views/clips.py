@@ -21,8 +21,8 @@ class Clips(BaseClip):
         elif 'parent' in data:
             return jsonify(error='Please send to url of intended parent'), 422
 
-        new_item = current_app.db.create_clip(data=data)
-        current_app.emitter.send_to_clipboards(new_item,
+        new_item = self.db.create_clip(data=data)
+        self.emitter.send_to_clipboards(new_item,
                                                data.pop('from_hook', False),
                                                data.pop('sender_id', ''))
         res = make_response(new_item.pop('data'), 201)

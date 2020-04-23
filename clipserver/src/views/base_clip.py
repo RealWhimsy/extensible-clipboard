@@ -18,6 +18,7 @@ class BaseClip(MethodView):
         self.parser = RequestParser(current_app.MAX_CONTENT_LENGTH)
         self.pre_hooks = HookManager()
         self.db = current_app.db
+        self.emitter = current_app.emitter
 
     def _load_pre_hooks(self):
         return []

@@ -20,4 +20,4 @@ jobs:
 
     - name: Install and run
       run:
-        make build | make test
+        make build | make run | make test

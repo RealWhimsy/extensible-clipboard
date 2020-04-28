@@ -1,9 +1,8 @@
 import requests
 from requests import exceptions as req_exceptions
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
-from utils import NetworkUtil
+from utils import network_util
 from flask import request
-
 
 class ConnectionHandler(QObject):
     """
@@ -23,7 +22,7 @@ class ConnectionHandler(QObject):
             self.domain = domain + ':' + str(self.port) + '/'
         # Request own ip through external service for more convenience
         elif domain == 'public':
-            self.domain = NetworkUtil.get_public_ipv4(self.port)
+            self.domain = network_util.get_public_ipv4(self.port)
         else:
             self.domain = domain + ':' + str(self.port) + '/'
 

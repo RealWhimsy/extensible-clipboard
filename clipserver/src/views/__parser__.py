@@ -1,9 +1,6 @@
 import re
 import requests
 
-from networking import FlaskServer as server
-
-
 class RequestParser():
     """
     This class parses incoming requests and builds a clip object from them.
@@ -32,7 +29,7 @@ class RequestParser():
         """
         r = requests.head(url)
         cl = r.headers.get('content-length')
-        if cl and int(cl) <= server.MAX_CONTENT_LENGTH:
+        if cl and int(cl) <= self.max_content_length:
             return False
         else:
             return True
@@ -73,7 +70,7 @@ class RequestParser():
         except Exception as e:
             print('Error during download')
             return None
-        if int(r.headers.get('content-length')) >= server.MAX_CONTENT_LENGTH:
+        if int(r.headers.get('content-length')) >= self.max_content_length:
             # HEAD to url war not indicating large file
             return None
         # Creates file from response
@@ -122,5 +119,6 @@ class RequestParser():
                 data[h[5:]] = request.headers[h]
         return data
 
-    def __init__(self):
+    def __init__(self, max_content_length):
         self.filename_pattern = re.compile('^.*\..*$')
+        self.max_content_length = max_content_length

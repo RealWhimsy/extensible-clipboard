@@ -47,35 +47,3 @@ The clip/backend server will only accept requests from trusted clipboards. Trust
 can be defined in ExtensibleClipboard/config/trusted-clients-config.json: Simply add the
 IPv4 address of your clipboard device to the list to allow access to the clipboard.
 
-### System
-You can adapt extensible clipboard to your needs and workflows by changing the config files 
-or passing command line arguments. The following commands will demonstrate some possible 
-use cases, that we have encountered
-
-#### Full package
-For deploying the complete system with server and clipboard, simply run:
-
-    # Start extensible clipboard full environment
-    cd ./servers
-    'target/ExtensibleClipboard/ExtensibleClipboard'
-
-#### Server only
-For only running a server, enter:
-
-    # Start extensible clipboard server
-    cd ./servers
-    'target/ExtensibleClipboard/ExtensibleClipboard' -nocbs
-
-This may come in handy, if you want to offer a centralized, remote server.
-
-#### Clipboard only
-For only running the clipboard, enter:
-
-    # Start extensible clipboard, clipboard-only
-    cd ./servers
-    'target/ExtensibleClipboard/ExtensibleClipboard' -nocs -cbsdomain=http://mydomain -cbsport=12345 -cshost=http://myserverdomain:12345/
-
-This configuration is suitable for setups, where you might connect your local 
-clipboard to a remote server.
-
-

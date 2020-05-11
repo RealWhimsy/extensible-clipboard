@@ -7,12 +7,13 @@ class Clips(BaseClip):
     Class responsible for handling a set of Clips
     """
 
-    @decorators.pre_hooks
+    @decorators.pre_commit_hooks
     def post(self):
         """
         Create a new clip
-        # TODO: refactor save_in_database
         """
+
+
         data = self.parser.get_data_from_request(request)
         if not data:
             return jsonify(error='Unable to parse data'), 400
@@ -29,7 +30,7 @@ class Clips(BaseClip):
         self.set_headers(res, new_item)
         return res
 
-    @decorators.pre_hooks
+    @decorators.pre_commit_hooks
     def get(self):
         """
         Get all clips from the db. This will not get their data to reduce
@@ -43,7 +44,7 @@ class Clips(BaseClip):
         else:
             return jsonify(clips), 200
 
-    @decorators.pre_hooks
+    @decorators.pre_commit_hooks
     def delete(self):
         """
         Remove all clips from database, or by option just the ones older than a certain date.

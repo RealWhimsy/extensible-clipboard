@@ -12,8 +12,6 @@ class Clips(BaseClip):
         """
         Create a new clip
         """
-
-
         data = self.parser.get_data_from_request(request)
         if not data:
             return jsonify(error='Unable to parse data'), 400
@@ -21,7 +19,6 @@ class Clips(BaseClip):
             return jsonify(error=data['error']), 413
         elif 'parent' in data:
             return jsonify(error='Please send to url of intended parent'), 422
-
         new_item = self.db.create_clip(data=data)
         self.emitter.send_to_clipboards(new_item,
                                                data.pop('from_hook', False),

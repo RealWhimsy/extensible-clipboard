@@ -10,7 +10,7 @@ class Clip(BaseClip):
     its contents or getting alternative representations of the same data.
     """
 
-    @decorators.pre_commit_hooks
+    @decorators.pre_access_hooks
     def get(self, clip_id=None):
         """
         Reroute get requests on single clip.
@@ -68,7 +68,7 @@ class Clip(BaseClip):
         except NoClipsExistingException:
             return jsonify(error='No clip with specified id'), 404
 
-    @decorators.pre_commit_hooks
+    @decorators.pre_access_hooks
     def put(self, clip_id=None):
         """
         Updates the clip specified by clip_id
@@ -91,7 +91,7 @@ class Clip(BaseClip):
         except ClipNotFoundException:
             return jsonify(error='No clip with specified id'), 404
 
-    @decorators.pre_commit_hooks
+    @decorators.pre_access_hooks
     def delete(self, clip_id=None):
         """
         Deletes a clip from the collection. If a parent is deleted, this will also delete its children.
@@ -106,7 +106,7 @@ class Clip(BaseClip):
         except ClipNotFoundException:
             return jsonify(error='No clip with specified id'), 404
 
-    @decorators.pre_commit_hooks
+    @decorators.pre_access_hooks
     def post(self, clip_id=None):
         """
         TODO: rethink, whether this makes sense and is necessary

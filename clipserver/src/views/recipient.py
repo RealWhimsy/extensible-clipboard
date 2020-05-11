@@ -17,10 +17,10 @@ class Recipient(MethodView):
 
     def __init__(self):
         self.parser = RequestParser(current_app.MAX_CONTENT_LENGTH)
-        self.pre_hooks = HookManager()
+        self.hook_manager = HookManager()
         self.db = current_app.db
 
-    @decorators.pre_hooks
+    @decorators.pre_commit_hooks
     def post(self):
         """
         Adds another recipient. Depending on the URL, the request was sent

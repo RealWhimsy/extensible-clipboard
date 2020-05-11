@@ -9,7 +9,7 @@ class ChildClip(BaseClip):
     Introduced to simplify the flow of the application.
     """
 
-    @decorators.pre_hooks
+    @decorators.pre_commit_hooks
     def post(self, clip_id=None):
         data = self.parser.get_data_from_request(request)
         if not data:

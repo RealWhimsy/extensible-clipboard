@@ -2,6 +2,7 @@ from importlib import machinery
 from os import listdir
 from hooks.basehook import BaseHook
 from hooks.pre_commit.baseprecommithook import BasePreCommitHook
+from hooks.pre_access.basepreaccesshook import BasePreAccessHook
 
 
 class HookManager:
@@ -39,6 +40,13 @@ class HookManager:
                 return False
         return True
 
+    def trigger_preaccess(self, request):
+        for h in self.pre_access_hooks:
+            if not h.do_work(request):
+                return False
+        return True
+
     def __init__(self):
         self.hooks = []
+        self.pre_access_hooks = self._load_hooks('./hooks/pre_access', 'preaccesshook', BasePreAccessHook)
         self.pre_commit_hooks = self._load_hooks('./hooks/pre_commit', 'precommithook', BasePreCommitHook)

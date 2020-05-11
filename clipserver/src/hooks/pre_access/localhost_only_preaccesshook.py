@@ -1,6 +1,7 @@
-from hooks.basehook import BaseHook
+from hooks.pre_access.basepreaccesshook import BasePreAccessHook
 
-class LocalhostOnlyHook(BaseHook):
+
+class LocalhostOnlyHook(BasePreAccessHook):
     """
     Hook for restricting access to the local machine
     """

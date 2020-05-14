@@ -19,8 +19,9 @@ class Clips(BaseClip):
         elif 'error' in data:
             return jsonify(error=data['error']), 413
         elif 'parent' in data:
-            return jsonify(error='Please send to url of intended parent'), 422
-        new_item = self.db.create_clip(data=data)
+            return jsonify(error='Please send to url of intended parent'), 42
+
+        new_item = (decorators.post_access_hooks(self.db.create_clip, self))(data=data)
         self.emitter.send_to_clipboards(new_item,
                                                data.pop('from_hook', False),
                                                data.pop('sender_id', ''))

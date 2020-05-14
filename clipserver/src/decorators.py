@@ -17,3 +17,12 @@ def pre_access_hooks(func):
             return '', 403
         return func(*args, **kwargs)
     return wrapper
+
+
+def post_access_hooks(func, self):
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        result = self.hook_manager.trigger_postcommit(result)
+        return result
+    return wrapper
+

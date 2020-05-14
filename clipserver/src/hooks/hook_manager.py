@@ -3,7 +3,7 @@ from os import listdir
 from hooks.basehook import BaseHook
 from hooks.pre_commit.baseprecommithook import BasePreCommitHook
 from hooks.pre_access.basepreaccesshook import BasePreAccessHook
-
+from hooks.post_commit.basepostcommithook import BasePostCommitHook
 
 class HookManager:
 
@@ -46,7 +46,15 @@ class HookManager:
                 return False
         return True
 
+    def trigger_postcommit(self, data):
+        result = data
+        for h in self.post_commit_hooks:
+            result = h.do_work(result)
+        return result
+
+
     def __init__(self):
         self.hooks = []
         self.pre_access_hooks = self._load_hooks('./hooks/pre_access', 'preaccesshook', BasePreAccessHook)
         self.pre_commit_hooks = self._load_hooks('./hooks/pre_commit', 'precommithook', BasePreCommitHook)
+        self.post_commit_hooks = self._load_hooks('./hooks/post_commit', 'postcommithook', BasePostCommitHook)

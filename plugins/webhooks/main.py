@@ -4,7 +4,7 @@ import sys
 
 from flask import Flask
 
-from server import ConnectionHandler
+from networking import ConnectionHandler
 
 """
 A webhook is a program that registers itself to teh remote clip-server.

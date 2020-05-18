@@ -82,9 +82,9 @@ class Clip(BaseClip):
 
         try:
             clip = self.db.update_clip(clip_id, data)
-            self.emitter.send_to_clipboards(clip,
-                                                   data.pop('from_hook', False),
-                                                   data.pop('sender_id', ''))
+            self.emitter.send_to_recipients(clip,
+                                            data.pop('from_hook', False),
+                                            data.pop('sender_id', ''))
             res = make_response(clip.pop('data'), 200)
             self.set_headers(res, clip)
             return res

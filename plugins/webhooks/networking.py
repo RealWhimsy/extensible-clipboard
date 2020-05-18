@@ -23,6 +23,7 @@ could harm the performance of the whole system if done synchronous.
 class HookWorker():
 
     def do_work(self, data, mimetype):
+        print(data)
         """
         Does some processing on the data and returns a dict consisting of
         the new mimetype and the new data. None if any error occurred
@@ -57,10 +58,9 @@ class ConnectionHandler():
             return self.handle_new_data(request)
 
     def _die(self, message):
-        print(message)
         sys.exit(1)
 
-    def start_server(self):
+    def start(self):
         """
         Starts flask on specified port
         """

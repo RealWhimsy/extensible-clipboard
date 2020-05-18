@@ -11,7 +11,8 @@ class ClipEventEmitter:
 
     def __init__(self, db):
         self.clipboards = []
-        self.post_hooks = []
+        self.webhooks = []
+        self.recipients = []
         self.db = db
         self.invalidate_listeners()
 
@@ -20,30 +21,30 @@ class ClipEventEmitter:
         Refreshes the list of clipboards and hooks
         """
         result = self.db.get_recipients() or []
-        self.post_hooks = []
+        self.webhooks = []
         self.clipboards = []
         for r in result:
             if r['is_hook']:
-                self.post_hooks.append(r)
+                self.webhooks.append(r)
             else:
                 self.clipboards.append(r)
             r['error_count'] = 0
+        self.recipients = self.clipboards + self.webhooks
 
-    # TODO Since this method is part of the save_in_database method, which is used across multiple
-    def send_to_clipboards(self, data, clipboards=None, force_propagation=False, last_sender=None):
+
+    def send_to_recipients(self, data, recipients=None, force_propagation=False, last_sender=None):
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
         """
-        if clipboards is None:
-            clipboards = self.clipboards
-        print(clipboards)
+        if recipients is None:
+            recipients = self.recipients
         parent = data.get('parent')
         # Handle child transmitted to
         if parent and self.db.get_latest_clip()['_id'] != parent:
             # Update was not to current clip
             return
-        for c in clipboards:
+        for c in recipients:
             if force_propagation or (last_sender and last_sender != c['_id']):
                 try:
                     # TODO: this runs identical to send to hooks
@@ -66,7 +67,7 @@ class ClipEventEmitter:
         self.native_hooks.call_hooks(data, self.db.save_clip)
         """
         _id = data.get('parent', data['_id'])
-        for c in self.post_hooks:
+        for c in self.webhooks:
             types = c['preferred_types']
             if data['mimetype'] in types or types == ['*/*']:
                 try:

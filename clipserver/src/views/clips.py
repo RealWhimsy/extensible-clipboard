@@ -10,6 +10,7 @@ class Clips(BaseClip):
 
     @decorators.pre_access_hooks
     @decorators.pre_commit_hooks
+    @decorators.post_access_hooks
     def post(self):
         """
         Create a new clip

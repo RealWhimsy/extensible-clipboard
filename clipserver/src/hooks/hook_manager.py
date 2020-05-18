@@ -6,7 +6,7 @@ from hooks.pre_access.basepreaccesshook import BasePreAccessHook
 from hooks.post_commit.basepostcommithook import BasePostCommitHook
 from hooks.pre_notify.baseprenotifyhook import BasePrenotifyHook
 from hooks.post_notify.basepostnotifyhook import BasePostnotifyHook
-
+from hooks.post_access.basepostaccesshook import BasePostAccessHook
 
 class HookManager:
 
@@ -47,6 +47,12 @@ class HookManager:
                 return False
         return True
 
+
+    def trigger_postaccess(self, response):
+        for h in self.post_access_hooks:
+            h.do_work(response)
+        return
+
     def trigger_postcommit(self, data):
         result = data
         for h in self.post_commit_hooks:
@@ -70,6 +76,7 @@ class HookManager:
     def __init__(self):
         self.hooks = []
         self.pre_access_hooks = self._load_hooks('./hooks/pre_access', 'preaccesshook', BasePreAccessHook)
+        self.post_access_hooks = self._load_hooks('./hooks/post_access', 'postaccesshook', BasePostAccessHook)
         self.pre_commit_hooks = self._load_hooks('./hooks/pre_commit', 'precommithook', BasePreCommitHook)
         self.post_commit_hooks = self._load_hooks('./hooks/post_commit', 'postcommithook', BasePostCommitHook)
         self.pre_notify_hooks = self._load_hooks('./hooks/pre_notify', 'prenotifyhook', BasePrenotifyHook)

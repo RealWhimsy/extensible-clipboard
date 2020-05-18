@@ -19,6 +19,14 @@ def pre_access_hooks(func):
     return wrapper
 
 
+def post_access_hooks(func):
+    def wrapper(*args, **kwargs):
+        response = func(*args, **kwargs)
+        args[0].hook_manager.trigger_postaccess(response)
+        return response
+    return wrapper
+
+
 def post_commit_hooks(func, self):
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)

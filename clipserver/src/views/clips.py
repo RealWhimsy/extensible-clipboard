@@ -2,6 +2,7 @@ import decorators as decorators
 from views.base_clip import BaseClip
 from flask import abort, current_app, jsonify, make_response, request, url_for
 
+
 class Clips(BaseClip):
     """
     Class responsible for handling a set of Clips
@@ -23,10 +24,13 @@ class Clips(BaseClip):
 
         new_item = (decorators.post_commit_hooks(self.db.create_clip, self))(data=data)
 
-        decorators.pre_notify_hooks(self.emitter.send_to_clipboards, self.hook_manager)(new_item,
-                                               data.pop('from_hook', False),
-                                               data.pop('sender_id', ''),
-                                                self.emitter.clipboards)
+        decorators.post_notify_hooks(
+            decorators.pre_notify_hooks(self.emitter.send_to_clipboards, self.hook_manager),
+            self.hook_manager
+        )(new_item,
+           data.pop('from_hook', False),
+           data.pop('sender_id', ''),
+            self.emitter.clipboards)
 
         res = make_response(new_item.pop('data'), 201)
         self.set_headers(res, new_item)

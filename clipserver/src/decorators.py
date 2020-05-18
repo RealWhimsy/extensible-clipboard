@@ -26,19 +26,21 @@ def _post_access_hooks(func):
         args[0].hook_manager.trigger_postaccess(response)
         return response
     return wrapper
+#
+#
 
 
 def commit_hooks(func):
     def wrapper(*args, **kwargs):
-        return pre_commit_hooks(
-            post_commit_hooks(
+        return _pre_commit_hooks(
+            _post_commit_hooks(
                 func
             )
         )(*args, **kwargs)
     return wrapper
 
 
-def pre_commit_hooks(func):
+def _pre_commit_hooks(func):
     def wrapper(*args, **kwargs):
         # Pass request to hooks and get their 'consent'
         if not args[0].hook_manager.trigger_precommit(request):
@@ -47,24 +49,38 @@ def pre_commit_hooks(func):
     return wrapper
 
 
-def post_commit_hooks(func):
+def _post_commit_hooks(func):
     def wrapper(*args, **kwargs):
         result = func(**kwargs)
         result = args[0].hook_manager.trigger_postcommit(result)
         return result
     return wrapper
+#
+#
 
+# TODO: continue here
 
-def pre_notify_hooks(func, hook_manager):
+def notify_hooks(func):
     def wrapper(*args, **kwargs):
-        args = hook_manager.trigger_prenotify(args[0], args[1], args[2], args[3])
-        return func(args[0], args[3])
+        return pre_notify_hooks(
+            post_notify_hooks(
+                func
+            )
+        )(*args, **kwargs)
     return wrapper
 
 
-def post_notify_hooks(func, hook_manager):
+def pre_notify_hooks(func):
     def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        hook_manager.trigger_postnotify(args[0], args[1], args[2], args[3])
+        nargs = args[0].hook_manager.trigger_prenotify(args[1], args[2], args[3], args[3])
+        print(nargs)
+        return func(args[0], *nargs, **kwargs)
+    return wrapper
+
+
+def post_notify_hooks(func):
+    def wrapper(*args, **kwargs):
+        result = func(args[1], args[4])
+        args[0].hook_manager.trigger_postnotify(args[1], args[2], args[3], args[4])
         return result
     return wrapper

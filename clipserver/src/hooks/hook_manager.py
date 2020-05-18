@@ -60,6 +60,8 @@ class HookManager:
         return result
 
     def trigger_prenotify(self, item, from_hook, sender_id, recipients, hooks=None):
+        print("REC")
+        print(recipients)
         if hooks is None:
             return self.trigger_prenotify(item, from_hook, sender_id, recipients, self.pre_notify_hooks)
         elif len(hooks) > 0:

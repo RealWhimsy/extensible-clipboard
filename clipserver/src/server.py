@@ -57,9 +57,6 @@ class Server(Flask):
                                        + 'alternatives/',
                                        view_func=clip_view,
                                        methods=['GET'])
-        self.add_url_rule('/clips/<uuid:clip_id>/hooks/call',
-                                       view_func=clip_view,
-                                       methods=['POST'])
         self.add_url_rule('/clips/<uuid:clip_id>/children',
                                        view_func=child_add_view,
                                        methods=['POST'])

@@ -82,9 +82,9 @@ class Clip(BaseClip):
 
         try:
             clip = self.db.update_clip(clip_id, data)
-            self.emitter.send_to_clipboards(clip,
-                                                   data.pop('from_hook', False),
-                                                   data.pop('sender_id', ''))
+            self.emitter.send_to_recipients(clip,
+                                            data.pop('from_hook', False),
+                                            data.pop('sender_id', ''))
             res = make_response(clip.pop('data'), 200)
             self.set_headers(res, clip)
             return res
@@ -105,20 +105,6 @@ class Clip(BaseClip):
             return jsonify(_id=clip_id), 200
         except ClipNotFoundException:
             return jsonify(error='No clip with specified id'), 404
-
-    @decorators.pre_access_hooks
-    def post(self, clip_id=None):
-        """
-        TODO: rethink, whether this makes sense and is necessary
-        :param clip_id:
-        :return:
-        """
-        if request.url.endswith('/hooks/call'):
-            clip = self.db.get_clip_by_id(clip_id)
-            self.emitter.send_to_hooks(clip)
-            return '', 204
-        else:
-            return jsonify(error='Please use put to update a clip'), 400
 
     @staticmethod
     def __add_url__(clip):

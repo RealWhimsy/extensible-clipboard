@@ -11,7 +11,8 @@ class ClipEventEmitter:
 
     def __init__(self, db):
         self.clipboards = []
-        self.post_hooks = []
+        self.webhooks = []
+        self.recipients = []
         self.db = db
         self.invalidate_listeners()
 
@@ -20,66 +21,45 @@ class ClipEventEmitter:
         Refreshes the list of clipboards and hooks
         """
         result = self.db.get_recipients() or []
-        self.post_hooks = []
+        self.webhooks = []
         self.clipboards = []
         for r in result:
             if r['is_hook']:
-                self.post_hooks.append(r)
+                self.webhooks.append(r)
             else:
                 self.clipboards.append(r)
             r['error_count'] = 0
+        self.recipients = self.clipboards + self.webhooks
 
-    # TODO Since this method is part of the save_in_database method, which is used across multiple
-    def send_to_clipboards(self, data, clipboards=None, force_propagation=False, last_sender=None):
+    def send_to_recipients(self, data, recipients=None, force_propagation=False, last_sender=None):
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
         """
-        if clipboards is None:
-            clipboards = self.clipboards
-        print(clipboards)
+        if recipients is None:
+            recipients = self.recipients
         parent = data.get('parent')
+        send_data = data.get('data')
+        headers = self.build_headers(data)
         # Handle child transmitted to
         if parent and self.db.get_latest_clip()['_id'] != parent:
             # Update was not to current clip
             return
-        for c in clipboards:
-            if force_propagation or (last_sender and last_sender != c['_id']):
+        for recipient in recipients:
+            if force_propagation or (last_sender != recipient['_id']):
                 try:
-                    # TODO: this runs identical to send to hooks
-                    send_data = data.get('data')
-                    headers = self.build_headers(data['_id'], data)
-                    requests.post(c['url'],
-                                  data=send_data,
-                                  headers=headers,
-                                  timeout=5)
+                    if(not recipient['is_hook']
+                            or (data['mimetype'] in recipient['preferred_types']
+                                or recipient['preferred_types'] == ['*/*'])):
+                        requests.post(recipient['url'],
+                                      data=send_data,
+                                      headers=headers,
+                                      timeout=5)
                 except Exception as e:
                     print(e)
-                    self._send_failed(c)
+                    self.__on_send_failed__(recipient)
 
-    def send_to_hooks(self, data):
-        """
-        Passes data to the Q-Application so it can put them into the clipboard
-        :param data: The data (text, binary) received by the Resource
-        """
-        """
-        self.native_hooks.call_hooks(data, self.db.save_clip)
-        """
-        _id = data.get('parent', data['_id'])
-        for c in self.post_hooks:
-            types = c['preferred_types']
-            if data['mimetype'] in types or types == ['*/*']:
-                try:
-                    send_data = data.pop('data')
-                    # URL used for adding a child to the entry
-                    headers = self.build_headers(_id, data)
-                    requests.post(c['url'],
-                                  data=send_data,
-                                  headers=headers,
-                                  timeout=5)
-                except Exception as e:
-                    print(e)
-                    self._send_failed(c)
+
 
     def __on_send_failed__(self, recipient):
         """
@@ -94,12 +74,13 @@ class ClipEventEmitter:
             recipient['error_count']
         ))
 
-    def build_headers(self, data, id):
+    def build_headers(self, data):
         response_url = url_for('child_adder',
-                               clip_id=id,
+                               clip_id=data.get('_id'),
                                _external=True)
         headers = {'X-C2-response_url': response_url}
-        headers['Content-Type'] = data.pop('mimetype')
+        headers['Content-Type'] = data.get('mimetype')
         for key, value in data.items():
-            headers['X-C2-{}'.format(key)] = value
+            if key is not 'data':
+                headers['X-C2-{}'.format(key)] = value
         return headers

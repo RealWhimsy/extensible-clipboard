@@ -20,7 +20,7 @@ class Recipient(MethodView):
         self.hook_manager = HookManager()
         self.db = current_app.db
 
-    @decorators.pre_commit_hooks
+    @decorators.access_hooks
     def post(self):
         """
         Adds another recipient. Depending on the URL, the request was sent

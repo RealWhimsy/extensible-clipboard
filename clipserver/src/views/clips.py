@@ -8,9 +8,7 @@ class Clips(BaseClip):
     Class responsible for handling a set of Clips
     """
 
-    @decorators.pre_access_hooks
-    @decorators.pre_commit_hooks
-    @decorators.post_access_hooks
+    @decorators.access_hooks
     def post(self):
         """
         Create a new clip
@@ -23,7 +21,7 @@ class Clips(BaseClip):
         elif 'parent' in data:
             return jsonify(error='Please send to url of intended parent'), 42
 
-        new_item = (decorators.post_commit_hooks(self.db.create_clip, self))(data=data)
+        new_item = decorators.commit_hooks(self.db.create_clip)(self, data=data)
 
         decorators.post_notify_hooks(
             decorators.pre_notify_hooks(self.emitter.send_to_recipients, self.hook_manager),
@@ -37,7 +35,7 @@ class Clips(BaseClip):
         self.set_headers(res, new_item)
         return res
 
-    @decorators.pre_access_hooks
+    @decorators.access_hooks
     def get(self):
         """
         Get all clips from the db. This will not get their data to reduce
@@ -51,7 +49,7 @@ class Clips(BaseClip):
         else:
             return jsonify(clips), 200
 
-    @decorators.pre_access_hooks
+    @decorators.access_hooks
     def delete(self):
         """
         Remove all clips from database, or by option just the ones older than a certain date.

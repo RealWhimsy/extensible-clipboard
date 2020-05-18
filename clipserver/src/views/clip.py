@@ -106,20 +106,6 @@ class Clip(BaseClip):
         except ClipNotFoundException:
             return jsonify(error='No clip with specified id'), 404
 
-    @decorators.pre_access_hooks
-    def post(self, clip_id=None):
-        """
-        TODO: rethink, whether this makes sense and is necessary
-        :param clip_id:
-        :return:
-        """
-        if request.url.endswith('/hooks/call'):
-            clip = self.db.get_clip_by_id(clip_id)
-            self.emitter.send_to_hooks(clip)
-            return '', 204
-        else:
-            return jsonify(error='Please use put to update a clip'), 400
-
     @staticmethod
     def __add_url__(clip):
         """"

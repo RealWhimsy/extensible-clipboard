@@ -12,7 +12,6 @@ class ClipEmitter:
 
     def __init__(self, clip_server_url, id_updater):
         self.post_url = clip_server_url + "clips/"
-        self.call_hook_url = self.post_url + "{}/hooks/call"
         self.add_child_url = self.post_url + "{}/children"
         self.id_updater = id_updater
 
@@ -61,12 +60,7 @@ class ClipEmitter:
         if r and r.status_code == 201:
             parent_id = r.headers['X-C2-_id']
             self.id_updater(parent_id)
-            # Calls hooks on remote server
-            requests.post(self.call_hook_url.format(parent_id))
             if len(clip_list) > 1:
                 # adds subsequent entries as children of the first
                 for c in clip_list[1:]:
                     r = self._post_clip(c, parent_id)
-                    if r and r.status_code == 201:
-                        requests.post(self.call_hook_url.format(
-                            r.headers['X-C2-_id']))

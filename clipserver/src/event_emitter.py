@@ -30,17 +30,20 @@ class ClipEventEmitter:
             r['error_count'] = 0
 
     # TODO Since this method is part of the save_in_database method, which is used across multiple
-    def send_to_clipboards(self, data, force_propagation=False, last_sender=None):
+    def send_to_clipboards(self, data, clipboards=None, force_propagation=False, last_sender=None):
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource
         """
+        if clipboards is None:
+            clipboards = self.clipboards
+        print(clipboards)
         parent = data.get('parent')
         # Handle child transmitted to
         if parent and self.db.get_latest_clip()['_id'] != parent:
             # Update was not to current clip
             return
-        for c in self.clipboards:
+        for c in clipboards:
             if force_propagation or (last_sender and last_sender != c['_id']):
                 try:
                     # TODO: this runs identical to send to hooks

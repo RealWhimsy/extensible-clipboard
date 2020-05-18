@@ -17,11 +17,13 @@ class ChildClip(BaseClip):
             abort(400)
         data['parent'] = clip_id
         try:
-            new_item = self.db.create_child_clip(data=data)
-            self.emitter.send_to_clipboards(
+            new_item = decorators.post_commit_hooks(self.db.create_child_clip, self)(data=data)
+            decorators.pre_notify_hooks(self.emitter.send_to_clipboards, self.hook_manager)(
                 new_item,
+                self.emitter.clipboards,
                 data.pop('from_hook', False),
-                data.pop('sender_id', ''))
+                data.pop('sender_id', '')
+            )
             res = make_response(new_item.pop('data'), 201)
             self.set_headers(res, new_item)
             return res

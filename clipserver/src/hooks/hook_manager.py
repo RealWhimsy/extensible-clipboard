@@ -47,6 +47,12 @@ class HookManager:
                 return False
         return True
 
+
+    def trigger_postaccess(self, response):
+        for h in self.post_access_hooks:
+            h.do_work(response)
+        return
+
     def trigger_postcommit(self, data):
         result = data
         for h in self.post_commit_hooks:

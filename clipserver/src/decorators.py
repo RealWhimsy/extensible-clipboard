@@ -19,10 +19,17 @@ def pre_access_hooks(func):
     return wrapper
 
 
-def post_access_hooks(func, self):
+def post_commit_hooks(func, self):
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         result = self.hook_manager.trigger_postcommit(result)
         return result
     return wrapper
 
+
+def pre_notify_hooks(func, hook_manager):
+    def wrapper(*args, **kwargs):
+        args = hook_manager.trigger_prenotify(args[0], args[1], args[2], args[3])
+        print(*args)
+        return func(args[0], args[3])
+    return wrapper

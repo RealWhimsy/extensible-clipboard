@@ -21,10 +21,13 @@ class Clips(BaseClip):
         elif 'parent' in data:
             return jsonify(error='Please send to url of intended parent'), 42
 
-        new_item = (decorators.post_access_hooks(self.db.create_clip, self))(data=data)
-        self.emitter.send_to_clipboards(new_item,
+        new_item = (decorators.post_commit_hooks(self.db.create_clip, self))(data=data)
+
+        decorators.pre_notify_hooks(self.emitter.send_to_clipboards, self.hook_manager)(new_item,
                                                data.pop('from_hook', False),
-                                               data.pop('sender_id', ''))
+                                               data.pop('sender_id', ''),
+                                                self.emitter.clipboards)
+
         res = make_response(new_item.pop('data'), 201)
         self.set_headers(res, new_item)
         return res

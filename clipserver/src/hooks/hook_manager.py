@@ -4,6 +4,8 @@ from hooks.basehook import BaseHook
 from hooks.pre_commit.baseprecommithook import BasePreCommitHook
 from hooks.pre_access.basepreaccesshook import BasePreAccessHook
 from hooks.post_commit.basepostcommithook import BasePostCommitHook
+from hooks.pre_notify.baseprenotifyhook import BasePrenotifyHook
+
 
 class HookManager:
 
@@ -13,11 +15,11 @@ class HookManager:
         hook_files = [f for f in files if f.endswith('_' + name_contains + '.py')]
         for file_name in hook_files:
             modname = file_name[:-3]
-            module = machinery.SourceFileLoader(modname, root_dir +'/'+file_name).load_module()
+            module = machinery.SourceFileLoader(modname, root_dir + '/' + file_name).load_module()
             members = dir(module)
             for m in members:
                 # Do not even check underscored stuff and Parent class
-                if not m.startswith('_') and 'Base'not in m and 'Hook' in m:
+                if not m.startswith('_') and 'Base' not in m and 'Hook' in m:
                     try:
                         hook = getattr(module, m)()  # instanciate found class
                     except TypeError:
@@ -26,13 +28,11 @@ class HookManager:
                         hooks.append(hook)
         return hooks
 
-
     def call_hooks(self, request):
         for h in self.hooks:
             if not h.do_work(request):
                 return False
         return True
-
 
     def trigger_precommit(self, request):
         for h in self.pre_commit_hooks:
@@ -52,9 +52,18 @@ class HookManager:
             result = h.do_work(result)
         return result
 
+    def trigger_prenotify(self, item, from_hook, sender_id, recipients, hooks=None):
+        if hooks is None:
+            return self.trigger_prenotify(item, from_hook, sender_id, recipients, self.pre_notify_hooks)
+        elif len(hooks) > 0:
+            hook = hooks.pop()
+            return self.trigger_prenotify(*hook.do_work(item, from_hook, sender_id, recipients), hooks)
+        else:
+            return item, from_hook, sender_id, recipients
 
     def __init__(self):
         self.hooks = []
         self.pre_access_hooks = self._load_hooks('./hooks/pre_access', 'preaccesshook', BasePreAccessHook)
         self.pre_commit_hooks = self._load_hooks('./hooks/pre_commit', 'precommithook', BasePreCommitHook)
         self.post_commit_hooks = self._load_hooks('./hooks/post_commit', 'postcommithook', BasePostCommitHook)
+        self.pre_notify_hooks = self._load_hooks('./hooks/pre_notify', 'prenotifyhook', BasePrenotifyHook)

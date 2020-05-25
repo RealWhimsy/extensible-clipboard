@@ -32,6 +32,7 @@ class ClipEventEmitter:
         self.recipients = self.clipboards + self.webhooks
 
     def send_to_recipients(self, data, recipients=None, force_propagation=False, last_sender=None):
+        print(recipients)
         """
         Passes data to the recipient clipboards
         :param data: The data (text, binary) received by the Resource

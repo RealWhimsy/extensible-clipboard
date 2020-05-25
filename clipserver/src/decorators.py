@@ -62,23 +62,22 @@ def _post_commit_hooks(func):
 
 def notify_hooks(func):
     def wrapper(*args, **kwargs):
-        return pre_notify_hooks(
-            post_notify_hooks(
+        return _pre_notify_hooks(
+            _post_notify_hooks(
                 func
             )
         )(*args, **kwargs)
     return wrapper
 
 
-def pre_notify_hooks(func):
+def _pre_notify_hooks(func):
     def wrapper(*args, **kwargs):
-        nargs = args[0].hook_manager.trigger_prenotify(args[1], args[2], args[3], args[3])
-        print(nargs)
+        nargs = args[0].hook_manager.trigger_prenotify(args[1], args[2], args[3], args[4])
         return func(args[0], *nargs, **kwargs)
     return wrapper
 
 
-def post_notify_hooks(func):
+def _post_notify_hooks(func):
     def wrapper(*args, **kwargs):
         result = func(args[1], args[4])
         args[0].hook_manager.trigger_postnotify(args[1], args[2], args[3], args[4])

@@ -9,24 +9,21 @@ class ChildClip(BaseClip):
     Introduced to simplify the flow of the application.
     """
 
-    @decorators.pre_access_hooks
-    @decorators.pre_commit_hooks
-    @decorators.post_access_hooks
+    @decorators.access_hooks
     def post(self, clip_id=None):
         data = self.parser.get_data_from_request(request)
         if not data:
             abort(400)
         data['parent'] = clip_id
         try:
-            new_item = decorators.post_commit_hooks(self.db.create_child_clip, self)(data=data)
-            decorators.post_notify_hooks(
-                decorators.pre_notify_hooks(self.emitter.send_to_recipients, self.hook_manager),
-                self.hook_manager
-            )(
+            new_item = decorators.commit_hooks(self.db.create_child_clip)(self, data=data)
+            decorators.notify_hooks(self.emitter.send_to_recipients)
+            (
+                self,
                 new_item,
+                self.emitter.recipients,
                 data.pop('from_hook', False),
-                data.pop('sender_id', ''),
-                self.emitter.recipients
+                data.pop('sender_id', '')
             )
             res = make_response(new_item.pop('data'), 201)
             self.set_headers(res, new_item)

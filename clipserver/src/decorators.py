@@ -1,5 +1,14 @@
 from flask import request
 
+'''
+ACCESS HOOKS
+
+Access Hooks will be triggered, whenever an API Request is made. 
+
+Access Hooks can be used for controlling access to resources based on the requests made or document access 
+(e.g. for logging reasons).
+'''
+
 
 def access_hooks(func):
     def wrapper(*args, **kwargs):
@@ -13,10 +22,11 @@ def access_hooks(func):
 
 def _pre_access_hooks(func):
     def wrapper(*args, **kwargs):
-        # Pass request to hooks and get their 'consent'
-        if not args[0].hook_manager.trigger_preaccess(request):
-            return '', 403
-        return func(*args, **kwargs)
+        try:
+            args[0].hook_manager.trigger_preaccess(request)
+            return func(*args, **kwargs)
+        except ValueError:
+            return 'Unauthorized Access', 403
     return wrapper
 
 

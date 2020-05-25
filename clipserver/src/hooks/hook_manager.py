@@ -41,26 +41,23 @@ class HookManager:
                 return False
         return True
 
-    def trigger_preaccess(self, request):
-        for h in self.pre_access_hooks:
-            if not h.do_work(request):
-                return False
-        return True
-
-
-    def trigger_postaccess(self, response):
-        for h in self.post_access_hooks:
-            h.do_work(response)
-        return
-
     def trigger_postcommit(self, data):
         result = data
         for h in self.post_commit_hooks:
             result = h.do_work(result)
         return result
 
+    def trigger_preaccess(self, request):
+        for h in self.pre_access_hooks:
+            h.do_work(request)
+        return
+
+    def trigger_postaccess(self, response):
+        for h in self.post_access_hooks:
+            h.do_work(response)
+        return
+
     def trigger_prenotify(self, item, from_hook, sender_id, recipients, hooks=None):
-        print("REC")
         print(recipients)
         if hooks is None:
             return self.trigger_prenotify(item, from_hook, sender_id, recipients, self.pre_notify_hooks)

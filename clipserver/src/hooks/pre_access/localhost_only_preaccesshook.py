@@ -9,6 +9,6 @@ class LocalhostOnlyHook(BasePreAccessHook):
     def do_work(self, request):
         remote = request.remote_addr
         if remote.startswith('127.0.0'):
-            return True
+            return request
         else:
-            return False
+            raise ValueError('User Not Authorized for Access on Resource!')

@@ -26,9 +26,9 @@ class Clips(BaseClip):
         decorators.notify_hooks(self.emitter.send_to_recipients)(
             self,
             new_item,
+            self.emitter.recipients,
             data.pop('from_hook', False),
             data.pop('sender_id', ''),
-            self.emitter.recipients
         )
 
         res = make_response(new_item.pop('data'), 201)

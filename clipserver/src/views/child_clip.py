@@ -21,9 +21,9 @@ class ChildClip(BaseClip):
             (
                 self,
                 new_item,
+                self.emitter.recipients,
                 data.pop('from_hook', False),
-                data.pop('sender_id', ''),
-                self.emitter.recipients
+                data.pop('sender_id', '')
             )
             res = make_response(new_item.pop('data'), 201)
             self.set_headers(res, new_item)

@@ -35,9 +35,9 @@ class HookManager:
                 return False
         return True
 
-    def trigger_precommit(self, request):
+    def trigger_precommit(self, *args, **kwargs):
         for h in self.pre_commit_hooks:
-            if not h.do_work(request):
+            if not h.do_work(*args, **kwargs):
                 return False
         return True
 

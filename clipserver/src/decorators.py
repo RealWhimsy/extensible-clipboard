@@ -39,6 +39,13 @@ def _post_access_hooks(func):
 #
 #
 
+'''
+COMMIT HOOKS
+
+Commit Hooks will be triggered right before saving a new clip or child clip.
+
+Commit Hooks can be used to derive and save related formats or transform the clip to be saved.
+'''
 
 def commit_hooks(func):
     def wrapper(*args, **kwargs):
@@ -53,7 +60,7 @@ def commit_hooks(func):
 def _pre_commit_hooks(func):
     def wrapper(*args, **kwargs):
         # Pass request to hooks and get their 'consent'
-        if not args[0].hook_manager.trigger_precommit(request):
+        if not args[0].hook_manager.trigger_precommit(*args, **kwargs):
             return '', 403
         return func(*args, **kwargs)
     return wrapper

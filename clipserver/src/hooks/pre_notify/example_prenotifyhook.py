@@ -1,6 +1,6 @@
 from hooks.pre_notify.baseprenotifyhook import BasePrenotifyHook
 
-class PrintPrenotifyHook(BasePrenotifyHook):
+class ExamplePrenotifyHook(BasePrenotifyHook):
 
     def do_work(self, item, recipients, from_hook, sender_id):
         print("Hola de prenotify")

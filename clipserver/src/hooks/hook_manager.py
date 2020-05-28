@@ -35,40 +35,42 @@ class HookManager:
                 return False
         return True
 
-    def trigger_precommit(self, request):
-        for h in self.pre_commit_hooks:
-            if not h.do_work(request):
-                return False
-        return True
+    def trigger_precommit(self, data, hooks=None):
+        if hooks is None:
+            return self.trigger_precommit(data, self.pre_commit_hooks)
+        elif len(hooks) > 0:
+            curr_hook = hooks.pop()
+            return self.trigger_precommit(curr_hook.do_work(data), hooks)
+        else:
+            return data
+
+    def trigger_postcommit(self, data, hooks=None):
+        if hooks is None:
+            return self.trigger_postcommit(data, self.post_commit_hooks)
+        elif len(hooks) > 0:
+            curr_hook = hooks.pop()
+            return self.trigger_postcommit(data, hooks)
+        else:
+            return data
 
     def trigger_preaccess(self, request):
         for h in self.pre_access_hooks:
-            if not h.do_work(request):
-                return False
-        return True
-
+            h.do_work(request)
+        return
 
     def trigger_postaccess(self, response):
         for h in self.post_access_hooks:
             h.do_work(response)
         return
 
-    def trigger_postcommit(self, data):
-        result = data
-        for h in self.post_commit_hooks:
-            result = h.do_work(result)
-        return result
-
-    def trigger_prenotify(self, item, from_hook, sender_id, recipients, hooks=None):
-        print("REC")
-        print(recipients)
+    def trigger_prenotify(self, item, recipients, from_hook, sender_id, hooks=None):
         if hooks is None:
-            return self.trigger_prenotify(item, from_hook, sender_id, recipients, self.pre_notify_hooks)
+            return self.trigger_prenotify(item, recipients, from_hook, sender_id, self.pre_notify_hooks)
         elif len(hooks) > 0:
             hook = hooks.pop()
-            return self.trigger_prenotify(*hook.do_work(item, from_hook, sender_id, recipients), hooks)
+            return self.trigger_prenotify(*hook.do_work(item, recipients, from_hook, sender_id), hooks)
         else:
-            return item, from_hook, sender_id, recipients
+            return item, recipients, from_hook, sender_id
 
     def trigger_postnotify(self, item, from_hook, sender_id, recipients):
         for h in self.post_notify_hooks:

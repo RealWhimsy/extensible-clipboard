@@ -63,15 +63,14 @@ class HookManager:
             h.do_work(response)
         return
 
-    def trigger_prenotify(self, item, from_hook, sender_id, recipients, hooks=None):
-        print(recipients)
+    def trigger_prenotify(self, item, recipients, from_hook, sender_id, hooks=None):
         if hooks is None:
-            return self.trigger_prenotify(item, from_hook, sender_id, recipients, self.pre_notify_hooks)
+            return self.trigger_prenotify(item, recipients, from_hook, sender_id, self.pre_notify_hooks)
         elif len(hooks) > 0:
             hook = hooks.pop()
-            return self.trigger_prenotify(*hook.do_work(item, from_hook, sender_id, recipients), hooks)
+            return self.trigger_prenotify(*hook.do_work(item, recipients, from_hook, sender_id), hooks)
         else:
-            return item, from_hook, sender_id, recipients
+            return item, recipients, from_hook, sender_id
 
     def trigger_postnotify(self, item, from_hook, sender_id, recipients):
         for h in self.post_notify_hooks:

@@ -3,10 +3,9 @@ from hooks.pre_commit.baseprecommithook import BasePreCommitHook
 
 class ExamplePreCommitHook(BasePreCommitHook):
 
-    def do_work(self, *args, **kwargs):
-        super().do_work(*args, **kwargs)
-        print(self.data)
-        """
-        This is the base hook for pre-commit hooks. A pre-commit hook is called right before the clipboard request is persisted
-        and may modify the request or deny further processing (this may allow for implementing auth-mechanisms)
-        """
+    def do_work(self, data):
+        if data['mimetype'] == 'text/plain':
+            # data['data'] = "save another text instead of the original text, or convert it somehow"
+            print("Hi from commit hook!")
+            print(data['data'])
+        return data

@@ -35,17 +35,23 @@ class HookManager:
                 return False
         return True
 
-    def trigger_precommit(self, *args, **kwargs):
-        for h in self.pre_commit_hooks:
-            if not h.do_work(*args, **kwargs):
-                return False
-        return True
+    def trigger_precommit(self, data, hooks=None):
+        if hooks is None:
+            return self.trigger_precommit(data, self.pre_commit_hooks)
+        elif len(hooks) > 0:
+            curr_hook = hooks.pop()
+            return self.trigger_precommit(curr_hook.do_work(data), hooks)
+        else:
+            return data
 
-    def trigger_postcommit(self, data):
-        result = data
-        for h in self.post_commit_hooks:
-            result = h.do_work(result)
-        return result
+    def trigger_postcommit(self, data, hooks=None):
+        if hooks is None:
+            return self.trigger_postcommit(data, self.post_commit_hooks)
+        elif len(hooks) > 0:
+            curr_hook = hooks.pop()
+            return self.trigger_postcommit(data, hooks)
+        else:
+            return data
 
     def trigger_preaccess(self, request):
         for h in self.pre_access_hooks:

@@ -118,3 +118,5 @@ tmux_startup
 
 z_servers_obsolete/clip_collection.db
 *report.html
+
+*.pid

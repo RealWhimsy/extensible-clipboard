@@ -24,8 +24,10 @@ class ClipboardServerApp(QApplication):
         splits = uri_list.splitlines()
         for s in splits:
             new_file = {}
+            # the error may be located here: a fixed count of chars is trimmed here, also  it somehow supposes to take just file:// links
+            # TODO: add handling for multiple formats (or only recognized ones)
             path = unquote(s.decode("utf8"))[7:]  # Strings file://
-            f = open(path, mode='rb')
+            f = open(str(s.decode("utf8")), mode='rb')
             new_file['data'] = f
             new_file['mimetype'] = mimetypes.guess_type(path)[0]
             new_file['filename'] = os.path.split(f.name)[1]

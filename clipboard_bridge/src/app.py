@@ -42,7 +42,11 @@ class ClipboardServerApp(QApplication):
             if protocol is 'file':
                 to_return.append(self.load_local_file(path))
             else:
-                print('Dont know this protocol yet '+ protocol)
+                clip = {}
+                clip['data'] = str(s)
+                clip['mimetype'] = 'text/plain'
+                print('Clipboard bridge cannot (yet) handle the following protocol ' + protocol)
+                to_return.append(clip)
         return to_return
 
     def on_data_get(self, data):

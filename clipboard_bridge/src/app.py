@@ -33,16 +33,17 @@ class ClipboardServerApp(QApplication):
         to_return = []
         splits = uri_list.splitlines()
         for s in splits:
-            new_file = {}
-            # the error may be located here: a fixed count of chars is trimmed here, also  it somehow supposes to take just file:// links
-            # TODO: add handling for multiple formats (or only recognized ones)
             path = unquote(s.decode("utf8")).split('://')[1]  # Strings file://
             protocol = unquote(s.decode("utf8")).split('://')[0]
 
             if protocol is 'file':
                 to_return.append(self.load_local_file(path))
             else:
-                print('Dont know this protocol yet '+ protocol)
+                clip = {}
+                clip['data'] = str(s)
+                clip['mimetype'] = 'text/plain'
+                print('Clipboard bridge cannot (yet) handle the following protocol ' + protocol)
+                to_return.append(clip)
         return to_return
 
     def on_data_get(self, data):

@@ -14,7 +14,17 @@ from PyQt5 import QtCore
 
 class ClipboardServerApp(QApplication):
 
-    def get_files(self, uri_list):
+    def load_local_file(self, path):
+        new_file = {}
+        f = open(path, mode='rb')
+        new_file['data'] = f
+        new_file['mimetype'] = mimetypes.guess_type(path)[0]
+        new_file['filename'] = os.path.split(f.name)[1]
+        if new_file['mimetype'] is None:
+            new_file['mimetype'] = 'application/ƒoctet-stream'
+        return new_file
+
+    def load_files(self, uri_list):
         """
         Gets all files specified in uri_list from the disk and loads them.
         :return: A list of objects with the file itself, it's mimetype
@@ -23,15 +33,17 @@ class ClipboardServerApp(QApplication):
         to_return = []
         splits = uri_list.splitlines()
         for s in splits:
-            new_file = {}
-            path = unquote(s.decode("utf8"))[7:]  # Strings file://
-            f = open(path, mode='rb')
-            new_file['data'] = f
-            new_file['mimetype'] = mimetypes.guess_type(path)[0]
-            new_file['filename'] = os.path.split(f.name)[1]
-            if new_file['mimetype'] is None:
-                new_file['mimetype'] = 'application/ƒoctet-stream'
-            to_return.append(new_file)
+            path = unquote(s.decode("utf8")).split('://')[1]  # Strings file://
+            protocol = unquote(s.decode("utf8")).split('://')[0]
+
+            if protocol is 'file':
+                to_return.append(self.load_local_file(path))
+            else:
+                clip = {}
+                clip['data'] = str(s)
+                clip['mimetype'] = 'text/plain'
+                print('Clipboard bridge cannot (yet) handle the following protocol ' + protocol)
+                to_return.append(clip)
         return to_return
 
     def on_data_get(self, data):
@@ -49,7 +61,7 @@ class ClipboardServerApp(QApplication):
         """
         for clip in clip_list:
             if 'text/uri-list' in clip['mimetype']:
-                clip_list += self.get_files(clip['data'])
+                clip_list += self.load_files(clip['data'])
                 break
         self.clip_sender.add_clips_to_server(clip_list)
 

@@ -15,6 +15,7 @@ from PyQt5 import QtCore
 class ClipboardServerApp(QApplication):
 
     def get_files(self, uri_list):
+        print('Get Files', uri_list)
         """
         Gets all files specified in uri_list from the disk and loads them.
         :return: A list of objects with the file itself, it's mimetype
@@ -26,8 +27,9 @@ class ClipboardServerApp(QApplication):
             new_file = {}
             # the error may be located here: a fixed count of chars is trimmed here, also  it somehow supposes to take just file:// links
             # TODO: add handling for multiple formats (or only recognized ones)
-            path = unquote(s.decode("utf8"))[7:]  # Strings file://
-            f = open(str(s.decode("utf8")), mode='rb')
+            path = unquote(s.decode("utf8")).split('://')[1] # Strings file://
+            print("PATH", path)
+            f = open(path, mode='rb')
             new_file['data'] = f
             new_file['mimetype'] = mimetypes.guess_type(path)[0]
             new_file['filename'] = os.path.split(f.name)[1]
@@ -51,6 +53,8 @@ class ClipboardServerApp(QApplication):
         """
         for clip in clip_list:
             if 'text/uri-list' in clip['mimetype']:
+                print("------- YAY ------- ")
+                print(clip)
                 clip_list += self.get_files(clip['data'])
                 break
         self.clip_sender.add_clips_to_server(clip_list)

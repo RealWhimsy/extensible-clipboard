@@ -111,5 +111,5 @@ class Clip(BaseClip):
         """"
         Map method to add the url for a clip
         """
-        clip['url'] = url_for('clip', clip_id=clip['_id'], _external=True)
+        clip['url'] = url_for('clip_details', clip_id=clip['_id'], _external=True)
         return clip

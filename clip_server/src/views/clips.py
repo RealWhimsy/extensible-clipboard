@@ -47,6 +47,7 @@ class Clips(BaseClip):
         if clips is None:
             return jsonify(error='No clips saved yet'), 404
         else:
+            clips = list(map(Clips.__add_url__, clips))
             return jsonify(clips), 200
 
     @decorators.access_hooks
@@ -64,3 +65,11 @@ class Clips(BaseClip):
             return "Clips Deleted Successfully", 200
         else:
             return "Error deleting multiple clips", 500
+
+    @staticmethod
+    def __add_url__(clip):
+        """"
+        Map method to add the url for a clip
+        """
+        clip['url'] = url_for('clip_details', clip_id=clip['_id'], _external=True)
+        return clip

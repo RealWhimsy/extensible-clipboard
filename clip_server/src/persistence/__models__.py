@@ -10,7 +10,8 @@ from peewee import \
     BooleanField, \
     Proxy
 import os
-path = os.path.expanduser('~/clip_collection.db')
+from appdirs import user_data_dir
+path = os.path.join(user_data_dir('extensible-clipboard', 'extensible-clipboard'),'clips.db')
 db = SqliteDatabase(path)
 
 class BaseModel(Model):

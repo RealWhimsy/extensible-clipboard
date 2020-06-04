@@ -227,6 +227,10 @@ class Persistence:
         if q.count() < 1:
             raise ClipNotFoundException
         else:
+            q = q[0]
+            query =  ((Clip._id==clip_id) | (Clip.parent==q.parent)| (Clip._id==q.parent))
+            if not q.parent:
+                query = ((Clip._id==clip_id) | (Clip.parent==q._id))
             clips_cursor = Clip.select(
                 Clip._id,
                 Clip.mimetype,
@@ -234,11 +238,11 @@ class Persistence:
                 Clip.src_app,
                 Clip.filename,
                 Clip.parent
-            ).where((Clip._id==clip_id) | (Clip.parent==clip_id)).execute()
+            ).where(query).execute()
             clips = list(map(lambda item: model_to_dict(item), clips_cursor))
             return clips
 
-    def update_clip(self, object_id, data):
+    def update_clip(self, object_id, datmimetypea):
         """
         Update clip with a certain ID with input data.
         :param object_id:

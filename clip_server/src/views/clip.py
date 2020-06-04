@@ -39,7 +39,10 @@ class Clip(BaseClip):
         :return: Json representation of the clip or None if no clip found
         """
         try:
-            clip = current_app.db.get_clip_by_id(clip_id, preferred_type)
+            if('ignore-accept-types' in request.args):
+                clip = current_app.db.get_clip_by_id(clip_id)
+            else:
+                clip = current_app.db.get_clip_by_id(clip_id, preferred_type)
         except ClipNotFoundException:
             return jsonify(error='No clip with specified id'), 404
         res = make_response(clip.pop('data'), 200)

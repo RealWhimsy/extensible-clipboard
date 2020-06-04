@@ -52,7 +52,6 @@ class Persistence:
 
         # first round, exact match
         for curr_type in preferred_types:
-            print(curr_type)
             if parent['mimetype'] == curr_type[0]:
                 return parent
             for child in children:

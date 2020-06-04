@@ -1,12 +1,16 @@
 from datetime import datetime
 from uuid import UUID, uuid4
+from pathlib import Path
 import os
 from exceptions import (GrandchildException, ParentNotFoundException, ClipNotFoundException, NoClipsExistingException)
 from peewee import SqliteDatabase
-from persistence.__models__ import Clip, Recipient, PreferredTypes
 from playhouse.shortcuts import model_to_dict
-path = os.path.expanduser('~/clip_collection.db')
+from appdirs import user_data_dir
+folderPath = Path(user_data_dir('extensible-clipboard', 'extensible-clipboard'))
+folderPath.mkdir(parents=True, exist_ok=True)
+path = os.path.join(str(folderPath),'clips.db')
 database = SqliteDatabase(path)
+from persistence.__models__ import Clip, Recipient, PreferredTypes
 
 ################################################################################################
 #
@@ -18,6 +22,7 @@ database = SqliteDatabase(path)
 class Persistence:
 
     def __init__(self):
+        print(path)
         database.create_tables([Clip, Recipient, PreferredTypes])
 
     def _get_parent(self, child):

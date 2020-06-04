@@ -3,6 +3,8 @@ from requests import exceptions as req_exceptions
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from utils import network_util
 from flask import request
+import time
+import sys
 
 class ConnectionHandler(QObject):
     """
@@ -12,6 +14,8 @@ class ConnectionHandler(QObject):
 
     new_item_signal = pyqtSignal(dict)
     recipient_id_got = pyqtSignal(str)
+    MAX_CONNECTION_ERRORS = 5
+    CONNECTION_ERROR_TIMEOUT = 10
 
     def __init__(self, flask_app, port, clip_server_url, domain):
         super(QObject, self).__init__()
@@ -26,16 +30,29 @@ class ConnectionHandler(QObject):
         else:
             self.domain = domain + ':' + str(self.port) + '/'
 
+        self.connection_error_count = 0
+
         # needed to add the route here, because self.flask_app needs to be set
         @self.flask_app.route('/', methods=['POST'])
         def new_item_incoming():
             return self.handle_request(request)
 
+    def _on_error(self, message):
+        self.connection_error_count += 1
+        if self.connection_error_count > self.MAX_CONNECTION_ERRORS:
+            self._die(message)
+        else:
+            print("Connection to server failed, try reconnect in " + str(self.CONNECTION_ERROR_TIMEOUT) +
+                  " seconds. Attempt no. (" + str(self.connection_error_count) + "/" + str(self.MAX_CONNECTION_ERRORS) + ") ")
+            time.sleep(self.CONNECTION_ERROR_TIMEOUT)
+            self.register_to_server()
+
+
     def _die(self, message):
         print("Clipboard Server: Networking has died")
         # This causes the app to crash if connection fails
         # TODO: add slot for error messages
-        # sys.exit(1)
+        sys.exit(1)
 
     def _check_data(self, data):
         """
@@ -82,12 +99,13 @@ class ConnectionHandler(QObject):
             )
             response.raise_for_status()
             self.recipient_id_got.emit(response.json()['_id'])
+            self.connection_error_count = 0
         except req_exceptions.ConnectionError as e:
-            self._die('Connection refused by remote server')
+            self._on_error('Connection refused by remote server')
         except req_exceptions.Timeout as e:
-            self._die('Remote server failed to respond in time')
+            self._on_error('Remote server failed to respond in time')
         except req_exceptions.HTTPError as e:
             m = 'Remote server responded with statuscode {}\n'.format(
                 response.status_code)
             m += 'Message from server: {}'.format(response.text)
-            self._die(m)
+            self._on_error(m)

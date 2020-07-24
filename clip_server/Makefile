@@ -11,6 +11,4 @@ run:
 clean:
 	rm -rf venv
 test:
-	. venv/bin/activate; python3 ./src/main.py $(ARGS) &
-	. venv/bin/activate; coverage run -m pytest --html=pytest-report.html
-	pgrep python3 | xargs kill
+	. venv/bin/activate; python3 -m pytest

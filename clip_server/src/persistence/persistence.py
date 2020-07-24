@@ -246,7 +246,7 @@ class Persistence:
             clips = list(map(lambda item: model_to_dict(item), clips_cursor))
             return clips
 
-    def update_clip(self, object_id, datmimetypea):
+    def update_clip(self, object_id, data):
         """
         Update clip with a certain ID with input data.
         :param object_id:

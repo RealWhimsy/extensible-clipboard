@@ -80,14 +80,16 @@ class Clip(BaseClip):
             return jsonify(
                     error='Please specify an existing object to update'), 405
         data = self.parser.get_data_from_request(request)
+        print(data)
         if not data:
             return jsonify(error='Could not parse data'), 400
 
         try:
             clip = self.db.update_clip(clip_id, data)
             self.emitter.send_to_recipients(clip,
+                                            self.emitter.recipients,
                                             data.pop('from_hook', False),
-                                            data.pop('sender_id', ''))
+                                            data.pop('sender_id', False))
             res = make_response(clip.pop('data'), 200)
             self.set_headers(res, clip)
             return res

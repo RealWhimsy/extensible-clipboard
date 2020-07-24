@@ -11,4 +11,9 @@ run:
 clean:
 	rm -rf venv
 test:
-	. venv/bin/activate; python3 -m pytest
+	. venv/bin/activate; python3 ./src/main.py $(ARGS) & echo $$! > testserver.pid
+	sleep 5;
+	. venv/bin/activate; python3 -m pytest;
+	# TPID=$(shell cat testserver.pid);
+	# rm testserver.pid; \
+	# kill $$TPID;

@@ -1,0 +1,6 @@
+bin/
+build/
+types.rdb
+StarterProject.jar
+.project
+.classpath

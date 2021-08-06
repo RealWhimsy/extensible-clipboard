@@ -8,9 +8,8 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
+./build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -115,4 +114,9 @@ dmypy.json
 # ctags
 /tags
 tmux_startup
-run_tests.sh
+# run_tests.sh
+
+z_servers_obsolete/clip_collection.db
+*report.html
+
+*.pid

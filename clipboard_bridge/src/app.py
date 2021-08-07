@@ -34,9 +34,14 @@ class ClipboardServerApp(QApplication):
         splits = uri_list.splitlines()
         for s in splits:
             path = unquote(s.decode("utf8")).split('://')[1]  # Strings file://
+
+            # on my Windows 10 system the path has an additional '/' prefix that needs to be removed
+            if path[0] == '/':
+                path = path[1:]
+
             protocol = unquote(s.decode("utf8")).split('://')[0]
 
-            if protocol is 'file':
+            if protocol == 'file':
                 to_return.append(self.load_local_file(path))
             else:
                 clip = {}

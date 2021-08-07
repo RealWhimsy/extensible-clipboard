@@ -2,8 +2,8 @@
 echo Now installing extensible clipboard dependencies for windows
 pip3 install virtualenv
 
-cd clipserver
+cd clip_server
 call win_install.bat
 
-cd ..\clipboard
+cd ..\clipboard_bridge
 call win_install.bat

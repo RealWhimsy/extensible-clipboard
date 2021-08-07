@@ -1,6 +1,6 @@
 @echo off
-cd clipserver
+cd clip_server
 START /B win_run.bat
-cd ..\clipboard
+cd ..\clipboard_bridge
 call win_run.bat
 cd ..

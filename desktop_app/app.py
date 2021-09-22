@@ -68,7 +68,7 @@ class ClipboardApp(QtWidgets.QMainWindow):
 
         for clip in self.clips:
             if user_id != '':
-                if user_id not in clip['user_id']:
+                if clip['user_id'] is None or user_id not in clip['user_id']:
                     continue
 
             if user_name != '':

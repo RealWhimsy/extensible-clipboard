@@ -130,7 +130,7 @@ class ClipboardServerApp(QApplication):
             else:
                 self.user_id = file.readline()
 
-            self.user_name = file.readline()
+                self.user_name = file.readline()
 
             if self.user_name is not None:
                 self.user_id = self.user_id[:-1]

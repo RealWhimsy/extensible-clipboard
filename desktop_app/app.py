@@ -8,6 +8,9 @@ CLIP_ID = 'clip_id'
 MIME_TYPE = 'mime_type'
 
 class ClipboardApp(QtWidgets.QMainWindow):
+    """
+    Main window for the clipboard app
+    """
 
     clips = []
     filtered_clips = []
@@ -59,6 +62,9 @@ class ClipboardApp(QtWidgets.QMainWindow):
         self.reset_button.clicked.connect(self.on_reset_clicked)
 
     def on_search_clicked(self):
+        """
+        Filters the clips by the search parameters entered by the user.
+        """
         user_id = self.user_id_input.text()
         user_name = self.user_name_input.text()
         clip_id = self.clip_id_input.text()
@@ -88,11 +94,20 @@ class ClipboardApp(QtWidgets.QMainWindow):
         self.update_list_items()
 
     def on_reset_clicked(self):
+        """
+        On clicking the reset button:
+        Clear the list.
+        Clear all search parameters.
+        Add items back to the list.
+        """
         self.search_list.clear()
         self.clear_search_form()
         self.add_clips_to_list(self.clips)
 
     def clear_search_form(self):
+        """
+        Clears all user input from the search form
+        """
         self.user_id_input.setText('')
         self.user_name_input.setText('')
         self.clip_id_input.setText('')
@@ -103,12 +118,18 @@ class ClipboardApp(QtWidgets.QMainWindow):
         self.add_clips_to_list(self.filtered_clips)
 
     def _get_all_clips(self):
-        r = requests.get(self.clip_url)
+        try:
+            r = requests.get(self.clip_url)
 
-        if r.status_code == 200:
-            self.clips = json.loads(r.text)
-            self.clips.reverse()
-            self.filtered_clips = deepcopy(self.clips)
+            if r.status_code == 200:
+                self.clips = json.loads(r.text)
+                self.clips.reverse()  # display newest clips on top
+                self.filtered_clips = deepcopy(self.clips)
+
+        except requests.exceptions.RequestException:
+            print("Could not connect to clip server!")
+
+
 
     def _init_search_list(self):
         self.search_list = self.search_widget.searchListWidget
@@ -172,6 +193,11 @@ class ClipboardApp(QtWidgets.QMainWindow):
 
 
 class ListItem(QtWidgets.QWidget):
+    """
+    Custom list item used to display the clips.
+    Shows general info about the clip in text labels and has buttons for
+    copying and deleting a clip.
+    """
 
     copy_signal = QtCore.pyqtSignal(dict)
     delete_signal = QtCore.pyqtSignal(str)
@@ -216,7 +242,7 @@ class ListItem(QtWidgets.QWidget):
 
 class DeleteClipWorker(QtCore.QObject):
     """
-    Worker class for running the http request on its own thread to prevent locking the UI
+    Worker class for running the http delete request on its own thread to prevent locking the UI
     """
     finished = QtCore.pyqtSignal()
     success = QtCore.pyqtSignal()
@@ -235,7 +261,7 @@ class DeleteClipWorker(QtCore.QObject):
 
 class GetClipWorker(QtCore.QObject):
     """
-    Worker class for running the http request on its own thread to prevent locking the UI
+    Worker class for running the http get request on its own thread to prevent locking the UI
     """
     finished = QtCore.pyqtSignal()
     received_data = QtCore.pyqtSignal(QtCore.QMimeData)
@@ -267,8 +293,9 @@ class GetClipWorker(QtCore.QObject):
 
             self.received_data.emit(data)
 
+
 if __name__ == "__main__":
-    ip = "localhost:5000"
+    ip = "localhost:5000"  # default clip server IP for testing locally
     if len(sys.argv) == 2:
         ip = sys.argv[1]
     app = QtWidgets.QApplication([])

@@ -15,7 +15,7 @@ class ClipEmitter:
         self.add_child_url = self.post_url + "{}/children"
         self.id_updater = id_updater
 
-    def _post_clip(self, clip, parent_id=None):
+    def _post_clip(self, clip, parent_id=None, user_id=None, user_name=None):
         """
         Sends a clip received from the local clipboard to the server
         """
@@ -27,6 +27,9 @@ class ClipEmitter:
             url = self.add_child_url.format(parent_id)
         else:
             url = self.post_url
+
+        headers['X-C2-user_id'] = user_id
+        headers['X-C2-user_name'] = user_name
 
         try:
             r = requests.post(
@@ -50,17 +53,17 @@ class ClipEmitter:
             r = None
         return r
 
-    def add_clips_to_server(self, clip_list):
+    def add_clips_to_server(self, clip_list, user_id, user_name):
         """
         Receives the current clipboard-data and pushes them onto the server
         """
         if not clip_list:
             return
-        r = self._post_clip(clip_list[0])
+        r = self._post_clip(clip_list[0], user_id=user_id, user_name=user_name)
         if r and r.status_code == 201:
             parent_id = r.headers['X-C2-_id']
             self.id_updater(parent_id)
             if len(clip_list) > 1:
                 # adds subsequent entries as children of the first
                 for c in clip_list[1:]:
-                    r = self._post_clip(c, parent_id)
+                    r = self._post_clip(c, parent_id, user_id=user_id, user_name=user_name)

@@ -9,12 +9,14 @@ import requests
 
 class ClipEventEmitter:
 
-    def __init__(self, db):
+    def __init__(self, db, user_id, user_name):
         self.clipboards = []
         self.webhooks = []
         self.recipients = []
         self.db = db
         self.invalidate_listeners()
+        self.user_id = user_id
+        self.user_name = user_name
 
     def invalidate_listeners(self):
         """
@@ -81,6 +83,8 @@ class ClipEventEmitter:
                                _external=True)
         headers = {'X-C2-response_url': response_url}
         headers['Content-Type'] = data.get('mimetype')
+        headers['X-C2-user_id'] = self.user_id
+        headers['X-C2-user_name'] = self.user_name
         for key, value in data.items():
             if key is not 'data':
                 headers['X-C2-{}'.format(key)] = value

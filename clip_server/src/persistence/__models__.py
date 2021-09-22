@@ -28,6 +28,8 @@ class Clip(BaseModel):
     src_app = CharField(null=True)
     filename = CharField(null=True)
     parent = CharField(null=True)
+    user_id = CharField()
+    user_name = CharField()
 
 
 class Recipient(BaseModel):

@@ -83,6 +83,8 @@ class ConnectionHandler(QObject):
         data['mimetype'] = request.headers['Content-Type']
         data['_id'] = request.headers['X-C2-_id']
         data['parent'] = request.headers.get('X-C2-parent', None)
+        data['user_id'] = request.headers.get('X-C2-user_id', None)
+        data['user_name'] = request.headers.get('X-C2-user_name', None)
         self.new_item_signal.emit(data)
         return '', 204
 

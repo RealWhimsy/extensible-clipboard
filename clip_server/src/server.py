@@ -1,3 +1,5 @@
+import os
+import uuid
 from flask import Flask, url_for
 
 from event_emitter import ClipEventEmitter
@@ -22,7 +24,8 @@ class Server(Flask):
         super(Server, self).__init__(app_name)
         self.db = database
         self.port = port
-        self.emitter = ClipEventEmitter(database)
+        self._init_user_id()
+        self.emitter = ClipEventEmitter(database, self.user_id, self.user_name)
 
 
         # TODO: these instance variables belong somewhere else
@@ -75,3 +78,19 @@ class Server(Flask):
         """
         self.run(debug=False, use_reloader=False,
                  host='0.0.0.0', port=self.port)
+
+    def _init_user_id(self):
+        if not os.path.isfile("../../user_id.txt"):
+            open("../../user_id.txt", 'w+').close()
+
+        with open("../../user_id.txt", "r+") as file:
+            if os.stat("../../user_id.txt").st_size == 0:
+                self.user_id = uuid.uuid1()
+                file.write(str(self.user_id))
+            else:
+                self.user_id = file.readline()
+
+            self.user_name = file.readline()
+
+            if self.user_name is not None:
+                self.user_id = self.user_id[:-1]

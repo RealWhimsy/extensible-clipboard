@@ -2,6 +2,7 @@ import mimetypes
 import os
 import signal
 import sys
+import uuid
 from urllib.parse import unquote
 from flask import Flask
 from networking.server import ConnectionHandler
@@ -11,6 +12,7 @@ import signal
 from PyQt5.QtWidgets import QApplication
 from PyQt5 import QtCore
 
+user_name = ''
 
 class ClipboardServerApp(QApplication):
 
@@ -33,7 +35,13 @@ class ClipboardServerApp(QApplication):
         to_return = []
         splits = uri_list.splitlines()
         for s in splits:
-            path = unquote(s.decode("utf8")).split('://')[1]  # Strings file://
+            unquoted = unquote(s.decode("utf8")).split('://')  # Strings file://
+
+            # sometimes we get a string without '://', meaning the split function returns a list of length 1
+            if len(unquoted) == 1:
+                return None
+
+            path = unquoted[1]
 
             # on my Windows 10 system the path has an additional '/' prefix that needs to be removed
             if path[0] == '/':
@@ -66,9 +74,11 @@ class ClipboardServerApp(QApplication):
         """
         for clip in clip_list:
             if 'text/uri-list' in clip['mimetype']:
-                clip_list += self.load_files(clip['data'])
+                file = self.load_files(clip['data'])
+                if file is not None:
+                    clip_list += file
                 break
-        self.clip_sender.add_clips_to_server(clip_list)
+        self.clip_sender.add_clips_to_server(clip_list, self.user_id, self.user_name)
 
     def on_id_get(self, _id):
         """
@@ -107,6 +117,24 @@ class ClipboardServerApp(QApplication):
         self.flask_qt.new_item_signal.connect(self.on_data_get)
         self.flask_qt.recipient_id_got.connect(self.on_id_get)
         self.server_thread.start()
+        self._init_user_data()
+
+    def _init_user_data(self):
+        if not os.path.isfile("../../user_id.txt"):
+            open("../../user_id.txt", 'w+').close()
+
+        with open("../../user_id.txt", "r+") as file:
+            if os.stat("../../user_id.txt").st_size == 0:
+                self.user_id = uuid.uuid1()
+                file.write(str(self.user_id))
+            else:
+                self.user_id = file.readline()
+
+            self.user_name = file.readline()
+
+            if self.user_name is not None:
+                self.user_id = self.user_id[:-1]
+
 
     def __init__(self, port, clipserver_address, domain, is_syncing, argv=sys.argv, app=None):
         super(ClipboardServerApp, self).__init__(argv)

@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from uuid import UUID, uuid4
 from pathlib import Path
@@ -23,6 +24,7 @@ class Persistence:
 
     def __init__(self):
         print(path)
+        self._get_user_id()
         database.create_tables([Clip, Recipient, PreferredTypes])
 
     def _get_parent(self, child):
@@ -146,7 +148,9 @@ class Persistence:
             data=data['data'],
             src_app=data.get('src_app'),
             filename=data.get('filename'),
-            parent=data.get('parent')
+            parent=data.get('parent'),
+            user_id=self.user_id,
+            user_name=self.user_name
         )
         clip.save()
         return model_to_dict(Clip.get(Clip._id==id))
@@ -262,3 +266,19 @@ class Persistence:
             clip.last_modified = str(datetime.now())
             clip.save()
             return model_to_dict(Clip.get_by_id(object_id))
+
+    def _get_user_id(self):
+        if not os.path.isfile("../../user_id.txt"):
+            open("../../user_id.txt", 'w+').close()
+
+        with open("../../user_id.txt", "r+") as file:
+            if os.stat("../../user_id.txt").st_size == 0:
+                self.user_id = uuid.uuid1()
+                file.write(str(self.user_id))
+            else:
+                self.user_id = file.readline()
+
+            self.user_name = file.readline()
+
+            if self.user_name is not None and self.user_name != '':
+                self.user_id = self.user_id[:-1]

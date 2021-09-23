@@ -18,21 +18,21 @@ class ClipboardApp(QtWidgets.QMainWindow):
     def __init__(self, server_address, parent=None):
         super(ClipboardApp, self).__init__(parent)
         self.server_address = str(server_address)
+        self._init_threads()
         self._init_clip_url()
         self._init_ui()
         self._get_all_clips()
         self._init_click_listeners()
         self._init_search_list()
-        self._init_threads()
-        self.get_clip_thread = None
-        self.get_clip_worker = None
         self.show()
 
     def _init_threads(self):
-        self.get_clip_thread = None
-        self.get_clip_worker = None
+        self.get_filtered_clip_thread = None
+        self.get_filtered_clip_worker = None
         self.delete_clip_thread = None
         self.delete_clip_worker = None
+        self.get_all_clips_thread = None
+        self.get_all_clips_worker = None
 
     def _init_clip_url(self):
         if not self.server_address.endswith('/'):
@@ -53,6 +53,7 @@ class ClipboardApp(QtWidgets.QMainWindow):
         self.clip_id_input = self.search_widget.clipIdInput
         self.mime_type_input = self.search_widget.mimeTypeInput
         self.info_label = self.search_widget.infoLabel
+        self.refresh_button = self.search_widget.refreshButton
 
     def _init_click_listeners(self):
         self.search_button = self.search_widget.searchButton
@@ -60,6 +61,7 @@ class ClipboardApp(QtWidgets.QMainWindow):
 
         self.search_button.clicked.connect(self.on_search_clicked)
         self.reset_button.clicked.connect(self.on_reset_clicked)
+        self.refresh_button.clicked.connect(self.on_refresh_clicked)
 
     def on_search_clicked(self):
         """
@@ -104,6 +106,13 @@ class ClipboardApp(QtWidgets.QMainWindow):
         self.clear_search_form()
         self.add_clips_to_list(self.clips)
 
+    def on_refresh_clicked(self):
+        """
+        Load clips from the server again.
+        """
+        self._get_all_clips()
+
+
     def clear_search_form(self):
         """
         Clears all user input from the search form
@@ -118,18 +127,26 @@ class ClipboardApp(QtWidgets.QMainWindow):
         self.add_clips_to_list(self.filtered_clips)
 
     def _get_all_clips(self):
-        try:
-            r = requests.get(self.clip_url)
+        self.info_label.setText("Loading clips...")
 
-            if r.status_code == 200:
-                self.clips = json.loads(r.text)
-                self.clips.reverse()  # display newest clips on top
-                self.filtered_clips = deepcopy(self.clips)
+        self.get_all_clips_thread = QtCore.QThread()
+        self.get_all_clips_worker = GetAllClipsWorker(self.clip_url)
+        self.get_all_clips_worker.moveToThread(self.get_all_clips_thread)
 
-        except requests.exceptions.RequestException:
-            print("Could not connect to clip server!")
+        self.get_all_clips_thread.started.connect(self.get_all_clips_worker.run)
+        self.get_all_clips_worker.finished.connect(self.get_all_clips_thread.quit)
+        self.get_all_clips_worker.finished.connect(self.get_all_clips_worker.deleteLater)
+        self.get_all_clips_thread.finished.connect(self.get_all_clips_thread.deleteLater)
+        self.get_all_clips_worker.received_data.connect(self.on_all_clips_received)
 
+        self.get_all_clips_thread.start()
 
+    def on_all_clips_received(self, response):
+        self.clips = json.loads(response.text)
+        self.clips.reverse()  # display newest clips on top
+        self.filtered_clips = deepcopy(self.clips)
+        self.on_search_clicked()
+        self.info_label.setText("Ready")
 
     def _init_search_list(self):
         self.search_list = self.search_widget.searchListWidget
@@ -151,17 +168,17 @@ class ClipboardApp(QtWidgets.QMainWindow):
     def on_item_copy_clicked(self, clip_dict):
         self.info_label.setText("Retrieving clip data... please wait!")
 
-        self.get_clip_thread = QtCore.QThread()
-        self.get_clip_worker = GetClipWorker(self.clip_url, clip_dict)
-        self.get_clip_worker.moveToThread(self.get_clip_thread)
+        self.get_filtered_clip_thread = QtCore.QThread()
+        self.get_filtered_clip_worker = GetFilteredClipWorker(self.clip_url, clip_dict)
+        self.get_filtered_clip_worker.moveToThread(self.get_filtered_clip_thread)
 
-        self.get_clip_thread.started.connect(self.get_clip_worker.run)
-        self.get_clip_worker.finished.connect(self.get_clip_thread.quit)
-        self.get_clip_worker.finished.connect(self.get_clip_worker.deleteLater)
-        self.get_clip_thread.finished.connect(self.get_clip_thread.deleteLater)
-        self.get_clip_worker.received_data.connect(self.set_clipboard_data)
+        self.get_filtered_clip_thread.started.connect(self.get_filtered_clip_worker.run)
+        self.get_filtered_clip_worker.finished.connect(self.get_filtered_clip_thread.quit)
+        self.get_filtered_clip_worker.finished.connect(self.get_filtered_clip_worker.deleteLater)
+        self.get_filtered_clip_thread.finished.connect(self.get_filtered_clip_thread.deleteLater)
+        self.get_filtered_clip_worker.received_data.connect(self.set_clipboard_data)
 
-        self.get_clip_thread.start()
+        self.get_filtered_clip_thread.start()
 
     def on_item_delete_clicked(self, clip_id):
         self.info_label.setText("Deleting... Please Wait")
@@ -259,7 +276,7 @@ class DeleteClipWorker(QtCore.QObject):
             self.success.emit()
 
 
-class GetClipWorker(QtCore.QObject):
+class GetFilteredClipWorker(QtCore.QObject):
     """
     Worker class for running the http get request on its own thread to prevent locking the UI
     """
@@ -267,7 +284,7 @@ class GetClipWorker(QtCore.QObject):
     received_data = QtCore.pyqtSignal(QtCore.QMimeData)
 
     def __init__(self, clip_url, clip_dict):
-        super(GetClipWorker, self).__init__()
+        super(GetFilteredClipWorker, self).__init__()
         self.clip_url = clip_url
         self.clip_dict = clip_dict
 
@@ -293,6 +310,24 @@ class GetClipWorker(QtCore.QObject):
 
             self.received_data.emit(data)
 
+
+class GetAllClipsWorker(QtCore.QObject):
+    finished = QtCore.pyqtSignal()
+    received_data = QtCore.pyqtSignal(requests.Response)
+
+    def __init__(self, clip_url):
+        super(GetAllClipsWorker, self).__init__()
+        self.clip_url = clip_url
+
+    def run(self):
+        try:
+            r = requests.get(self.clip_url)
+
+            if r.status_code == 200:
+                self.received_data.emit(r)
+
+        except requests.exceptions.RequestException:
+            print("Could not connect to clip server!")
 
 if __name__ == "__main__":
     ip = "localhost:5000"  # default clip server IP for testing locally
